@@ -29,6 +29,21 @@ const state = {
       label:"OTHER",
       name:"other",
     }
+  ],
+  itemType:[
+    {
+      label:"int",
+      name:"int",
+    },{
+      label:"double",
+      name:"double",
+    },{
+      label:"string",
+      name:"string",
+    },{
+      label:"boolean",
+      name:"boolean"
+    }
   ]
 }
 

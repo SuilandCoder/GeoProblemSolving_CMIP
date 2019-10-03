@@ -23,13 +23,17 @@ import java.util.List;
 @Document
 public class DataProcessMethod {
     String oid;
+    String interpretor;
     String name;
     String type; // normal | comparison
     String desc;
+    String userId;
+    String userName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date createdTime;
     List<DependencyItem> dependencyItemList;
     List<DataItem> inputList;
     List<DataItem> parameterList;
     List<DataItem> outputList;
+    String scriptSourceId;
 }

@@ -2,12 +2,15 @@ package cn.edu.njnu.geoproblemsolving.comparison.controller;
 
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataresource.DataResourceDaoImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpItem;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
+import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Author: SongJie
@@ -27,5 +30,16 @@ public class CmpDataController {
         DataResourceDaoImpl dataResourceDao = new DataResourceDaoImpl(mongoTemplate);
         DataResource dataResource = dataResourceDao.createDataResource(dr);
         return ResultUtils.success(dataResource);
+    }
+
+    @RequestMapping(value = "/getDataResourceByIdList", method = RequestMethod.POST)
+    public JsonResult getDataResourceByIdList(@RequestBody List<String> idList){
+        DataResourceDaoImpl dataResourceDao = new DataResourceDaoImpl(mongoTemplate);
+        try{
+            List<DataResource> dataResources = dataResourceDao.findDataResourceByIdList(idList);
+            return ResultUtils.success(dataResources);
+        }catch (Exception e){
+            return ResultUtils.error(ResultEnum.FAILED);
+        }
     }
 }
