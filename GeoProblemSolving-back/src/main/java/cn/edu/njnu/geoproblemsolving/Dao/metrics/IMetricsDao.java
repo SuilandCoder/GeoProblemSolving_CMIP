@@ -1,4 +1,8 @@
-package cn.edu.njnu.geoproblemsolving.comparison.dao.metrics;
+package cn.edu.njnu.geoproblemsolving.Dao.metrics;
+
+import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
+
+import java.util.List;
 
 /**
  * @Author: SongJie
@@ -6,5 +10,12 @@ package cn.edu.njnu.geoproblemsolving.comparison.dao.metrics;
  * @Date: Created in 20:05 2019/10/2
  * @Modified By:
  **/
-public class IMetricsDao {
+public interface IMetricsDao {
+    Metrics findMetricsByOid(String oid);
+
+    Metrics createMetrics(Metrics metrics);
+
+    List<Metrics> findMetricsByIdList(List<String> idList);
+
+    Metrics updateMetrics(Metrics mr);
 }

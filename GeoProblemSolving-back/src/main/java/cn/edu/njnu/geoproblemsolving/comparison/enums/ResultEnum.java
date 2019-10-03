@@ -30,7 +30,8 @@ public enum ResultEnum {
     FAILED_TO_GET_INFO(-18,"Failed to get info"),
     FAILED_TO_UPLOAD_DATA(-19,"Failed to upload data"),
     FAILED_TO_INVOKE_MODEL(-20,"Failed to invoke model"),
-    FAILED_TO_GET_RECORD(-21, "Failed to get record");
+    FAILED_TO_GET_RECORD(-21, "Failed to get record"),
+    UNKNOWN_METHOD_TYPE_ERROR(-22,"Unknown method type error");
 
     private Integer code;
 

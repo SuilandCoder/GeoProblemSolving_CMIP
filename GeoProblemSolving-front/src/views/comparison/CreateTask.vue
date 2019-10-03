@@ -1,54 +1,101 @@
 <template>
   <div>
-    <h2 class="title">Title</h2>
-    <Divider style="margin-top:5px;margin-bottom:5px;" dashed />
-    <div class="split" :style="{height:splitHeight}">
-      <Split v-model="split">
-        <div slot="left" class="split-pane">
-          <Tabs value="instances" size="small">
-            <TabPane label="Instances" name="instances">
-              <ul>
-                <li class="element-item" v-for="(instance,idx) of instances" :key="instance.name" type="instance"
-                  :id="idx">{{instance.name}}
-                </li>
-              </ul>
-            </TabPane>
-            <TabPane label="Data Process" name="dataProcess">
-              <ul>
-                <li class="element-item" v-for="dp of dataProcess" :key="dp.name" type="dataProcess">{{dp.name}}</li>
-              </ul>
-            </TabPane>
-            <TabPane label="Comparison Methods" name="cmpMethods">
-              <ul>
-                <li class="element-item" v-for="cm of comparisonMethods" :key="cm.name" type="comparisonMethods">
-                  {{cm.name}}
-                </li>
-              </ul>
-            </TabPane>
-          </Tabs>
-        </div>
-        <div slot="right" class="split-pane">
-          <Split v-model="split2" :style="{height:splitHeight}">
-            <div slot="left">
-              <div id="graphContainer" :style="{height:splitHeight}" @mousemove="mMove($event)"
-                @mousedown="mDown($event)" @mouseup="mUp($event)">
-                <ButtonGroup size="small" style="position:absolute;margin-left:10px;margin-top:10px;">
-                  <Button @click="importXML">import</Button>
-                  <Button @click="delCell" :disabled="_.isEmpty(selectVertex) && _.isEmpty(selectEdge)">Delete</Button>
-                </ButtonGroup>
-                <Button style="position:absolute; bottom:5px; right:5px;"  @click.stop.prevent="createTask">Create</Button>
-                <div id="container" style="background-color:#31676f;" :style="mouseBoxStyle"></div>
+    <h2 style="text-align:center;margin:20px;">Create Comparison Task</h2>
+    <Steps :current="currentStep" style="width:1000px;margin:auto;">
+      <Step title="Step 1">
+      </Step>
+      <Step title="Step 2">
+      </Step>
+      <Step title="Step 3">
+      </Step>
+    </Steps>
+
+    <div v-show="currentStep===0" class="box">
+      <Form :model="taskInfo" style="margin-top:30px;">
+        <FormItem prop="name" label="Task Name" :label-width="150">
+          <Input v-model="taskInfo.name" style="width: 300px" placeholder="Enter task name" />
+        </FormItem>
+        <FormItem prop="description" label="Description" :label-width="150">
+          <div>
+            <Input type="textarea" v-model="taskInfo.description" placeholder="Enter description about this task"
+              style="width: 500px" />
+          </div>
+        </FormItem>
+
+        <FormItem label="Target Instance" :label-width="150">
+          <Transfer :data="getTransferInstanceList" :target-keys="targetInstanceKeys" :render-format="renderTransfer"
+            @on-change="handleTransferChange"></Transfer>
+        </FormItem>
+
+        <FormItem label="Target Metrics" :label-width="150">
+          <Table border :columns="metricsColumn" :data="metricsTableData"> 
+          </Table>
+        </FormItem>
+      </Form>
+
+      <Button class="stepBtn" type="primary" v-if="currentStep>0" @click="previous">Previous</Button>
+      <Button class="stepBtn" type="primary" @click="next">Next step</Button>
+    </div>
+
+    <div v-show="currentStep===1" style="margin-top:20px;">
+      <!-- <h2 class="title">Title</h2> -->
+      <Divider style="margin-top:5px;margin-bottom:5px;" dashed />
+      <div class="split" :style="{height:splitHeight}">
+        <Split v-model="split">
+          <div slot="left" class="split-pane">
+            <Tabs value="instances" size="small" @on-click="changeTab">
+              <TabPane label="Instances" name="instances">
+                <ul>
+                  <li class="element-item" v-for="(instance,idx) of instances" :key="instance.name" type="instance"
+                    :id="idx">{{instance.name}}
+                  </li>
+                </ul>
+              </TabPane>
+              <TabPane label="Data Process" name="dataProcess">
+                <Button size="small" @click="createDPM('normal')">Create</Button>
+                <ul>
+                  <li class="element-item" v-for="dp of dataProcess" :key="dp.name" type="dataProcess">{{dp.name}}
+                  </li>
+                </ul>
+              </TabPane>
+              <TabPane label="Comparison Methods" name="cmpMethods">
+                <Button size="small" @click="createDPM('comparison')">Create</Button>
+                <ul>
+                  <li class="element-item" v-for="cm of comparisonMethods" :key="cm.name" type="comparisonMethods">
+                    {{cm.name}}
+                  </li>
+                </ul>
+              </TabPane>
+            </Tabs>
+          </div>
+          <div slot="right" class="split-pane">
+            <Split v-model="split2" :style="{height:splitHeight}">
+              <div slot="left">
+                <div id="graphContainer" :style="{height:splitHeight}" @mousemove="mMove($event)"
+                  @mousedown="mDown($event)" @mouseup="mUp($event)">
+                  <ButtonGroup size="small" style="position:absolute;margin-left:10px;margin-top:10px;">
+                    <Button @click="importXML">import</Button>
+                    <Button @click="delCell"
+                      :disabled="_.isEmpty(selectVertex) && _.isEmpty(selectEdge)">Delete</Button>
+                  </ButtonGroup>
+                  <Button style="position:absolute; bottom:5px; right:5px;"
+                    @click.stop.prevent="createTask">Create</Button>
+                  <div id="container" style="background-color:#31676f;" :style="mouseBoxStyle"></div>
+                </div>
               </div>
-            </div>
-            <div slot='right'>
-              <div v-if="selectVertex.data" style="margin-left:20px">
-                <span>{{selectVertex.data.name}}</span>
-                <p>{{selectVertex.data.desc}}</p>
+              <div slot='right'>
+                <div v-if="selectVertex.data" style="margin-left:20px">
+                  <span>{{selectVertex.data.name}}</span>
+                  <p>{{selectVertex.data.desc}}</p>
+                </div>
               </div>
-            </div>
-          </Split>
-        </div>
-      </Split>
+            </Split>
+          </div>
+        </Split>
+      </div>
+
+      <Button class="stepBtn" type="primary" @click="next">Next step</Button>
+      <Button class="stepBtn" type="primary" v-if="currentStep>0" @click="previous">Previous</Button>
     </div>
   </div>
 </template>
@@ -202,7 +249,7 @@ const initGraph = () => {
 
   // 将外元素拖拽进画布参考这个例子
   // https://github.com/jinzhanye/mxgraph-demos/blob/master/src/07.drag.html
-  makeDraggable(document.getElementsByClassName("element-item"));
+  // makeDraggable(document.getElementsByClassName("element-item"));
   listenGraphEvent();
   setCursor();
   setConnectValidation();
@@ -220,15 +267,21 @@ export default {
   created() {
     window.addEventListener("resize", this.getGraphHeight);
     this.getGraphHeight();
+
+    this.projectId = this.$route.params.id;
+    //* 获取 instance 信息
+    this.getInstanceList();
+    //* 获取数据处理方法 和 对比方法；
+    this.getDataProcessMethod();
   },
   data() {
     return {
       split: 0.2,
       split2: 0.8,
-      splitHeight: $(document).height() - 200 + "px",
+      splitHeight: "",
       // splitHeight: window.screen.availHeight - 300 + "px",
       graphBoxHeight: $(document).height() - 230 + "px",
-      // elements,
+      taskInfo: {},
       selectEdge: {},
       selectVertex: {},
       mouseBoxStyle: {},
@@ -273,10 +326,148 @@ export default {
           name: "对比方法3",
           desc: "asgoiklnninoi"
         }
-      ]
+      ],
+      elementItem: [],
+      currentStep: 0,
+      projectId: "",
+      instanceList: [],
+      targetInstanceKeys: [],
+      targetInstanceList: [],
+      cmpDataList: [],
+      metricList: [],
+      metricsColumn: [],
+      metricsTableData: []
     };
   },
   methods: {
+    renderTransfer(item) {
+      return item.label;
+    },
+    handleTransferChange(newTargetKeys, direction, moveKeys) {
+      this.targetInstanceKeys = newTargetKeys;
+      this.metricsColumn = [];
+      this.getMetricsInfo();
+    },
+    getInstanceList() {
+      this.$api.cmp_instance
+        .getInstanceList(this.projectId)
+        .then(res => {
+          this.instanceList = res;
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
+    },
+    getMetricsInfo() {
+      let vm = this;
+      this.metricList = [];
+      this.targetInstanceList = this.instanceList.filter(instance => {
+        let index = _.indexOf(vm.targetInstanceKeys, instance.instanceId);
+        return index >= 0;
+      });
+      if (this.targetInstanceList.length > 0) {
+        this.createMetricsColumn();
+      }
+      // console.log(JSON.stringify(this.targetInstanceList));
+      //* 求所有 instance 中 cmpDataList 的并集
+      let cmpDataIdList = [];
+      this.targetInstanceList.forEach(instance => {
+        cmpDataIdList = _.union(cmpDataIdList, instance.cmpDataList);
+      });
+      // console.log("idList:", JSON.stringify(cmpDataIdList));
+      this.getCmpDataList(cmpDataIdList);
+    },
+    getCmpDataList(idList) {
+      this.$api.cmp_data
+        .getDataResourceByIdList(idList)
+        .then(res => {
+          this.cmpDataList = res;
+          let vm = this;
+          res.forEach(item => {
+            let index = _.findIndex(vm.metricList, item.metrics);
+            if (index == -1) {
+              vm.metricList.push(item.metrics);
+            }
+          });
+          console.log("metricList:", JSON.stringify(this.metricList));
+          this.createMetricsTableData();
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
+    },
+    createMetricsColumn() {
+      this.metricsColumn = [
+        { title: "Metrics", key: "metric", width: "100px", align: "center" }
+      ];
+      this.targetInstanceList.forEach(instance => {
+        let item = {
+          title: instance.name,
+          key: instance.name,
+          align: "center"
+        };
+        this.metricsColumn.push(item);
+      });
+    },
+    createMetricsTableData() {
+      this.metricsTableData = [];
+      this.metricList.forEach(metric => {
+        let item = { metric: metric.alias };
+        let obj = this.checkMetric(metric);
+        Object.assign(item, obj);
+        this.metricsTableData.push(item);
+      });
+    },
+    checkMetric(metric) {
+      // let list = this.cmpDataList.filter(cmpData => {
+      //   return cmpData.metrics.oid === metric.oid;
+      // });
+      let obj = {};
+      this.targetInstanceList.forEach(instance => {
+        let name = instance.name;
+        let contain = false;
+        instance.cmpDataList.forEach(cmpDataId => {
+          let data = this.cmpDataList.filter(cmpData => {
+            return cmpData.dataId === cmpDataId;
+          });
+          if (data.length > 0 && data[0].metrics.oid === metric.oid) {
+            // Object.assign(obj, { name: true });
+            contain = true;
+          }
+          // list.forEach(data => {
+          //   if (data.dataId === cmpDataId) {
+          //     Object.assign(obj, { name: true });
+          //   }
+          // });
+        });
+        obj[name] = contain;
+      });
+      return obj;
+    },
+    getDataProcessMethod() {
+      this.$api.cmp_task
+        .getDataProcessMethod("comparison")
+        .then(res => {
+          this.comparisonMethods = res;
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
+      this.$api.cmp_task
+        .getDataProcessMethod("normal")
+        .then(res => {
+          this.dataProcess = res;
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
+    },
+    changeTab() {
+      let newItem = document.getElementsByClassName("element-item");
+      let draggableItem = _.difference(newItem, this.elementItem);
+      makeDraggable(draggableItem);
+      this.elementItem = newItem;
+    },
     showNormalTypeSelect(sender, evt) {
       const normalTypeDom = graph.getDom(evt.getProperty("cell"));
       const { left, top } = normalTypeDom.getBoundingClientRect();
@@ -315,6 +506,17 @@ export default {
       console.log(xml);
       console.log("mode:", graph.getModel());
     },
+    previous() {
+      if (this.currentStep > 0) {
+        this.currentStep -= 1;
+      }
+    },
+    next() {
+      if (this.currentStep < 3) {
+        this.currentStep += 1;
+      } else {
+      }
+    },
     importXML() {
       let txt = `<mxGraphModel>
   <root>
@@ -352,7 +554,14 @@ export default {
       graph.importModelXML(txt);
     },
     getGraphHeight() {
-      this.splitHeight = window.screen.availHeight - 300 + "px";
+      this.splitHeight = window.screen.availHeight - 350 + "px";
+    },
+    createDPM(type) {
+      this.$router.push({
+        path: `/create-dataprocess-method`,
+        name: "create-dataprocess-method"
+      });
+      sessionStorage.setItem("dpmType", type);
     },
     _listenEvent() {
       // 监听自定义事件
@@ -479,14 +688,22 @@ export default {
         return graph.getCellStyle(this.selectEdge);
       }
       return {};
+    },
+    getTransferInstanceList() {
+      return this.instanceList.map(instance => {
+        instance.key = instance.instanceId;
+        instance.label = instance.name;
+        return instance;
+      });
     }
   },
   mounted() {
     initGraph();
+    // this.changeTab();
     this._listenEvent();
   },
   beforeDestroy() {
-     window.removeEventListener('resize', this.getGraphHeight)
+    window.removeEventListener("resize", this.getGraphHeight);
     destroyGraph();
   }
 };
@@ -514,7 +731,7 @@ export default {
 
 .element-item {
   cursor: pointer;
-  font-family: PingF
+  font-family: PingF;
 }
 
 #toolBar {
@@ -522,5 +739,14 @@ export default {
   padding-left: 10px;
   border-radius: 4px;
   margin-bottom: 10px;
+}
+.box {
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.stepBtn {
+  float: right;
+  margin-right: 20px;
 }
 </style>

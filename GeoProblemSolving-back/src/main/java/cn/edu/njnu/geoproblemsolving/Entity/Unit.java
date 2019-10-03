@@ -1,10 +1,12 @@
-package cn.edu.njnu.geoproblemsolving.comparison.entity;
+package cn.edu.njnu.geoproblemsolving.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,13 +24,20 @@ public class Unit {
     String name;
     String alias;
     List<String> classifications;
-    String description;
     String detail;
     String author;
+    String type;
+    String parentId;
+    String xml;
+    String name_EN;
+    String name_ZH;
+    String description_EN;
+    String description_ZH;
     String image;
-    String createTime;
-    String lastModifyTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    Date createTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    Date lastModifyTime;
     String loadCount;
     String lock;
-
 }

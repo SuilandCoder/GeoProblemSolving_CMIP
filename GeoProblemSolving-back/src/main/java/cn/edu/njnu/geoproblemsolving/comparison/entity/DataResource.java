@@ -1,11 +1,11 @@
 package cn.edu.njnu.geoproblemsolving.comparison.entity;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.DataResourceTypeEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -37,6 +37,7 @@ public class DataResource {
     private String md5;
     private String dcSourceStoreId; // 数据容器 sourceStoreId
     private String url;
+    private Metrics metrics;
 
     // 地理信息
     private float[] extent; // west east south north

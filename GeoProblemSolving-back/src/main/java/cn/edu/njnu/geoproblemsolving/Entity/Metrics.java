@@ -1,9 +1,12 @@
-package cn.edu.njnu.geoproblemsolving.comparison.entity;
+package cn.edu.njnu.geoproblemsolving.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
 
 /**
  * @Author: SongJie
@@ -23,4 +26,6 @@ public class Metrics {
     String min;
     String max;
     Unit unit;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    Date updateTime;
 }

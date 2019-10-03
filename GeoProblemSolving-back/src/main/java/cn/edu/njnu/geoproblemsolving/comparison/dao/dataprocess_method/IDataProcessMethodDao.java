@@ -17,6 +17,9 @@ public interface IDataProcessMethodDao {
 
     DataProcessMethod createDataProcessMethod(DataProcessMethod dpm);
 
+    List<DataProcessMethod> getAllDataProcessMethod();
+    List<DataProcessMethod> findDataProcessMethod(String key, String value);
+
     List<DataProcessMethod> findDataProcessMethodByIdList(List<String> idList);
 
     DataProcessMethod updateDataProcessMethod(DataProcessMethod dpm);

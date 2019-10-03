@@ -4,6 +4,8 @@ import cn.edu.njnu.geoproblemsolving.Entity.UserEntity;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +46,9 @@ public class DataResourceDaoImpl implements IDataResourceDao {
 
     @Override
     public List<DataResource> findDataResourceByIdList(List<String> idList) {
-        return null;
+        Query query = Query.query(Criteria.where("dataId").in(idList));
+        List<DataResource> dataResources = mongoTemplate.find(query, DataResource.class);
+        return dataResources;
     }
 
     @Override
