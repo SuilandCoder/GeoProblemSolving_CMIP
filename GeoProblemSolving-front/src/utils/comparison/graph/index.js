@@ -12,6 +12,6 @@ window.mxGeometry = mxgraph.mxGeometry;
 window.mxDefaultKeyHandler = mxgraph.mxDefaultKeyHandler;
 window.mxDefaultPopupMenu = mxgraph.mxDefaultPopupMenu;
 window.mxStylesheet = mxgraph.mxStylesheet;
-window.mxDefaultToolbar = mxgraph.mxDefaultToolbar; 
+window.mxDefaultToolbar = mxgraph.mxDefaultToolbar;
 
 export default mxgraph;
