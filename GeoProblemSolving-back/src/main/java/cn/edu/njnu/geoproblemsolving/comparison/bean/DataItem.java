@@ -17,5 +17,6 @@ public class DataItem {
     String name;
     String type; // file | double | int | String | boolean
     String desc;
+    boolean optional;
     String value;
 }

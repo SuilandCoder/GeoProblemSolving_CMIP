@@ -6,8 +6,6 @@
       </Step>
       <Step title="Step 2">
       </Step>
-      <Step title="Step 3">
-      </Step>
     </Steps>
 
     <div v-show="currentStep===0" class="box">
@@ -50,7 +48,7 @@
       <div class="split" :style="{height:splitHeight}">
         <Split v-model="split">
           <div slot="left" class="split-pane">
-            <Tabs size="small" @on-click="changeTab">
+            <Tabs size="small" @on-click="changeTab" :value="leftTabValue">
               <TabPane label="Metrics" name="metrics">
                 <CellGroup>
                   <Cell class="element-item" v-for="(metricsInfo,idx) of taskInfo.checkedMetrics"
@@ -91,8 +89,14 @@
               </div>
               <div slot='right'>
                 <div v-if="selectVertex.data" style="margin-left:20px">
-                  <span>{{selectVertex.data.name}}</span>
-                  <p>{{selectVertex.data.desc}}</p>
+                  <span style="margin-top:10px;display:block;">{{selectVertex.data.name}}</span>
+                  <p style="margin:10px;">{{selectVertex.data.desc}}</p>
+                  <Form>
+                    <FormItem v-for="(param,index) in selectVertex.data.parameterList" :key="index" :label="param.name"
+                      :label-width="50">
+                      <Input v-model="param.value" :placeholder="param.type" style="width:100px" />
+                    </FormItem>
+                  </Form>
                 </div>
               </div>
             </Split>
@@ -100,8 +104,9 @@
         </Split>
       </div>
 
-      <Button class="stepBtn" type="primary" @click="next">Next step</Button>
-      <Button class="stepBtn" type="primary" v-if="currentStep>0" @click="previous">Previous</Button>
+      <Button class="stepBtn" type="primary" v-if="currentStep===0" @click="next">Next step</Button>
+      <Button class="stepBtn" type="primary" v-if="currentStep===1" @click="createTask">Create</Button>
+      <Button class="stepBtn" type="primary" v-if="currentStep===1" @click="previous">Previous</Button>
     </div>
   </div>
 </template>
@@ -253,7 +258,7 @@ const setConnectValidation = () => {
      * 1. instance 只能作为 source
      * 2. comparison 只能作为 target
      */
-    if(target.data.type==="instance" || source.data.type==="comparison"){
+    if (target.data.type === "instance" || source.data.type === "comparison") {
       return false;
     }
 
@@ -278,6 +283,17 @@ const initGraph = () => {
   // new mxCellTracker(graph,"#00FFff");
   // graph.setTooltips(true); // 是否显示提示,默认显示Cell的名称
   // graph.connectionArrowsEnabled = true;
+};
+
+var objDeepCopy = function(source) {
+  var sourceCopy = source instanceof Array ? [] : {};
+  for (var item in source) {
+    sourceCopy[item] =
+      typeof source[item] === "object"
+        ? objDeepCopy(source[item])
+        : source[item];
+  }
+  return sourceCopy;
 };
 
 export default {
@@ -349,7 +365,8 @@ export default {
             message: "Please select metrics"
           }
         ]
-      }
+      },
+      leftTabValue: "metrics"
     };
   },
   methods: {
@@ -550,22 +567,165 @@ export default {
       graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
       this.elementItem = [];
     },
+    createTask() {
+      console.log("taskInfo:", this.taskInfo);
+    },
     saveTask(event) {
       const xml = graph.exportModelXML();
       console.log(xml);
       console.log("model:", graph.getModel());
-      this.parseGraphModel(graph.getModel());
+      let computableModelInfo = this.parseGraphModel(graph.getModel());
+      computableModelInfo.graphXML = xml;
+      this.taskInfo.computableModels.push(computableModelInfo);
+      //* 清空画布并跳转第一个tab页；
+      graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
+      this.leftTabValue = "metrics";
     },
     parseGraphModel(model) {
       let cells = model.cells;
-      let cmpMethods = [];
-      let dataList = [];
-      let dependencyList = [];
-      cells.forEach(cell=>{
-        if(cell.vertex&&cell.data.type==="comparison"){
-          
+      let computableModelInfo = {};
+      let cmpMethodList = [];
+      let dataProcessMethodList = [];
+      let metricId = "";
+      for (let i in cells) {
+        let cell = cells[i];
+        if (cell.vertex && cell.data.type === "comparison") {
+          let cmpMethodInfo = {};
+          let inputList = [];
+          cmpMethodInfo.methodId = cell.data.oid;
+          //* 判断数据处理方法参数是否设置
+          for (let param of cell.data.parameterList) {
+            if (!param.optional && !param.value) {
+              this.$Message.error(
+                "Please enter the parameters of the comparison method."
+              );
+              return;
+            }
+          }
+          for (let j in cell.edges) {
+            let edge = cell.edges[j];
+            let inputInfo = {};
+            let source = edge.source;
+            if (source.data.type === "instance") {
+              inputInfo.type = "instance";
+              inputInfo.instanceId = source.data.instanceId;
+              inputInfo.cmpDataId = source.data.cmpDataId;
+            } else if (source.data.type === "normal") {
+              inputInfo.type = "normal";
+              inputInfo.oid = source.data.oid;
+            }
+            inputList.push(inputInfo);
+          }
+          //* 对比方法最少有两个输入；
+          if (inputList.length < 2) {
+            this.$Message.error(
+              "The comparison method must have at least two inputs."
+            );
+            return;
+          }
+
+          cmpMethodInfo.params = objDeepCopy(cell.data.parameterList);
+          // Object.assign(dpmInfo.params,cell.data.parameterList);
+          // cell.data.parameterList.forEach(param=>{
+          //   param.value = "";
+          // });
+
+          // cmpMethodInfo.params = cell.data.parameterList;
+          cmpMethodInfo.inputList = inputList;
+          cmpMethodList.push(cmpMethodInfo);
+        } else if (cell.vertex && cell.data.type === "normal") {
+          let dpmInfo = {};
+          let inputList = [];
+          dpmInfo.methodId = cell.data.oid;
+          //* 判断数据处理方法参数是否设置
+          for (let param of cell.data.parameterList) {
+            if (!param.optional && !param.value) {
+              this.$Message.error(
+                "Please enter the parameters of the data processing method."
+              );
+              return;
+            }
+          }
+          for (let j in cell.edges) {
+            let edge = cell.edges[j];
+            let source = edge.source;
+            //* 排除以自身为 source 的边
+            if (source.id != cell.id) {
+              let inputInfo = {};
+              if (source.data.type === "instance") {
+                inputInfo.type = "instance";
+                inputInfo.instanceId = source.data.instanceId;
+                inputInfo.cmpDataId = source.data.cmpDataId;
+              } else if (source.data.type === "normal") {
+                inputInfo.type = "normal";
+                inputInfo.oid = source.data.oid;
+              }
+              inputList.push(inputInfo);
+            }
+          }
+
+          //* 数据处理方法最少有一个输入
+          if (inputList.length < 1) {
+            this.$Message.error(
+              "The data processing method must have one inputs."
+            );
+            return;
+          }
+          dpmInfo.params = objDeepCopy(cell.data.parameterList);
+          // Object.assign(dpmInfo.params,cell.data.parameterList);
+          // cell.data.parameterList.forEach(param=>{
+          //   param.value = "";
+          // });
+          dpmInfo.inputList = inputList;
+          dataProcessMethodList.push(dpmInfo);
+        } else if (cell.vertex && cell.data.type === "instance") {
+          let cmpDataInfo = this.getObjByid(
+            this.cmpDataList,
+            cell.data.cmpDataId,
+            "cmpData"
+          );
+          let metricId_new = cmpDataInfo.metrics.oid;
+          if (metricId != "" && metricId !== metricId_new) {
+            this.$Message.error("Only one metric can be configured at a time");
+            return;
+          }
+          metricId = metricId_new;
         }
+      }
+      //* 对比方法不能没有
+      if (cmpMethodList.length < 1) {
+        this.$Message.error("Please choose a comparison method");
+        return;
+      }
+
+
+
+      Object.keys(cells).forEach(key=>{
+        let cell = cells[key];
+        if (
+          cell.vertex &&
+          (cell.data.type === "comparison" || cell.data.type === "normal")
+        )
+          cell.data.parameterList.forEach(param => {
+            param.value = "";
+          });
       });
+      //* for in 第二次循环时 每次都是最后一个元素！！！
+      // for (let k in cells) {
+      //   let cell = cells[k];
+      //   if (
+      //     cell.vertex &&
+      //     (cell.data.type === "comparison" && cell.data.type === "normal")
+      //   )
+      //     cell.data.parameterList.forEach(param => {
+      //       param.value = "";
+      //     });
+      // }
+
+      computableModelInfo.metricId = metricId;
+      computableModelInfo.cmpMethodList = cmpMethodList;
+      computableModelInfo.dataProcessMethodList = dataProcessMethodList;
+      return computableModelInfo;
     },
     previous() {
       if (this.currentStep > 0) {
