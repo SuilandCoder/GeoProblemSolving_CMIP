@@ -146,6 +146,39 @@ public class MyHttpUtils {
         return resObj.getString("data");
     }
 
+    public static String post_RESCODE(String urlString, JSONObject jsonObj,String rightCode) throws IOException {
+        String body = "";
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(urlString);
+        httpPost.setHeader("Content-Type","application/json");
+        StringEntity stringEntity = new StringEntity(jsonObj.toJSONString(),"UTF-8");
+        httpPost.setEntity(stringEntity);
+        CloseableHttpResponse httpResponse = client.execute(httpPost);
+        HttpEntity responseEntity = httpResponse.getEntity();
+        int statusCode= httpResponse.getStatusLine().getStatusCode();
+        if(statusCode == 200){
+            BufferedReader reader = new BufferedReader(new InputStreamReader(responseEntity.getContent()));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            body = buffer.toString();
+        }
+        //释放链接
+        httpResponse.close();
+        client.close();
+        if("".equals(body)){
+            return null;
+        }
+        JSONObject resObj = JSONObject.parseObject(body);
+        if(!rightCode.equals(resObj.getString("code"))){
+            System.out.println(resObj.getString("msg"));
+            return null;
+        }
+        return resObj.getString("data");
+    }
+
     public static String post_JSONStr(String urlString, JSONObject jsonObj) throws IOException {
         String body = "";
         CloseableHttpClient client = HttpClients.createDefault();

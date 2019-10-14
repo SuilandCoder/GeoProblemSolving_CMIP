@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.dataprocess_method;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,8 +26,10 @@ public class DataProcessMethodDaoImpl implements IDataProcessMethodDao {
     }
 
     @Override
-    public DataProcessMethod findDataProcessMethodById(String id) {
-        return null;
+    public DataProcessMethod findDataProcessMethodByOid(String oid) {
+        Query q = Query.query(Criteria.where("oid").is(oid));
+        DataProcessMethod method = mongoTemplate.findOne(q,DataProcessMethod.class);
+        return method;
     }
 
     @Override

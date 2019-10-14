@@ -53,7 +53,7 @@ const routes = [{
     { path: 'cmp-invoke-model/:id', name: 'cmp-invoke-model', component: resolve => (require(["@/views/comparison/InvokeModel"], resolve)) },
     { path: 'cmp-model-record/:id', name: 'cmp-model-record', component: resolve => (require(["@/views/comparison/CmpModelRecord"], resolve)) },
     { path: 'create-cmp-instance/:id', name:"create-cmp-instance", component:resolve=>(require(["@/views/comparison/CreateInstance"],resolve))},
-    { path: 'create-cmp-task/:id', name:"create-cmp-task", component:resolve=>(require(["@/views/comparison/CreateTask"],resolve))},
+    { path: 'create-cmp-task/:id', name:"create-cmp-task", component:resolve=>(require(["@/views/comparison/CreateTask"],resolve)),meta:{keepAlive: false} },
     { path: 'create-dataprocess-method', name:"create-dataprocess-method", component:resolve=>(require(["@/views/comparison/CreateDataProcessMethod"],resolve))}
   ]
 },

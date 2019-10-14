@@ -11,6 +11,9 @@ const cmp_task = {
     } else {
       return axios.get(`${base.cmpTask}/getDataProcessMethod`);
     }
+  },
+  createTask(taskJsonInfo){
+    return axios.post(`${base.cmpTask}/createTask`, taskJsonInfo);
   }
 
 }

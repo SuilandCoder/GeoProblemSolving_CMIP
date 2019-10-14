@@ -31,7 +31,9 @@ public enum ResultEnum {
     FAILED_TO_UPLOAD_DATA(-19,"Failed to upload data"),
     FAILED_TO_INVOKE_MODEL(-20,"Failed to invoke model"),
     FAILED_TO_GET_RECORD(-21, "Failed to get record"),
-    UNKNOWN_METHOD_TYPE_ERROR(-22,"Unknown method type error");
+    UNKNOWN_METHOD_TYPE_ERROR(-22,"Unknown method type error"),
+    COMPARISON_METHOD_LACKS_INPUT_DATA(-23, "Comparison method lacks input data"),
+    FAILED_TO_COMPARING(-24,"Failed to comparing.");
 
     private Integer code;
 

@@ -1,6 +1,7 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance;
 
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpInstance;
+import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.ModelResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,7 +27,9 @@ public class CmpInstanceDaoImpl implements ICmpInstanceDao {
 
     @Override
     public CmpInstance findInstanceByMsrId(String instanceId) {
-        return null;
+        Query q = Query.query(Criteria.where("instanceId").is(instanceId));
+        CmpInstance instance = mongoTemplate.findOne(q,CmpInstance.class);
+        return instance;
     }
 
     @Override
