@@ -33,7 +33,8 @@ public enum ResultEnum {
     FAILED_TO_GET_RECORD(-21, "Failed to get record"),
     UNKNOWN_METHOD_TYPE_ERROR(-22,"Unknown method type error"),
     COMPARISON_METHOD_LACKS_INPUT_DATA(-23, "Comparison method lacks input data"),
-    FAILED_TO_COMPARING(-24,"Failed to comparing.");
+    FAILED_TO_EXCUTE_SCRIPT(-24,"Failed to excute scripte"),
+    FAILED_TO_COMPARING(-25,"Failed to comparing.");
 
     private Integer code;
 

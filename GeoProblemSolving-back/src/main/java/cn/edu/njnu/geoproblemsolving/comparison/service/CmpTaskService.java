@@ -4,7 +4,9 @@ import cn.edu.njnu.geoproblemsolving.comparison.constant.HttpContant;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance.CmpInstanceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataprocess_method.DataProcessMethodDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataresource.DataResourceDaoImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.dao.taskrecord.CmpMethodRecordImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpInstance;
+import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpMethodRecord;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
@@ -13,11 +15,13 @@ import cn.edu.njnu.geoproblemsolving.comparison.utils.MyHttpUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.xml.internal.ws.util.CompletedFuture;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +36,14 @@ import java.util.concurrent.Future;
 @Service
 public class CmpTaskService {
 
-    public JSONObject runTaskTest(JSONObject cmpMethodItem, String metricId, String metricName, JSONArray dataProcessMethodList) throws IOException, ExecutionException, InterruptedException {
+    @Resource
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    CmpMethodRecordImpl cmpMethodRecordDao;
+
+    @Async
+    public void runTask(JSONObject cmpMethodItem, String metricId, String metricName, JSONArray dataProcessMethodList) throws IOException, ExecutionException, InterruptedException {
         cmpMethodItem.put("metricId", metricId);
         cmpMethodItem.put("metricName", metricName);
         JSONArray inputList = cmpMethodItem.getJSONArray("inputList");
@@ -98,6 +109,10 @@ public class CmpTaskService {
                     }
                 }
                 if (inputData.getString("dataStoreId")==null) {
+                    // 将脚本运行结果保存数据库
+                    CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
+                    cmr.setStatus("-1");
+                    cmpMethodRecordDao.updateRecord(cmr);
                     throw new MyException(ResultEnum.COMPARISON_METHOD_LACKS_INPUT_DATA);
                 }
             }
@@ -107,7 +122,7 @@ public class CmpTaskService {
         res.put("cmpMethodInfo", cmpMethodTaskRes);
         res.put("dataProcessMethodList", dataProcessMethodList);
 
-        return res;
+//        return res;
     }
 
 
@@ -151,48 +166,23 @@ public class CmpTaskService {
     }
 
 
-    //    @Async
-    public JSONObject runTask(JSONObject cmpMethodItem, String metricId, String metricName, JSONArray dataProcessMethodList) throws IOException {
-        cmpMethodItem.put("metricId", metricId);
-        cmpMethodItem.put("metricName", metricName);
-        // 判断输入数据是否完备
-        JSONArray inputList = cmpMethodItem.getJSONArray("inputList");
-        boolean inputAllOk = true;
-        for (int i = 0; i < inputList.size(); i++) {
-            JSONObject inputData = inputList.getJSONObject(i);
-            String type = inputData.getString("type");
-            if (inputData.getString("dataStoreId").isEmpty()) {
-                inputAllOk = false;
-            }
-            if ("normal".equals(type) && inputData.getString("dataStoreId").isEmpty()) {
-                String dependencyMethodId = inputData.getString("oid");
-                for (int j = 0; j < dataProcessMethodList.size(); j++) {
-                    JSONObject dpm = dataProcessMethodList.getJSONObject(j);
-                    if (dependencyMethodId.equals(dpm.getString("methodId"))) {
-                        JSONObject methodRes = runTask(dpm, metricId, metricName, dataProcessMethodList);
-                        JSONObject output = methodRes.getJSONObject("output");
-                        dpm.put("output", output);
-                        dataProcessMethodList.set(j, dpm);
-                        inputData.put("dataStoreId", output.getString("dataStoreId"));
-                        inputList.set(i, inputData);
-                    }
-                }
-            }
-        }
-        // 请求执行脚本：
-        JSONObject res = runScript(cmpMethodItem);
-//        Map<String, JSONObject> resMap = new HashMap<>();
-//        resMap.put("cmpMethodItem",res);
-
-        return res;
-    }
 
     public JSONObject runScript(JSONObject cmpMethodItem) throws IOException {
         String url = "http://" + HttpContant.DATA_CONTAINER_IP + ":" + HttpContant.DATA_CONTAINER_PORT + "/cmpTask/runCmpTask";
         String res = MyHttpUtils.post_RESCODE(url, cmpMethodItem,"0");
-        System.out.println(res);
-        JSONObject resJSON = JSONObject.parseObject(res);
-        return resJSON;
+//        System.out.println(res);
+        // 将脚本运行结果保存数据库
+        CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
+        if(res==null){
+            cmr.setStatus("-1");
+            cmpMethodRecordDao.updateRecord(cmr);
+            throw new MyException(ResultEnum.FAILED_TO_EXCUTE_SCRIPT);
+        }else{
+            cmr.setStatus("1");
+            cmpMethodRecordDao.updateRecord(cmr);
+            JSONObject resJSON = JSONObject.parseObject(res);
+            return resJSON;
+        }
     }
 
 

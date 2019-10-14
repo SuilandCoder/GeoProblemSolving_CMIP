@@ -316,22 +316,30 @@ export default {
     }
     next();
   },
-  // beforeRouteEnter: (to, from, next) => {
-  //   if(from.name==="create-dataprocess-method" && from.params.newMethod){
-  //     let newMethod = JSON.parse(from.params.newMethod);
-  //     // if(newMethod.type==="comparison"){
-  //     //   this.comparisonMethods.push(newMethod);
-  //     // }else if(newMethod.type === "normal"){
-  //     //   this.dataProcess.push(newMethod);
-  //     // }
-  //   }
-  //   next();
-  // },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      $.ajax({
+        url: "/GeoProblemSolving/user/state",
+        type: "GET",
+        async: false,
+        success: function(data) {
+          if (!data) {
+            vm.$store.commit("userLogout");
+            vm.$router.push({ name: "Login" });
+          }
+        },
+        error: function(err) {
+          console.log("Get user state fail.");
+        }
+      });
+    });
+  },
   created() {
     window.addEventListener("resize", this.getGraphHeight);
     this.getGraphHeight();
 
     this.projectId = this.$route.params.id;
+    this.taskInfo.projectId = this.projectId;
     //* 获取 instance 信息
     this.getInstanceList();
     //* 获取数据处理方法 和 对比方法；
@@ -344,9 +352,13 @@ export default {
       splitHeight: "",
       // splitHeight: window.screen.availHeight - 300 + "px",
       graphBoxHeight: $(document).height() - 230 + "px",
+      projectId: "",
       taskInfo: {
+        projectId:this.projectId,
         name: "",
         description: "",
+        userName: this.$store.getters.userName,
+        userId: this.$store.getters.userId,
         targetInstanceList: [],
         checkedMetrics: [],
         computableModels: []
@@ -358,7 +370,6 @@ export default {
       comparisonMethods: [],
       elementItem: [],
       currentStep: 0,
-      projectId: "",
       instanceList: [],
       targetInstanceKeys: [],
       cmpDataList: [],

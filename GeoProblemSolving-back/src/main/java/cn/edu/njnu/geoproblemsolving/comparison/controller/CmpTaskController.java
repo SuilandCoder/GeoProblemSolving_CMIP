@@ -2,9 +2,14 @@ package cn.edu.njnu.geoproblemsolving.comparison.controller;
 
 import cn.edu.njnu.geoproblemsolving.Dao.metrics.MetricsDaoImpl;
 import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
+import cn.edu.njnu.geoproblemsolving.comparison.bean.CmpMetirc;
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
+import cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance.CmpInstanceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataprocess_method.DataProcessMethodDaoImpl;
-import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
+import cn.edu.njnu.geoproblemsolving.comparison.dao.project.CmpProjectDaoImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.dao.taskrecord.CmpMethodRecordImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.dao.taskrecord.CmpTaskRecordImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.entity.*;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
 import cn.edu.njnu.geoproblemsolving.comparison.service.CmpTaskService;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
@@ -16,8 +21,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -36,6 +44,15 @@ public class CmpTaskController {
 
     @Autowired
     CmpTaskService cmpTaskService;
+
+    @Autowired
+    CmpMethodRecordImpl cmpMethodRecordDao;
+
+    @Autowired
+    CmpTaskRecordImpl cmpTaskRecordDao;
+
+    @Autowired
+    CmpProjectDaoImpl cmpProjectDao;
 
 
     @RequestMapping(value = "/uploadDataProcessMethod", method = RequestMethod.POST)
@@ -64,12 +81,21 @@ public class CmpTaskController {
         return ResultUtils.success(dataProcessMethods);
     }
 
-    // 创建比较任务
+    // 创建对比任务
     @RequestMapping(value = "/createTask", method = RequestMethod.POST)
     public JsonResult createTask(@RequestBody JSONObject tasksInfo) {
         System.out.println(tasksInfo);
         try {
+            String projectId = tasksInfo.getString("projectId");
             JSONArray computableModels = tasksInfo.getJSONArray("computableModels");
+            JSONArray targetInstanceList = tasksInfo.getJSONArray("targetInstanceList");
+            JSONArray checkedMetrics = tasksInfo.getJSONArray("checkedMetrics");
+
+            List<CmpMetirc> cmpMetircs = checkedMetrics.toJavaList(CmpMetirc.class);
+            List<CmpInstance> cmpInstanceList = targetInstanceList.toJavaList(CmpInstance.class);
+            //创建比较任务记录
+            CmpTaskRecord cmpTaskRecord = new CmpTaskRecord(UUID.randomUUID().toString(), tasksInfo.getString("userId"), tasksInfo.getString("userName"), tasksInfo.getString("name"), tasksInfo.getString("description"), cmpInstanceList, cmpMetircs);
+            List<CmpTaskModel> cmpTaskModelList = new ArrayList<>();
             for (int i = 0; i < computableModels.size(); i++) {
                 JSONObject computableModel = computableModels.getJSONObject(i);
 
@@ -77,51 +103,74 @@ public class CmpTaskController {
                 String metricName = computableModel.getString("metricName");
                 JSONArray cmpMethodList = computableModel.getJSONArray("cmpMethodList");
                 JSONArray dataProcessMethodList = computableModel.getJSONArray("dataProcessMethodList");
+
+                List<String> cmpMethodIdList = new ArrayList<>();
+                List<String> dataProcessMethodIdList = new ArrayList<>();
+                for (int k = 0; k < dataProcessMethodList.size(); k++) {
+                    JSONObject dpm = dataProcessMethodList.getJSONObject(k);
+                    String recordId = UUID.randomUUID().toString();
+                    dpm.put("recordId", recordId);
+                    dataProcessMethodIdList.add(recordId);
+
+                    //生成记录并入库；
+                    CmpMethodRecord cmr = dpm.toJavaObject(CmpMethodRecord.class);
+                    cmr.setStatus("0");
+//                    CmpMethodRecordImpl cmpMethodRecordDao = new CmpMethodRecordImpl(mongoTemplate);
+                    cmpMethodRecordDao.createCmpMethodRecord(cmr);
+                }
                 for (int j = 0; j < cmpMethodList.size(); j++) {
                     JSONObject cmpMethodItem = cmpMethodList.getJSONObject(j);
-//                    cmpMethodItem = cmpTaskService.runTask(cmpMethodItem, metricId, metricName, dataProcessMethodList);
-                    JSONObject res = cmpTaskService.runTaskTest(cmpMethodItem, metricId, metricName, dataProcessMethodList);
+                    String recordId = UUID.randomUUID().toString();
+                    cmpMethodItem.put("recordId", recordId);
+                    cmpMethodIdList.add(recordId);
+                    //生成记录并入库；
+                    CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
+                    cmr.setStatus("0");
+//                    CmpMethodRecordImpl cmpMethodRecordDao = new CmpMethodRecordImpl(mongoTemplate);
+                    cmpMethodRecordDao.createCmpMethodRecord(cmr);
 
-                    computableModel.getJSONArray("cmpMethodList").set(j, res.getJSONObject("cmpMethodInfo"));
-                    //todo 如果改成异步的，这里不能直接赋值。
-                    dataProcessMethodList = res.getJSONArray("dataProcessMethodList");
+//                    JSONObject res = cmpTaskService.runTask(cmpMethodItem, metricId, metricName, dataProcessMethodList);
+//                    computableModel.getJSONArray("cmpMethodList").set(j, res.getJSONObject("cmpMethodInfo"));
+//                    //todo 如果改成异步的，这里不能直接赋值。
+//                    dataProcessMethodList = res.getJSONArray("dataProcessMethodList");
+                    cmpTaskService.runTask(cmpMethodItem, metricId, metricName, dataProcessMethodList);
                 }
-                computableModel.put("dataProcessMethodList", dataProcessMethodList);
-                tasksInfo.getJSONArray("computableModels").set(i,computableModel);
+//                computableModel.put("dataProcessMethodList", dataProcessMethodList);
+//                tasksInfo.getJSONArray("computableModels").set(i,computableModel);
+                CmpTaskModel cmpTaskModel = new CmpTaskModel(metricId, metricName, computableModel.getString("graphXML"), cmpMethodIdList, dataProcessMethodIdList);
+                cmpTaskModelList.add(cmpTaskModel);
             }
-            return ResultUtils.success(tasksInfo);
+            cmpTaskRecord.setCmpTaskModelList(cmpTaskModelList);
+            //记录进数据库
+//            CmpTaskRecordImpl cmpTaskRecordDao = new CmpTaskRecordImpl(mongoTemplate);
+            cmpTaskRecordDao.createCmpTaskRecord(projectId,cmpTaskRecord);
+            return ResultUtils.success(cmpTaskRecord);
         } catch (IOException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return ResultUtils.error(ResultEnum.FAILED_TO_COMPARING);
         }
     }
 
-    // 创建比较任务
-    @RequestMapping(value = "/testAsync", method = RequestMethod.GET)
-    public JsonResult testAsync() {
-        long currentTimeMillis = System.currentTimeMillis();
-        try {
-            Future<String> task1 = cmpTaskService.task1();
-            Future<String> task2 = cmpTaskService.task2();
-            Future<String> task3 = cmpTaskService.task3();
 
-            String result = null;
-            for (; ; ) {
-                if (task1.isDone() && task2.isDone() && task3.isDone()) {
-                    break;
-                }
-//                if(task1.isDone()){
-//                    break;
-//                }
-                Thread.sleep(1000);
-            }
-            long currentTimeMillis1 = System.currentTimeMillis();
-            result = "task总耗时：" + (currentTimeMillis1 - currentTimeMillis) + "ms";
-            return ResultUtils.success(result);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return ResultUtils.error(ResultEnum.FAILED);
-        }
+    //查询所有对比任务
+    @RequestMapping(value = "/getCmpTasks", method = RequestMethod.GET)
+    public JsonResult getCmpTasks(@RequestParam("projectId") String projectId) {
+        CmpProject project = cmpProjectDao.findByProjectId(projectId);
+        List<CmpTaskRecord> taskRecordList = cmpTaskRecordDao.findByRecordIdList(project.getTaskList());
+        return ResultUtils.success(taskRecordList);
     }
 
+    //查询对比任务记录
+    @RequestMapping(value = "/getCmpTaskRecord", method = RequestMethod.GET)
+    public JsonResult getCmpTaskRecord(@RequestParam("recordId") String recordId) {
+        CmpTaskRecord record = cmpTaskRecordDao.findByRecordId(recordId);
+        return ResultUtils.success(record);
+    }
+
+    //查询对比任务中方法执行记录
+    @RequestMapping(value = "/getCmpMethodRecord", method = RequestMethod.GET)
+    public JsonResult getCmpMethodRecord(@RequestParam("recordId") String recordId){
+        CmpMethodRecord record = cmpMethodRecordDao.findByRecordId(recordId);
+        return ResultUtils.success(record);
+    }
 }
