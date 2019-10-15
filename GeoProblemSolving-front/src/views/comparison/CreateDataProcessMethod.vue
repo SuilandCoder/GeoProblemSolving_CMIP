@@ -103,11 +103,22 @@ export default {
       });
     });
   },
+  beforeRouteLeave(to, from, next) {
+    // 设置下一个路由的 meta
+    if (to.name === "create-cmp-task") {
+      to.meta.keepAlive = true; // 让 A 缓存，即不刷新
+      // if(this.newMethod){
+      //   from.params.newMethod = JSON.stringify(this.newMethod);
+      // }
+    }
+    next();
+  },
   created() {
     this.dpmInfo.type = sessionStorage.getItem("dpmType");
   },
   data() {
     return {
+      newMethod:"",
       dpmInfo: {
         name: "",
         type: "",
@@ -301,6 +312,7 @@ export default {
           this.$api.cmp_task
             .uploadDataProcessMethod(this.dpmInfo)
             .then(res => {
+              this.newMethod = res;
               this.$router.go(-1);
             })
             .catch(err => {

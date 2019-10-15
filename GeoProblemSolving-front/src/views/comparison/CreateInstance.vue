@@ -3,7 +3,7 @@
     <h2 style="text-align:center;margin:20px;">Create Instance</h2>
     <Form ref="instanceInfo" :model="instanceInfo" :rules="rules">
       <FormItem prop="name" label="Name" :label-width="150">
-        <Input v-model="instanceInfo.name"  style="width: 300px" placeholder="Enter instance name" />
+        <Input v-model="instanceInfo.name" style="width: 300px" placeholder="Enter instance name" />
       </FormItem>
       <FormItem prop="description" label="Description" :label-width="150">
         <div>

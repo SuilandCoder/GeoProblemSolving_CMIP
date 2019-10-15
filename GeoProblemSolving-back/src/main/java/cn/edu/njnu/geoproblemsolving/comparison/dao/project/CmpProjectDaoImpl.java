@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.UUID;
  * @Date: Created in 9:50 2019/7/10
  * @Modified By:
  **/
+@Service
 public class CmpProjectDaoImpl implements ICmpProjectDao {
 
     private final MongoTemplate mongoTemplate;
@@ -122,6 +124,20 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
     }
 
     @Override
+    public CmpProject updateTaskList(String projectId, String taskId, boolean isAdd) {
+        Query query = Query.query(Criteria.where("projectId").is(projectId));
+        CmpProject project = mongoTemplate.findOne(query, CmpProject.class);
+        Update update = new Update();
+        if(isAdd){
+            update.addToSet("taskList",taskId);
+        }else{
+            update.pull("taskList",taskId);
+        }
+        mongoTemplate.updateFirst(query,update,CmpProject.class);
+        return project;
+    }
+
+    @Override
     public void updateModelList(String projectId, String modelId, boolean isAdd) {
         Query query = Query.query(Criteria.where("projectId").is(projectId));
         Update update = new Update();
@@ -132,6 +148,8 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
         }
         mongoTemplate.updateFirst(query,update,CmpProject.class);
     }
+
+
 
     @Override
     public List<CmpProject> getAllProject() {

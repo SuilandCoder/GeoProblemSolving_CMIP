@@ -11,6 +11,24 @@ const cmp_task = {
     } else {
       return axios.get(`${base.cmpTask}/getDataProcessMethod`);
     }
+  },
+  getDataProcessMethodById(methodId){
+    return axios.get(`${base.cmpTask}/getDataProcessMethodById?methodId=${methodId}`);
+  },
+  createTask(taskJsonInfo){
+    return axios.post(`${base.cmpTask}/createTask`, taskJsonInfo);
+  },
+  getCmpTasks(projectId){
+    return axios.get(`${base.cmpTask}/getCmpTasks?projectId=${projectId}`);
+  },
+  getCmpTaskRecord(recordId){
+    return axios.get(`${base.cmpTask}/getCmpTaskRecord?recordId=${recordId}`);
+  },
+  getCmpMethodRecord(recordId){
+    return axios.get(`${base.cmpTask}/getCmpMethodRecord?recordId=${recordId}`);
+  },
+  getCmpMethodRecordList(recordList){
+    return axios.post(`${base.cmpTask}/getCmpMethodRecordList`, recordList);
   }
 
 }

@@ -3,20 +3,21 @@ package cn.edu.njnu.geoproblemsolving.comparison.bean;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @Author: SongJie
  * @Description:
- * @Date: Created in 14:38 2019/9/30
+ * @Date: Created in 10:51 2019/10/14
  * @Modified By:
  **/
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataItem {
-    String name;
-    String type; // file | double | int | String | boolean
-    String desc;
-    boolean optional;
-    String value;
+@Document
+public class TaskOutputItem extends DataItem {
+    String fileName;
+    String suffix;
+    String downloadUrl;
+    String dataStoreId;
 }

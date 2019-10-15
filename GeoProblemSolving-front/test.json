@@ -1,0 +1,42 @@
+{
+  "oid": "",
+  "name": "",
+  "desc": "",
+  "instanceList": [],
+  "metrics": [],
+  "graphXML": "",
+  "computableModels": [
+    {
+      "metricId": "",
+      "cmpMethodList": [
+        {
+          "methodId": "",
+          "inputList": [
+            {
+              "type":"",
+              "oid": "",
+              "instanceId": "",
+              "cmpDataId": ""
+            }
+          ],
+          "params": {}
+        }
+      ],
+      "dataProcessMethodList": [
+        {
+          "methodId": "",
+          "inputList": [
+            {
+              "type": "",
+              "oid": "",
+              "instanceId": "",
+              "cmpDataId": ""
+            }
+          ],
+          "params": {}
+        }
+
+      ]
+    }
+  ]
+}

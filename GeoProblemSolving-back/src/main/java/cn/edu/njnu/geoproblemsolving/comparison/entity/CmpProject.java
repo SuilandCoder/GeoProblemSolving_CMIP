@@ -37,9 +37,9 @@ public class CmpProject{
     String privacy;
     String picture;
     String evaluationRules;
-    List<String> evaluatedDataIds = new ArrayList<>(); // 评估数据 可以是观测数据、标准数据或者其他
-    String standardInputData;
-    String evaluatedData;
+//    List<String> evaluatedDataIds = new ArrayList<>(); // 评估数据 可以是观测数据、标准数据或者其他
+//    String standardInputData;
+//    String evaluatedData;
 
     Date startTime;
     Date endTime;
@@ -48,9 +48,10 @@ public class CmpProject{
     String resolution;
     String timeInterval;
     List<String> modelList = new ArrayList<>(); //todo 模型信息 此处不应该是 String 类型
-    List<String> requiredInputsId = new ArrayList<>(); //   必要输入数据
-    List<String> outputDataList = new ArrayList<>();//   必要输出数据
+//    List<String> requiredInputsId = new ArrayList<>(); //   必要输入数据
+//    List<String> outputDataList = new ArrayList<>();//   必要输出数据
 
-    List<String> solutionList = new ArrayList<>(); // 解决方案
+//    List<String> solutionList = new ArrayList<>(); // 解决方案
     List<String> instanceList = new ArrayList<>(); // instance
+    List<String> taskList = new ArrayList<>();     // task
 }

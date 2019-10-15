@@ -13,7 +13,7 @@ import java.util.List;
  * @Modified By:
  **/
 public interface IDataProcessMethodDao {
-    DataProcessMethod findDataProcessMethodById(String id);
+    DataProcessMethod findDataProcessMethodByOid(String oid);
 
     DataProcessMethod createDataProcessMethod(DataProcessMethod dpm);
 
