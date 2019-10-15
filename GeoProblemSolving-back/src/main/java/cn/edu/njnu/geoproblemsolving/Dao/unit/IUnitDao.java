@@ -19,4 +19,6 @@ public interface IUnitDao {
     List<Unit> findUnitByIdList(List<String> idList);
 
     Unit updateUnit(Unit unit);
+
+    List<Unit> getUnits(String key, String value);
 }
