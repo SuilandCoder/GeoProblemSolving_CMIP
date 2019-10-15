@@ -24,7 +24,7 @@ body {
     color: black;
     font-weight:700;
     /* margin-top:5%; */
-    
+
 }
 
 .sub-title{
@@ -32,7 +32,7 @@ body {
     color: black;
     font-weight:400;
     /* margin-top:5%; */
-    
+
 }
 .stepBtn{
   margin-left: 20%;
@@ -71,7 +71,7 @@ body {
                   <Icon type="md-time" :size="20" />
                   <span>Created Time</span>
               </div>
-              
+
             </Card>
 
               <Divider />
@@ -91,7 +91,7 @@ body {
           <!-- <Divider  type="vertical"/> -->
           <Col :lg="{span:18,offset:1}" :md="{span:15,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
           <div class="rightContent">
-           
+
             <Card>
               <Col offset="1">
                 <!-- <p>当前正在进行第 {{ currentStep + 1 }} 步</p> -->
@@ -122,11 +122,11 @@ body {
             </Col>
           </div>
           </Col>
-        </Row>       
+        </Row>
       </Col>
     </Row>
-   
-   
+
+
   </div>
 </template>
 <script>
@@ -141,7 +141,7 @@ export default {
       }
     });
   },
-  created() {   
+  created() {
     this.initSize();
   },
   components: {
@@ -158,7 +158,7 @@ export default {
       }
     };
     return {
-     
+
       //走马灯属性
       carouseValue: 0 ,
       dataProtocal: {
@@ -192,9 +192,6 @@ export default {
         this.currentStep -= 1;
       }
     },
-
-
-
   }
 };
 </script>

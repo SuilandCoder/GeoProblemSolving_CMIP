@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.Dao.spatialref;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Concept;
 import cn.edu.njnu.geoproblemsolving.Entity.SpatialReference;
 import cn.edu.njnu.geoproblemsolving.Entity.Unit;
 
@@ -12,6 +13,8 @@ import java.util.List;
  * @Modified By:
  **/
 public interface ISpatialRefDao {
+    List<SpatialReference> findAll();
+
     SpatialReference findSpatialReferenceByOid(String oid);
 
     SpatialReference createSpatialReference(SpatialReference sr);

@@ -1,6 +1,7 @@
 package cn.edu.njnu.geoproblemsolving.Dao.unit;
 
 import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
+import cn.edu.njnu.geoproblemsolving.Entity.SpatialReference;
 import cn.edu.njnu.geoproblemsolving.Entity.Unit;
 
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.List;
  * @Modified By:
  **/
 public interface IUnitDao {
+
+    List<Unit> findAll();
+
     Unit findUnitByOid(String oid);
 
     Unit createUnit(Unit unit);

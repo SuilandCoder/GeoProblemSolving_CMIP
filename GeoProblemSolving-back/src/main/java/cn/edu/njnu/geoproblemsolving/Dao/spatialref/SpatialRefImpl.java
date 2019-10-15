@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.Dao.spatialref;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Concept;
 import cn.edu.njnu.geoproblemsolving.Entity.SpatialReference;
 import cn.edu.njnu.geoproblemsolving.Entity.Unit;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpMethodRecord;
@@ -28,6 +29,12 @@ public class SpatialRefImpl implements ISpatialRefDao {
 
     public SpatialRefImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
+    }
+
+    @Override
+    public List<SpatialReference> findAll() {
+        List<SpatialReference> all = mongoTemplate.findAll(SpatialReference.class);
+        return all;
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -20,12 +21,19 @@ import java.util.UUID;
  * @Date: Created in 20:17 2019/10/2
  * @Modified By:
  **/
+@Service
 public class UnitDaoImpl implements IUnitDao {
 
     private final MongoTemplate mongoTemplate;
 
     public UnitDaoImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
+    }
+
+    @Override
+    public List<Unit> findAll() {
+        List<Unit> all = mongoTemplate.findAll(Unit.class);
+        return all;
     }
 
     @Override
