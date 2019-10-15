@@ -55,7 +55,7 @@
                 <template slot-scope="{ row, index }" slot="status">
                   <Icon v-if="row.status==='1'" type="md-checkmark" color="rgb(10, 171, 67)" />
                   <Icon v-if="row.status==='-1'" type="md-close" color="#f00" />
-                  <Icon v-if="row.status==='0'" type="md-pulse" color = "coral"/> 
+                  <Icon v-if="row.status==='0'" type="md-pulse" color = "coral"/>
                   <span>{{getExcuteStatus(row.status)}}</span>
                 </template>
                 <template slot-scope="{ row, index }" slot="progress">

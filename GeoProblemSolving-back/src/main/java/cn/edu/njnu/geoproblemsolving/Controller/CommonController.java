@@ -1,11 +1,24 @@
 package cn.edu.njnu.geoproblemsolving.Controller;
 
+import cn.edu.njnu.geoproblemsolving.Dao.concept.ConceptImpl;
+import cn.edu.njnu.geoproblemsolving.Dao.spatialref.SpatialRefImpl;
+import cn.edu.njnu.geoproblemsolving.Dao.template.TemplateImpl;
+import cn.edu.njnu.geoproblemsolving.Dao.unit.UnitDaoImpl;
+import cn.edu.njnu.geoproblemsolving.Entity.Concept;
+import cn.edu.njnu.geoproblemsolving.Entity.SpatialReference;
+import cn.edu.njnu.geoproblemsolving.Entity.Template;
+import cn.edu.njnu.geoproblemsolving.Entity.Unit;
+import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
+import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
+import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author: SongJie
@@ -20,5 +33,75 @@ public class CommonController {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    TemplateImpl templateDao;
+
+    @Autowired
+    SpatialRefImpl spatialRefDao;
+
+    @Autowired
+    ConceptImpl conceptDao;
+
+    @Autowired
+    UnitDaoImpl unitDao;
+
+    @RequestMapping(value = "/createItem",method = RequestMethod.POST)
+    public JsonResult createItem(@RequestBody JSONObject itemJson) {
+        //json 数据格式为 {type:"",data:JSONObject};
+        String type = itemJson.getString("type");
+        JSONObject data = itemJson.getJSONObject("data");
+        if ("unit".equals(type)) {
+            Unit unit = data.toJavaObject(Unit.class);
+            unitDao.createUnit(unit);
+        } else if ("template".equals(type)) {
+            Template template = data.toJavaObject(Template.class);
+            templateDao.createTemplate(template);
+        } else if ("concept".equals(type)) {
+            Concept concept = data.toJavaObject(Concept.class);
+            conceptDao.createConcept(concept);
+        }else if("spatialref".equals(type)){
+            SpatialReference spatialReference = data.toJavaObject(SpatialReference.class);
+            spatialRefDao.createSpatialReference(spatialReference);
+        }
+        return ResultUtils.success(data);
+    }
+
+
+    @RequestMapping(value = "/findAllItem",method = RequestMethod.GET)
+    public JsonResult findAllItem(@RequestParam(value = "type") String type) {
+        if ("unit".equals(type)) {
+            List<Unit> units = unitDao.findAll();
+            return ResultUtils.success(units);
+        } else if ("template".equals(type)) {
+            List<Template> all = templateDao.findAll();
+            return ResultUtils.success(all);
+        } else if ("concept".equals(type)) {
+            List<Concept> all = conceptDao.findAll();
+            return ResultUtils.success(all);
+        }else if("spatialref".equals(type)){
+            List<SpatialReference> all = spatialRefDao.findAll();
+            return ResultUtils.success(all);
+        }
+        return ResultUtils.error(ResultEnum.NO_OBJECT);
+    }
+
+
+    @RequestMapping(value = "/findByX",method = RequestMethod.GET)
+    public JsonResult findByX(@RequestParam(value = "type") String type,@RequestParam(value = "key") String key,@RequestParam(value = "value") String value){
+        if ("unit".equals(type)) {
+            List<Unit> units = unitDao.getUnits(key,value);
+            return ResultUtils.success(units);
+        } else if ("template".equals(type)) {
+            List<Template> all = templateDao.getTemplates(key,value);
+            return ResultUtils.success(all);
+        } else if ("concept".equals(type)) {
+            List<Concept> all = conceptDao.getConcepts(key,value);
+            return ResultUtils.success(all);
+        }else if("spatialref".equals(type)){
+            List<SpatialReference> all = spatialRefDao.getSpatialReferences(key,value);
+            return ResultUtils.success(all);
+        }
+        return ResultUtils.error(ResultEnum.NO_OBJECT);
+    }
 
 }
