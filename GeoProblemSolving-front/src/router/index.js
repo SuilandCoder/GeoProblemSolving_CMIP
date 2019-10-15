@@ -55,7 +55,7 @@ const routes = [{
     { path: 'create-cmp-instance/:id', name:"create-cmp-instance", component:resolve=>(require(["@/views/comparison/CreateInstance"],resolve))},
     { path: 'create-cmp-task/:id', name:"create-cmp-task", component:resolve=>(require(["@/views/comparison/CreateTask"],resolve))},
     { path: 'create-dataprocess-method', name:"create-dataprocess-method", component:resolve=>(require(["@/views/comparison/CreateDataProcessMethod"],resolve))},   
-    { path: 'cmp-task-record/:id', name:"cmp-task-record", component:resolve=>(require(["@/views/comparison/CmpTaskRecord"],resolve))}
+    { path: 'cmp-task-record/:id', name:"cmp-task-record", component:resolve=>(require(["@/views/comparison/CmpTaskRecord"],resolve))},
     { path: 'topic', name: 'topic', component: resolve => (require(["@/views/comparison/topic"], resolve)) },   
   ]
 },
