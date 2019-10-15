@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.service;
 
+import cn.edu.njnu.geoproblemsolving.comparison.bean.TaskOutputItem;
 import cn.edu.njnu.geoproblemsolving.comparison.constant.HttpContant;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance.CmpInstanceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataprocess_method.DataProcessMethodDaoImpl;
@@ -172,15 +173,21 @@ public class CmpTaskService {
         String res = MyHttpUtils.post_RESCODE(url, cmpMethodItem,"0");
 //        System.out.println(res);
         // 将脚本运行结果保存数据库
-        CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
         if(res==null){
+            CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
             cmr.setStatus("-1");
             cmpMethodRecordDao.updateRecord(cmr);
             throw new MyException(ResultEnum.FAILED_TO_EXCUTE_SCRIPT);
         }else{
-            cmr.setStatus("1");
-            cmpMethodRecordDao.updateRecord(cmr);
             JSONObject resJSON = JSONObject.parseObject(res);
+            CmpMethodRecord cmr = resJSON.toJavaObject(CmpMethodRecord.class);
+            cmr.setStatus("1");
+            //更新 output downloadUrl
+            TaskOutputItem output = cmr.getOutput();
+            String downLoadUrl = "http://" + HttpContant.DATA_CONTAINER_IP + ":" + HttpContant.DATA_CONTAINER_PORT + "/dataResource/getResource?sourceStoreId="+output.getDataStoreId();
+            output.setDownloadUrl(downLoadUrl);
+            cmr.setOutput(output);
+            cmpMethodRecordDao.updateRecord(cmr);
             return resJSON;
         }
     }

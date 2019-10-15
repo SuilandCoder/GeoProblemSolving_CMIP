@@ -354,7 +354,7 @@ export default {
       graphBoxHeight: $(document).height() - 230 + "px",
       projectId: "",
       taskInfo: {
-        projectId:this.projectId,
+        projectId: this.projectId,
         name: "",
         description: "",
         userName: this.$store.getters.userName,
@@ -620,7 +620,12 @@ export default {
       // console.log("taskInfo:", this.taskInfo);
       this.$api.cmp_task
         .createTask(this.taskInfo)
-        .then(res => {})
+        .then(res => {
+          let recordId = res.recordId;
+          this.$router.push({
+            path: `/cmp-task-record/${recordId}`
+          });
+        })
         .catch(err => {
           this.$Message.error(err);
         });

@@ -54,6 +54,9 @@ public class CmpTaskController {
     @Autowired
     CmpProjectDaoImpl cmpProjectDao;
 
+    @Autowired
+    DataProcessMethodDaoImpl dataProcessMethodDao;
+
 
     @RequestMapping(value = "/uploadDataProcessMethod", method = RequestMethod.POST)
     public JsonResult uploadDataProcessMethod(@RequestBody DataProcessMethod dpm) {
@@ -79,6 +82,12 @@ public class CmpTaskController {
             dataProcessMethods = new ArrayList<>();
         }
         return ResultUtils.success(dataProcessMethods);
+    }
+
+    @RequestMapping(value = "/getDataProcessMethodById", method = RequestMethod.GET)
+    public JsonResult getDataProcessMethodById(@RequestParam("methodId") String methodId){
+        DataProcessMethod dpm = dataProcessMethodDao.findDataProcessMethodByOid(methodId);
+        return ResultUtils.success(dpm);
     }
 
     // 创建对比任务
@@ -115,7 +124,6 @@ public class CmpTaskController {
                     //生成记录并入库；
                     CmpMethodRecord cmr = dpm.toJavaObject(CmpMethodRecord.class);
                     cmr.setStatus("0");
-//                    CmpMethodRecordImpl cmpMethodRecordDao = new CmpMethodRecordImpl(mongoTemplate);
                     cmpMethodRecordDao.createCmpMethodRecord(cmr);
                 }
                 for (int j = 0; j < cmpMethodList.size(); j++) {
@@ -126,17 +134,9 @@ public class CmpTaskController {
                     //生成记录并入库；
                     CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
                     cmr.setStatus("0");
-//                    CmpMethodRecordImpl cmpMethodRecordDao = new CmpMethodRecordImpl(mongoTemplate);
                     cmpMethodRecordDao.createCmpMethodRecord(cmr);
-
-//                    JSONObject res = cmpTaskService.runTask(cmpMethodItem, metricId, metricName, dataProcessMethodList);
-//                    computableModel.getJSONArray("cmpMethodList").set(j, res.getJSONObject("cmpMethodInfo"));
-//                    //todo 如果改成异步的，这里不能直接赋值。
-//                    dataProcessMethodList = res.getJSONArray("dataProcessMethodList");
                     cmpTaskService.runTask(cmpMethodItem, metricId, metricName, dataProcessMethodList);
                 }
-//                computableModel.put("dataProcessMethodList", dataProcessMethodList);
-//                tasksInfo.getJSONArray("computableModels").set(i,computableModel);
                 CmpTaskModel cmpTaskModel = new CmpTaskModel(metricId, metricName, computableModel.getString("graphXML"), cmpMethodIdList, dataProcessMethodIdList);
                 cmpTaskModelList.add(cmpTaskModel);
             }
@@ -172,5 +172,11 @@ public class CmpTaskController {
     public JsonResult getCmpMethodRecord(@RequestParam("recordId") String recordId){
         CmpMethodRecord record = cmpMethodRecordDao.findByRecordId(recordId);
         return ResultUtils.success(record);
+    }
+
+    @RequestMapping(value = "/getCmpMethodRecordList", method = RequestMethod.POST)
+    public JsonResult getCmpMethodRecordList(@RequestBody List<String> recordList){
+        List<CmpMethodRecord> cmpMethodRecordList = cmpMethodRecordDao.findByRecordIdList(recordList);
+        return ResultUtils.success(cmpMethodRecordList);
     }
 }
