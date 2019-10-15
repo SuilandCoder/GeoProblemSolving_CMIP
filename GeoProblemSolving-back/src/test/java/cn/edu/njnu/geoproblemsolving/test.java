@@ -1,6 +1,8 @@
 package cn.edu.njnu.geoproblemsolving;
 
 import cn.edu.njnu.geoproblemsolving.entity.MethodResource;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,26 +55,20 @@ public class test {
     }
 
     public static void main(String[] args) {
-//        List<PlayList> lists = new ArrayList<>();
-//        PlayList aList = new PlayList("A");
-//        PlayList bList = new PlayList("B");
-//        PlayList cList = new PlayList("C");
-//        PlayList dList = new PlayList("D");
-//        PlayList eList = new PlayList("E");
-//        lists.add(aList);
-//        lists.add(bList);
-//        lists.add(cList);
-//        lists.add(dList);
-//        lists.add(eList);
-//        play("ACBD", lists);
-//        JSONObject object = new JSONObject();
-//        object.put("date", "2019-09-16T07:12:14.000Z");
-//
-//        Date date = object.getDate("date");
-//        System.out.println(date);
-
-//        MethodResource methodResource = new MethodResource();
-//        System.out.println(methodResource.toString());
+        JSONArray ja = new JSONArray();
+        JSONObject object = new JSONObject();
+        object.put("name","songjie");
+        object.put("date", "2019-09-16T07:12:14.000Z");
+        JSONObject object1 = new JSONObject();
+        object1.put("name","zrm");
+        object1.put("date", "2019-09-16T07:12:14.000Z");
+        ja.add(object);
+        ja.add(object1);
+        JSONObject object2 = new JSONObject();
+        object2.put("name","sj");
+        object2.put("date", "2019-09-16T07:12:14.000Z");
+        ja.set(0,object2);
+        System.out.println(ja);
     }
 
 }

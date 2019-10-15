@@ -89,12 +89,24 @@
               </div>
               <div slot='right'>
                 <div v-if="selectVertex.data" style="margin-left:20px">
-                  <span style="margin-top:10px;display:block;">{{selectVertex.data.name}}</span>
-                  <p style="margin:10px;">{{selectVertex.data.desc}}</p>
+                  <div style="margin-top:10px;">
+                    <!-- <h3>Method Name:</h3> -->
+                    <h2 style="display:block;color:cadetblue;">{{selectVertex.data.name}}</h2>
+                  </div>
+                  <div style="margin-top:10px;">
+                    <h3>Description:</h3>
+                    <p style="margin:10px;">{{selectVertex.data.desc}}</p>
+                  </div>
+
+                  <div style="margin-top:10px;">
+                    <h3>Params:</h3>
+                  </div>
                   <Form>
                     <FormItem v-for="(param,index) in selectVertex.data.parameterList" :key="index" :label="param.name"
                       :label-width="50">
-                      <Input v-model="param.value" :placeholder="param.type" style="width:100px" />
+                      <!-- <Input ref="inputParam" v-model="param.value" :placeholder="param.type" style="width:100px" /> -->
+                      <input v-model="param.value" :placeholder="param.type"
+                        style="width:100px;height:25px;margin-left:10px;" />
                     </FormItem>
                   </Form>
                 </div>
@@ -156,7 +168,7 @@ const insertVertex = (dom, target, x, y, instance) => {
 
   nodeRootVertex.vertex = true;
   // 自定义的业务数据放在 data 属性
-  // idSeed++;
+  idSeed++;
 
   nodeRootVertex.data = {
     id: idSeed,
@@ -297,11 +309,37 @@ var objDeepCopy = function(source) {
 };
 
 export default {
+  beforeRouteLeave(to, from, next) {
+    // 设置下一个路由的 meta
+    if (to.name != "create-dataprocess-method") {
+      from.meta.keepAlive = false; // 让 A 缓存，即不刷新
+    }
+    next();
+  },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      $.ajax({
+        url: "/GeoProblemSolving/user/state",
+        type: "GET",
+        async: false,
+        success: function(data) {
+          if (!data) {
+            vm.$store.commit("userLogout");
+            vm.$router.push({ name: "Login" });
+          }
+        },
+        error: function(err) {
+          console.log("Get user state fail.");
+        }
+      });
+    });
+  },
   created() {
     window.addEventListener("resize", this.getGraphHeight);
     this.getGraphHeight();
 
     this.projectId = this.$route.params.id;
+    this.taskInfo.projectId = this.projectId;
     //* 获取 instance 信息
     this.getInstanceList();
     //* 获取数据处理方法 和 对比方法；
@@ -314,9 +352,13 @@ export default {
       splitHeight: "",
       // splitHeight: window.screen.availHeight - 300 + "px",
       graphBoxHeight: $(document).height() - 230 + "px",
+      projectId: "",
       taskInfo: {
+        projectId: this.projectId,
         name: "",
         description: "",
+        userName: this.$store.getters.userName,
+        userId: this.$store.getters.userId,
         targetInstanceList: [],
         checkedMetrics: [],
         computableModels: []
@@ -328,7 +370,6 @@ export default {
       comparisonMethods: [],
       elementItem: [],
       currentStep: 0,
-      projectId: "",
       instanceList: [],
       targetInstanceKeys: [],
       cmpDataList: [],
@@ -525,9 +566,13 @@ export default {
         return list.filter(item => {
           return item.instanceId === id;
         })[0];
-      } else {
+      } else if (type === "cmpData") {
         return list.filter(item => {
           return item.dataId === id;
+        })[0];
+      } else if (type === "metric") {
+        return list.filter(item => {
+          return item.metric.oid === id;
         })[0];
       }
     },
@@ -549,6 +594,10 @@ export default {
 
       if (cell.vertex) {
         this.selectVertex = cell;
+        console.log("selectVertex id:", this.selectVertex.data.id);
+        if (this.$refs.inputParam) {
+          this.$refs.inputParam.blur();
+        }
       } else {
         this.selectEdge = cell;
       }
@@ -568,7 +617,18 @@ export default {
       this.elementItem = [];
     },
     createTask() {
-      console.log("taskInfo:", this.taskInfo);
+      // console.log("taskInfo:", this.taskInfo);
+      this.$api.cmp_task
+        .createTask(this.taskInfo)
+        .then(res => {
+          let recordId = res.recordId;
+          this.$router.push({
+            path: `/cmp-task-record/${recordId}`
+          });
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
     },
     saveTask(event) {
       const xml = graph.exportModelXML();
@@ -576,6 +636,13 @@ export default {
       console.log("model:", graph.getModel());
       let computableModelInfo = this.parseGraphModel(graph.getModel());
       computableModelInfo.graphXML = xml;
+      //* push 前先判断computableModels中是否已有该对象，如有则覆盖。
+      let index = _.findIndex(this.taskInfo.computableModels, function(model) {
+        return model.metricId === computableModelInfo.metricId;
+      });
+      if (index >= 0) {
+        this.taskInfo.computableModels.splice(index, 1);
+      }
       this.taskInfo.computableModels.push(computableModelInfo);
       //* 清空画布并跳转第一个tab页；
       graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
@@ -587,12 +654,14 @@ export default {
       let cmpMethodList = [];
       let dataProcessMethodList = [];
       let metricId = "";
+      let metricName = "";
       for (let i in cells) {
         let cell = cells[i];
         if (cell.vertex && cell.data.type === "comparison") {
           let cmpMethodInfo = {};
           let inputList = [];
           cmpMethodInfo.methodId = cell.data.oid;
+          cmpMethodInfo.methodSourceId = cell.data.scriptSourceId;
           //* 判断数据处理方法参数是否设置
           for (let param of cell.data.parameterList) {
             if (!param.optional && !param.value) {
@@ -610,6 +679,12 @@ export default {
               inputInfo.type = "instance";
               inputInfo.instanceId = source.data.instanceId;
               inputInfo.cmpDataId = source.data.cmpDataId;
+              let cmpDataInfo = this.getObjByid(
+                this.cmpDataList,
+                source.data.cmpDataId,
+                "cmpData"
+              );
+              inputInfo.dataStoreId = cmpDataInfo.dcSourceStoreId;
             } else if (source.data.type === "normal") {
               inputInfo.type = "normal";
               inputInfo.oid = source.data.oid;
@@ -625,6 +700,10 @@ export default {
           }
 
           cmpMethodInfo.params = objDeepCopy(cell.data.parameterList);
+          cmpMethodInfo.input = cell.data.inputList[0];
+          cmpMethodInfo.output = cell.data.outputList[0];
+          cmpMethodInfo.dependencyLibs = cell.data.dependencyItemList;
+          cmpMethodInfo.interpretor = cell.data.interpretor;
           // Object.assign(dpmInfo.params,cell.data.parameterList);
           // cell.data.parameterList.forEach(param=>{
           //   param.value = "";
@@ -637,6 +716,7 @@ export default {
           let dpmInfo = {};
           let inputList = [];
           dpmInfo.methodId = cell.data.oid;
+          dpmInfo.methodSourceId = cell.data.scriptSourceId;
           //* 判断数据处理方法参数是否设置
           for (let param of cell.data.parameterList) {
             if (!param.optional && !param.value) {
@@ -656,6 +736,12 @@ export default {
                 inputInfo.type = "instance";
                 inputInfo.instanceId = source.data.instanceId;
                 inputInfo.cmpDataId = source.data.cmpDataId;
+                let cmpDataInfo = this.getObjByid(
+                  this.cmpDataList,
+                  source.data.cmpDataId,
+                  "cmpData"
+                );
+                inputInfo.dataStoreId = cmpDataInfo.dcSourceStoreId;
               } else if (source.data.type === "normal") {
                 inputInfo.type = "normal";
                 inputInfo.oid = source.data.oid;
@@ -672,6 +758,10 @@ export default {
             return;
           }
           dpmInfo.params = objDeepCopy(cell.data.parameterList);
+          dpmInfo.input = cell.data.inputList[0];
+          dpmInfo.output = cell.data.outputList[0];
+          dpmInfo.dependencyLibs = cell.data.dependencyItemList;
+          dpmInfo.interpretor = cell.data.interpretor;
           // Object.assign(dpmInfo.params,cell.data.parameterList);
           // cell.data.parameterList.forEach(param=>{
           //   param.value = "";
@@ -690,6 +780,7 @@ export default {
             return;
           }
           metricId = metricId_new;
+          metricName = cmpDataInfo.metrics.name;
         }
       }
       //* 对比方法不能没有
@@ -698,9 +789,7 @@ export default {
         return;
       }
 
-
-
-      Object.keys(cells).forEach(key=>{
+      Object.keys(cells).forEach(key => {
         let cell = cells[key];
         if (
           cell.vertex &&
@@ -723,6 +812,7 @@ export default {
       // }
 
       computableModelInfo.metricId = metricId;
+      computableModelInfo.metricName = metricName;
       computableModelInfo.cmpMethodList = cmpMethodList;
       computableModelInfo.dataProcessMethodList = dataProcessMethodList;
       return computableModelInfo;
@@ -839,11 +929,19 @@ export default {
           } else if (cellData.type === "dataProcess") {
             data = this.dataProcess[cellData.dataIndex];
             cell.setValue(data.name);
-            Object.assign(cell.data, data);
+            //! 此处需要深拷贝
+            let cellData_copyed = _.cloneDeep(data);
+            //! 一个方法可以使用多次所以不能公用一个 oid，此处给 methodId 加后缀
+            cellData_copyed.oid = cellData_copyed.oid + "_" + cell.data.id;
+            Object.assign(cell.data, cellData_copyed);
           } else {
             data = this.comparisonMethods[cellData.dataIndex];
             cell.setValue(data.name);
-            Object.assign(cell.data, data);
+            //! 此处需要深拷贝
+            let cellData_copyed = _.cloneDeep(data);
+            //! 一个方法可以使用多次所以不能公用一个oid，此处给 oid 加后缀
+            cellData_copyed.oid = cellData_copyed.oid + "_" + cell.data.id;
+            Object.assign(cell.data, cellData_copyed);
           }
 
           console.log(JSON.stringify(cell.data));

@@ -25,6 +25,8 @@ public interface ICmpProjectDao {
 
     CmpProject updateInstanceList(String projectId,String instanceId,boolean isAdd);
 
+    CmpProject updateTaskList(String projectId,String taskId,boolean isAdd);
+
     void updateModelList(String projectId,String modelId,boolean isAdd);
 
     List<CmpProject> getAllProject();

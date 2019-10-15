@@ -110,7 +110,44 @@
             </div>
 
             <div v-show="currentTab=='Tasks'">
-              <blank-box v-bind="blankTaskInfo" v-on:linkClicked="createTask"></blank-box>
+              <div v-if="taskList.length>0">
+                <div class="cmpModelBox">
+                  <Row>
+                    <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
+                    <div @click="createTask">
+                      <Card style="height:150px;margin:10px -15px">
+                        <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
+                          <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
+                        </div>
+                      </Card>
+                    </div>
+                    </Col>
+
+                    <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
+                      v-for="task of taskList" :key="task.recordId">
+                    <Card style="height:150px;margin:10px -15px">
+                      <div>
+                        <div class="cmpItemTitle">
+                          <a href="#" @click.prevent="taskDetail(task)">{{task.name}}</a>
+                        </div>
+                        <p class="cmpItemDesc">{{task.desc}}</p>
+                        <div id="bottom-info">
+                          <div class="info">
+                            <Icon type="md-body" :size="15" />
+                            <span style="margin-left:10px; color:#2b85e4">{{task.userName}}</span>
+                          </div>
+                          <div class="info">
+                            <Icon type="md-clock" :size="15" />
+                            <span style="margin-left:10px">{{getCreatedTime(task.createdTime)}}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                    </Col>
+                  </Row>
+                </div>
+              </div>
+              <blank-box v-else v-bind="blankTaskInfo" v-on:linkClicked="createTask"></blank-box>
             </div>
           </Content>
 
@@ -140,6 +177,8 @@ export default {
     this.getProjectInfo();
     //* 获取instance
     this.getInstanceList();
+    //* 获取 task
+    this.getTaskList();
   },
   data() {
     return {
@@ -166,6 +205,7 @@ export default {
       modelList: [],
       currentTab: "Instances",
       instanceList: [],
+      taskList:[],
       projectId: ""
     };
   },
@@ -236,6 +276,16 @@ export default {
           this.$Message.error(err);
         });
     },
+    getTaskList(){
+      this.$api.cmp_task
+        .getCmpTasks(this.projectId)
+        .then(res=>{
+          this.taskList = res;
+        })
+        .catch(err=>{
+          this.$Message.error(err);
+        })
+    },
     onLinkClick() {
       console.log("11");
       if (!this.$store.getters.userState) {
@@ -247,7 +297,7 @@ export default {
         });
       }
     },
-    createInstance() { 
+    createInstance() {
       this.$router.push({
         path: `/create-cmp-instance/${this.projectInfo.projectId}`
       });
@@ -258,6 +308,11 @@ export default {
       });
     },
     instanceDetail(instance) {},
+    taskDetail(task){
+      this.$router.push({
+        path: `/cmp-task-record/${task.recordId}`
+      });
+    },
     showTab($event) {
       this.currentTab = $event;
     },

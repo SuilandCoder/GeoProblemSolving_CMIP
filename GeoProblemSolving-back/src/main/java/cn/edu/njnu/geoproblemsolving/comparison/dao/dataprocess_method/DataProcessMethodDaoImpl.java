@@ -1,10 +1,12 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.dataprocess_method;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.UUID;
  * @Date: Created in 15:05 2019/9/30
  * @Modified By:
  **/
+@Service
 public class DataProcessMethodDaoImpl implements IDataProcessMethodDao {
 
     private final MongoTemplate mongoTemplate;
@@ -25,8 +28,10 @@ public class DataProcessMethodDaoImpl implements IDataProcessMethodDao {
     }
 
     @Override
-    public DataProcessMethod findDataProcessMethodById(String id) {
-        return null;
+    public DataProcessMethod findDataProcessMethodByOid(String oid) {
+        Query q = Query.query(Criteria.where("oid").is(oid));
+        DataProcessMethod method = mongoTemplate.findOne(q,DataProcessMethod.class);
+        return method;
     }
 
     @Override

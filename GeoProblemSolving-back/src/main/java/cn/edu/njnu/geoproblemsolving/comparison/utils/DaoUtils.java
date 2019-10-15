@@ -36,11 +36,11 @@ public class DaoUtils {
         // 4.设置默认 public
         info.setPrivacy("Public");
         // 5.设置outputList
-        if(info.getOutputDataList()!=null && info.getOutputDataList().size()>0){
-            DataResourceDaoImpl dataResourceDao = new DataResourceDaoImpl(mongoTemplate);
-            List<String> dataIdList = dataResourceDao.createDataResByNameList(info.getOutputDataList(), userInfo);
-            info.setOutputDataList(dataIdList);
-        }
+//        if(info.getOutputDataList()!=null && info.getOutputDataList().size()>0){
+//            DataResourceDaoImpl dataResourceDao = new DataResourceDaoImpl(mongoTemplate);
+//            List<String> dataIdList = dataResourceDao.createDataResByNameList(info.getOutputDataList(), userInfo);
+//            info.setOutputDataList(dataIdList);
+//        }
         // 6.设置modelList
 //        if(info.getModelList()!=null&&info.getModelList().size()>0){
 //            ModelResourceDaoImpl modelResourceDao = new ModelResourceDaoImpl(mongoTemplate);
