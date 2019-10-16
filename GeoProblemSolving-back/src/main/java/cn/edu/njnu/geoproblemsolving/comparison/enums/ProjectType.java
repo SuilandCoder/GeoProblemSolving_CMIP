@@ -8,7 +8,8 @@ package cn.edu.njnu.geoproblemsolving.comparison.enums;
  **/
 public enum ProjectType {
     COMPREHENSIVE(1,"comprehensive"),
-    SPECIFIC(2,"specific");
+    SPECIFIC(2,"specific"),
+    TCCM(3,"tccm");
 
 
     private int code;

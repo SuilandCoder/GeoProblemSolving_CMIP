@@ -1,13 +1,11 @@
 package cn.edu.njnu.geoproblemsolving.Controller;
 
 import cn.edu.njnu.geoproblemsolving.Dao.concept.ConceptImpl;
+import cn.edu.njnu.geoproblemsolving.Dao.metrics.MetricsDaoImpl;
 import cn.edu.njnu.geoproblemsolving.Dao.spatialref.SpatialRefImpl;
 import cn.edu.njnu.geoproblemsolving.Dao.template.TemplateImpl;
 import cn.edu.njnu.geoproblemsolving.Dao.unit.UnitDaoImpl;
-import cn.edu.njnu.geoproblemsolving.Entity.Concept;
-import cn.edu.njnu.geoproblemsolving.Entity.SpatialReference;
-import cn.edu.njnu.geoproblemsolving.Entity.Template;
-import cn.edu.njnu.geoproblemsolving.Entity.Unit;
+import cn.edu.njnu.geoproblemsolving.Entity.*;
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
@@ -45,6 +43,9 @@ public class CommonController {
     @Autowired
     UnitDaoImpl unitDao;
 
+    @Autowired
+    MetricsDaoImpl metricsDao;
+
     @RequestMapping(value = "/createItem",method = RequestMethod.POST)
     public JsonResult createItem(@RequestBody JSONObject itemJson) {
         //json 数据格式为 {type:"",data:JSONObject};
@@ -81,6 +82,9 @@ public class CommonController {
         }else if("spatialref".equals(type)){
             List<SpatialReference> all = spatialRefDao.findAll();
             return ResultUtils.success(all);
+        }else if ("metrics".equals(type)) {
+            List<Metrics> metrics = metricsDao.findAll();
+            return ResultUtils.success(metrics);
         }
         return ResultUtils.error(ResultEnum.NO_OBJECT);
     }
@@ -100,6 +104,9 @@ public class CommonController {
         }else if("spatialref".equals(type)){
             List<SpatialReference> all = spatialRefDao.getSpatialReferences(key,value);
             return ResultUtils.success(all);
+        } else if ("metrics".equals(type)) {
+            List<Metrics> metrics = metricsDao.getMetrics(key, value);
+            return ResultUtils.success(metrics);
         }
         return ResultUtils.error(ResultEnum.NO_OBJECT);
     }

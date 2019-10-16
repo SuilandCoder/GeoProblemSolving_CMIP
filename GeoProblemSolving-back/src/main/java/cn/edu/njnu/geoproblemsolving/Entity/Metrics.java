@@ -20,12 +20,15 @@ import java.util.Date;
 @Document
 public class Metrics {
     String oid;
+    String wkName;
     String name;
     String alias;
     String description;
     String min;
     String max;
     Unit unit;
+    SpatialReference srf;
+    Template template;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date updateTime;
 }

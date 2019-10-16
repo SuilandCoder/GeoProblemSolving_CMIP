@@ -49,8 +49,12 @@ export default {
       // console.log(this.$store.state.comparison.projectInfo);
       if(projectInfo.projectType=="COMPREHENSIVE"){
         this.$router.push({path:`/cmp-project/comprehensive/${projectInfo.projectId}`})
-      }else{
+      }else if(projectInfo.projectType=="SPECIFIC"){
         this.$router.push({path:`/cmp-project/specific/${projectInfo.projectId}`})
+      }else if(projectInfo.projectType=="TCCM"){
+         this.$router.push({
+            path: `/cmp-project/tccm/${projectInfo.projectId}`
+          });
       }
 
       // console.log("跳转项目详情");

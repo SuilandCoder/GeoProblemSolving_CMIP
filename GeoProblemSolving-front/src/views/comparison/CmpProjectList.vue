@@ -69,7 +69,8 @@ export default {
       if (!this.$store.getters.userState) {
         this.$router.push({ name: "Login" });
       } else {
-        this.$router.push({ name: "create-cmp-project"  });
+        // this.$router.push({ name: "create-cmp-project"  });
+        this.$router.push({ name: "create-tccm-project"  });
       }
     }
   }
