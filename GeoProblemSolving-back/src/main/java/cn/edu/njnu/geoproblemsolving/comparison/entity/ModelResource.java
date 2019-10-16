@@ -29,6 +29,7 @@ public class ModelResource {
     String description;
     String createTime;
     String projectId;
+    String  modelRecordId;
 
     List<String> computableModels;
     List<String> conceptualModels;

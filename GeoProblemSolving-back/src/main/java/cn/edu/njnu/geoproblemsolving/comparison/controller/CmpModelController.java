@@ -65,7 +65,7 @@ public class CmpModelController {
         // todo 如果 status 为 0 更新记录信息
         if(modelRecord.getStatus()==0){
             try {
-                modelRecord = CmpModelService.getModelInstanceRecord(modelRecord.getIp(), modelRecord.getPort(), modelRecord.getMsrId(), null, modelRecord.getUserId(), modelRecord.getUserName(), modelRecord.getModelId(), modelRecord.getModelName(), modelRecord.getRecordName(),modelRecord.getStates());
+                modelRecord = CmpModelService.getModelInstanceRecord(modelRecord.getIp(), modelRecord.getPort(), modelRecord.getMsrId(), null, modelRecord.getUserId(), modelRecord.getUserName(), modelRecord.getModelId(), modelRecord.getModelName(), modelRecord.getRecordName(),modelRecord.getStates(),modelRecord.getInstanceId());
                 modelRecordDao.updateRecord(modelRecord);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -281,7 +281,7 @@ public class CmpModelController {
         String modelId = request.getParameter("modelId");
         String modelName = request.getParameter("modelName");
         String computableModelId = request.getParameter("computableModelId");
-
+        String instanceId = request.getParameter("instanceId");
         try {
             //调用模型
 //            String recordId = CmpModelService.invokeModel_MC(ip, port, msid, inputs);
@@ -290,7 +290,7 @@ public class CmpModelController {
                 return ResultUtils.error(ResultEnum.FAILED_TO_INVOKE_MODEL);
             }
             // 模型运行成功，获取模型记录
-            ModelRecord record = CmpModelService.getModelInstanceRecord(ip, port, recordId, inputs, userId, username, modelId, modelName,null,null);
+            ModelRecord record = CmpModelService.getModelInstanceRecord(ip, port, recordId, inputs, userId, username, modelId, modelName,null,null,instanceId);
             if(record==null){
                 return ResultUtils.error(ResultEnum.FAILED_TO_GET_RECORD);
             }

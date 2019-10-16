@@ -7,6 +7,12 @@ const cmp_instance={
   },
   getInstanceList(projectId){
     return axios.get(`${base.cmpInstance}/getInstanceList?projectId=${projectId}`)
+  },
+  findInstanceByInstanceId(instanceId){
+    return axios.get(`${base.cmpInstance}/findInstanceByInstanceId?instanceId=${instanceId}`)
+  },
+  updateInstance(instance){
+    return axios.post(`${base.cmpInstance}/updateInstance`,instance);
   }
 }
 

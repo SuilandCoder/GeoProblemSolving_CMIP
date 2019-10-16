@@ -51,7 +51,7 @@
 
       <div style="margin-top:50px;">
         <div style="margin-top:10px;margin-bottom:10px;">
-          <h3 style="display:inline">1. Data Protocol</h3>
+          <h3 style="display:inline">2. Process Protocol</h3>
           <Button @click="addProtocol('process')" type="dashed" size="small" style="float: right;">
             Add Item
           </Button>
@@ -60,7 +60,7 @@
       </div>
       <div style="margin-top:50px;">
         <div style="margin-top:10px;margin-bottom:10px;">
-          <h3 style="display:inline">1. Data Protocol</h3>
+          <h3 style="display:inline">3. Output Protocol</h3>
           <Button @click="addProtocol('output')" type="dashed" size="small" style="float: right;">
             Add Item
           </Button>
@@ -86,7 +86,7 @@
               style="width: 300px" />
           </div>
         </FormItem>
-        <FormItem prop="metric" label="Bind Metric" :label-width="100">
+        <FormItem prop="metrics" label="Bind Metric" :label-width="100">
           <Input enter-button placeholder="Enter metric name" v-model="metricAlias" style="width: auto" on-search="">
           <Button slot="append" icon="ios-search" @click="search"></Button>
           </Input>
