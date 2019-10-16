@@ -353,11 +353,11 @@ export default {
     },
     next() {
       if (this.currentStep === 0) {
-        // this.$refs["step1Form"].validate(valid => {
-        //   if (valid) {
+        this.$refs["step1Form"].validate(valid => {
+          if (valid) {
         this.currentStep += 1;
-        //   }
-        // });
+          }
+        });
         // this.changeTab();
       } else if (this.currentStep === 1) {
         this.currentStep += 1;
