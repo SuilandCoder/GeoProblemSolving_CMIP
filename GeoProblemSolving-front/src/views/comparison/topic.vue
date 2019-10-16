@@ -80,12 +80,31 @@ body {
                 Information
               </div>
               <Tabs size="small">
-                <TabPane label="Vocabulary">Vocabulary</TabPane>
+                <TabPane label="Vocabulary">
+                  <div>
+                    <Input v-model="selectCardContent" disabled style="width: 200px" />
+                    <Icon type="md-close" @click="clearInput" />
+                    <Button @click="vocabularyValue = true">Select a concept</Button>
+                  </div>
+                </TabPane>
                 <TabPane label="Data template">Data template</TabPane>
                 <TabPane label="Unit">Unit</TabPane>
                 <TabPane label="Reference">Spatio-temporal reference</TabPane>
               </Tabs>
               </Card>
+
+              <!-- modal/drawer -->
+              <Drawer title="Concepts" :closable="false" v-model="vocabularyValue">
+                <Button style="margin-right: 8px" @click="vocabularyValue = false">Cancel</Button>
+                <Button type="primary" @click="test">Submit</Button>
+                <div  v-for="list in conceptResources" :key="list.oid">
+                  <Card>
+                    <div class="cardContent" @click="selectCard(list.name)">
+                      {{list.name}}
+                    </div>
+                  </Card>
+                </div>
+              </Drawer>
 
           </Col>
           <!-- <Divider  type="vertical"/> -->
@@ -141,9 +160,7 @@ export default {
       }
     });
   },
-  created() {
-    this.initSize();
-  },
+  
   components: {
     Avatar
   },
@@ -167,8 +184,20 @@ export default {
         input3: ''
       },
        currentStep: 0,
+       vocabularyValue :false,
+       resourceType:"concept",
+       conceptResources:[],
+       selectCardContent:"",
     };
   },
+
+  created() {
+    this.initSize();
+  },
+  mounted(){
+    this.getAllConcept();
+  },
+
   methods: {
     // 初始化侧边栏样式
     initSize() {
@@ -192,6 +221,28 @@ export default {
         this.currentStep -= 1;
       }
     },
+    // 获得后台所有的vocabulary
+    getAllConcept() {
+      this.resourceType = "concept";
+      this.axios
+        .get("/GeoProblemSolving/common/findAllItem?type=" + this.resourceType)
+        .then(res => {        
+            this.conceptResources = res.data.data;//异步
+        });
+    },
+
+    selectCard(selected){
+      this.selectCardContent = selected;
+      console.log(id);
+      console.log(123);
+    },
+
+    // 清除选择的内容
+    clearInput(){
+      this.selectCardContent = "";
+    },
+
+    
   }
 };
 </script>
