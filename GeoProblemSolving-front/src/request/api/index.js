@@ -5,6 +5,7 @@ import cmp_model from "./cmpModel";
 import cmp_data  from "./cmpData";
 import cmp_instance from "./cmpInstance"
 import cmp_task from "./cmpTask"
+import common from "./common"
 
 
 export default{
@@ -15,4 +16,5 @@ export default{
   cmp_data,
   cmp_instance,
   cmp_task,
+  common
 }

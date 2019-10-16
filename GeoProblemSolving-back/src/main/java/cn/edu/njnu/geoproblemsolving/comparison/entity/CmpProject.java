@@ -21,37 +21,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document
-public class CmpProject{
+public class CmpProject {
     String projectId;
     String parentId;
     ProjectType projectType;
     String category;
     List<String> subprojects = new ArrayList<>();
-
+    List<Protocol> protocols;
     String title;
     String description;
+    String background;
+    String goals;
     String managerId;
     String managerName;
     JSONArray members;
     String createTime;
     String privacy;
-    String picture;
-    String evaluationRules;
-//    List<String> evaluatedDataIds = new ArrayList<>(); // 评估数据 可以是观测数据、标准数据或者其他
-//    String standardInputData;
-//    String evaluatedData;
-
-    Date startTime;
-    Date endTime;
-    String location;
-    String scale;
-    String resolution;
-    String timeInterval;
     List<String> modelList = new ArrayList<>(); //todo 模型信息 此处不应该是 String 类型
-//    List<String> requiredInputsId = new ArrayList<>(); //   必要输入数据
-//    List<String> outputDataList = new ArrayList<>();//   必要输出数据
-
-//    List<String> solutionList = new ArrayList<>(); // 解决方案
     List<String> instanceList = new ArrayList<>(); // instance
     List<String> taskList = new ArrayList<>();     // task
 }
