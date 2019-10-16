@@ -83,6 +83,7 @@ body {
                 <TabPane label="Vocabulary">
                   <div>
                     <Input v-model="selectCardContent" disabled style="width: 200px" />
+                     <Tag  closable >{{selectCardContent}}</Tag>
                     <Icon type="md-close" @click="clearInput" />
                     <Button @click="vocabularyValue = true">Select a concept</Button>
                   </div>
@@ -188,6 +189,7 @@ export default {
        resourceType:"concept",
        conceptResources:[],
        selectCardContent:"",
+       
     };
   },
 
@@ -196,6 +198,7 @@ export default {
   },
   mounted(){
     this.getAllConcept();
+    this.selectCardContent=[];
   },
 
   methods: {
@@ -232,7 +235,7 @@ export default {
     },
 
     selectCard(selected){
-      this.selectCardContent = selected;
+      this.selectCardContent.push(selected);
       console.log(id);
       console.log(123);
     },
