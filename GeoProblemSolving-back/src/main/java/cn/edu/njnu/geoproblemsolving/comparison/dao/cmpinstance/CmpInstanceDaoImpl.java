@@ -3,9 +3,11 @@ package cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpInstance;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.ModelResource;
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Date;
 import java.util.List;
@@ -26,7 +28,7 @@ public class CmpInstanceDaoImpl implements ICmpInstanceDao {
     }
 
     @Override
-    public CmpInstance findInstanceByMsrId(String instanceId) {
+    public CmpInstance findInstanceByInstanceId(String instanceId) {
         Query q = Query.query(Criteria.where("instanceId").is(instanceId));
         CmpInstance instance = mongoTemplate.findOne(q,CmpInstance.class);
         return instance;
@@ -50,7 +52,12 @@ public class CmpInstanceDaoImpl implements ICmpInstanceDao {
     }
 
     @Override
-    public CmpInstance updateRecord(CmpInstance mr) {
-        return null;
+    public CmpInstance updateInstance(CmpInstance cmpInstance) {
+        Query query = Query.query(Criteria.where("instanceId").is(cmpInstance.getInstanceId()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(cmpInstance, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query,update, CmpInstance.class);
+        return cmpInstance;
     }
 }

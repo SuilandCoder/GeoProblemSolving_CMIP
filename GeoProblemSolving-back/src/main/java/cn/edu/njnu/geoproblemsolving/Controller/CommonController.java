@@ -54,17 +54,24 @@ public class CommonController {
         if ("unit".equals(type)) {
             Unit unit = data.toJavaObject(Unit.class);
             unitDao.createUnit(unit);
+            return ResultUtils.success(unit);
         } else if ("template".equals(type)) {
             Template template = data.toJavaObject(Template.class);
             templateDao.createTemplate(template);
+            return ResultUtils.success(template);
         } else if ("concept".equals(type)) {
             Concept concept = data.toJavaObject(Concept.class);
             conceptDao.createConcept(concept);
+            return ResultUtils.success(concept);
         }else if("spatialref".equals(type)){
             SpatialReference spatialReference = data.toJavaObject(SpatialReference.class);
             spatialRefDao.createSpatialReference(spatialReference);
+            return ResultUtils.success(spatialReference);
+        } else if ("metrics".equals(type)) {
+            Metrics metrics = data.toJavaObject(Metrics.class);
+            return ResultUtils.success(metrics);
         }
-        return ResultUtils.success(data);
+        return ResultUtils.error(ResultEnum.NO_OBJECT);
     }
 
 

@@ -306,7 +306,7 @@ public class CmpModelService {
     }
 
     // 获取模型运行记录
-    public static ModelRecord getModelInstanceRecord(String ip, String port, String recordId,String inputs,String userId,String userName,String modelId,String modelName,String recordName,List<ModelState> modelStates) throws IOException, URISyntaxException {
+    public static ModelRecord getModelInstanceRecord(String ip, String port, String recordId,String inputs,String userId,String userName,String modelId,String modelName,String recordName,List<ModelState> modelStates,String instanceId) throws IOException, URISyntaxException {
         if(ip==null){
             ip = "172.21.212.75";
         }
@@ -324,6 +324,7 @@ public class CmpModelService {
         modelRecord.setUserName(userName);
         modelRecord.setModelId(modelId);
         modelRecord.setModelName(modelName);
+        modelRecord.setInstanceId(instanceId);
         if(recordName==null){
             modelRecord.setRecordName(modelName+"_"+modelRecord.getStartTime());
         }else{

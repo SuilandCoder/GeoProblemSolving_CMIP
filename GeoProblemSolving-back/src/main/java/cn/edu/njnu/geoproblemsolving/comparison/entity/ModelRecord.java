@@ -35,4 +35,5 @@ public class ModelRecord {
     List<ModelState> states;
     String ip;
     String port;
+    String instanceId;
 }

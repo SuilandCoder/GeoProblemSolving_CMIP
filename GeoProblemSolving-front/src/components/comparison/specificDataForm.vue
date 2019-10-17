@@ -16,7 +16,7 @@
           <Input type="textarea" v-model="dataInfo.abstractInfo" placeholder="Enter abstract about this data" />
         </div>
       </FormItem>
-      <FormItem prop="extent" label="Spatial Coverage" :label-width="150">
+      <!-- <FormItem prop="extent" label="Spatial Coverage" :label-width="150">
         <div>
           <label style="font-family: Courier;">W:</label>
           <Input v-model="dataInfo.extent[0]" style="width: 100px" number />
@@ -35,6 +35,12 @@
         </DatePicker>
         <DatePicker type="date" placeholder="End time" style="width: 150px" v-model="dataInfo.temporalCoverage[1]">
         </DatePicker>
+      </FormItem> -->
+      <FormItem prop="metrics" label="Bind Metric" :label-width="150">
+        <Input enter-button placeholder="Enter metric name" v-model="dataInfo.metrics.alias" style="width: auto"
+          disabled>
+        <Button slot="append" icon="ios-search" @click="search"></Button>
+        </Input>
       </FormItem>
       <FormItem prop="dcSourceStoreId" label="File" :label-width="150">
         <Upload action="/GeoProblemSolving/cmp_model/uploadData_DC" :before-upload="beforeUpload" :data="uploadDataInfo"
@@ -46,15 +52,44 @@
     <Button style="float:right" type="primary" @click="createDataResource" :loading="loading">
       create
     </Button>
+    <Modal v-model="modal13" draggable scrollable title="Create Metric">
+      <create-metrics-form></create-metrics-form>
+    </Modal>
+
+    <Modal v-model="modal12" draggable scrollable title="Search Metric">
+      <div slot="header" style="display:flex;align-items:center">
+        <h3 style="display:inline;margin-right:20px;">Search Metric:</h3>
+        <Input enter-button placeholder="Enter metric name" v-model="metricAlias"
+          style="width: auto; display:inline-table">
+        <Button slot="append" icon="ios-search" @click="search"></Button>
+        <Button slot="append" icon="md-add" @click="createMetric"></Button>
+        </Input>
+      </div>
+
+      <CellGroup>
+        <Cell v-for="(metric,index) of metrics" :title="metric.wkName? metric.wkName: metric.alias" :key="metric.oid"
+          @click="chooseMetric(metric)">
+          <Button icon="ios-add" type="dashed" size="small" @click="chooseMetric(metric)" slot="extra"></Button>
+        </Cell>
+      </CellGroup>
+    </Modal>
+
   </div>
 
 </template>
 <script>
 import Util from "@/utils/comparison/cmpUtils";
+import CreateMetricForm from "@/components/comparison/CreateMetricsForm";
 export default {
   name: "specific-data-form",
+  components: {
+    "create-metrics-form": CreateMetricForm
+  },
   data() {
     return {
+      modal12: false,
+      modal13: false,
+      metricAlias: "",
       dataInfo: {
         name: "",
         fileType: "",
@@ -68,7 +103,8 @@ export default {
         ownerId: this.$store.getters.userId,
         fileName: "",
         fileSize: "",
-        privacy: "private"
+        privacy: "private",
+        metrics: {}
       },
       uploadDataInfo: {
         stateName: "",
@@ -112,8 +148,12 @@ export default {
         ]
       },
       dataTypeList: this.$store.state.comparison.dataType,
-      loading: false
+      loading: false,
+      metrics: []
     };
+  },
+  created() {
+    this.getMetrics();
   },
   methods: {
     beforeUpload(file, $event) {
@@ -184,8 +224,8 @@ export default {
             .createDataResource(this.dataInfo)
             .then(res => {
               this.loading = false;
-              console.log("返回的数据信息：",res);
-              this.$emit("createSuccess",res);
+              console.log("返回的数据信息：", res);
+              this.$emit("createSuccess", res);
             })
             .catch(err => {
               this.loading = false;
@@ -193,11 +233,42 @@ export default {
             });
         }
       });
-      
+    },
+    search() {
+      this.findMetric();
+      this.modal12 = true;
+    },
+    createMetric() {
+      this.modal12 = false;
+      this.modal13 = true;
+    },
+    getMetrics() {
+      this.$api.common
+        .findAllItem("metrics")
+        .then(res => {
+          this.metrics = res;
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        });
+    },
+    findMetric() {
+      this.$api.common
+        .findByX("metrics", "alias", this.metricAlias)
+        .then(res => {
+          this.metrics = res;
+        })
+        .catch(error => {
+          this.$Message.error(error);
+        });
+    },
+    chooseMetric(metric) {
+      this.dataInfo.metrics = metric;
+      this.metricAlias = metric.alias;
+      this.modal12 = false;
     }
   },
-  computed: {
-  }
+  computed: {}
 };
 </script>
 <style scoped>

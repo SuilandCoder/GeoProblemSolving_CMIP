@@ -12,11 +12,11 @@ import java.util.List;
  * @Modified By:
  **/
 public interface ICmpInstanceDao {
-    CmpInstance findInstanceByMsrId(String instanceId);
+    CmpInstance findInstanceByInstanceId(String instanceId);
 
     CmpInstance createInstance(CmpInstance instance);
 
     List<CmpInstance> findInstanceByIdList(List<String> idList);
 
-    CmpInstance updateRecord(CmpInstance mr);
+    CmpInstance updateInstance(CmpInstance cmpInstance);
 }
