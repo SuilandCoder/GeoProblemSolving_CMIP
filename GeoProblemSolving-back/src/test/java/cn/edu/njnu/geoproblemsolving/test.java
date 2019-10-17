@@ -3,9 +3,12 @@ package cn.edu.njnu.geoproblemsolving;
 import cn.edu.njnu.geoproblemsolving.entity.MethodResource;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: SongJie
@@ -14,6 +17,18 @@ import java.util.List;
  * @Modified By:
  **/
 public class test {
+
+    public static void main(String[] args) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("age", 24);
+        map.put("name", "sdf");
+        JSONObject object = new JSONObject(map);
+        System.out.println(object);
+        Map<String,Object> maptest = (Map<String,Object>)object;
+        System.out.println(maptest.toString());
+
+    }
+
     static class PlayList {
         String name;
         String song[] = {"1", "2", "3"};
@@ -54,21 +69,6 @@ public class test {
         }
     }
 
-    public static void main(String[] args) {
-        JSONArray ja = new JSONArray();
-        JSONObject object = new JSONObject();
-        object.put("name","songjie");
-        object.put("date", "2019-09-16T07:12:14.000Z");
-        JSONObject object1 = new JSONObject();
-        object1.put("name","zrm");
-        object1.put("date", "2019-09-16T07:12:14.000Z");
-        ja.add(object);
-        ja.add(object1);
-        JSONObject object2 = new JSONObject();
-        object2.put("name","sj");
-        object2.put("date", "2019-09-16T07:12:14.000Z");
-        ja.set(0,object2);
-        System.out.println(ja);
-    }
+
 
 }

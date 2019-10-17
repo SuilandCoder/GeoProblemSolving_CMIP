@@ -13,6 +13,7 @@ import cn.edu.njnu.geoproblemsolving.comparison.enums.ProjectType;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -37,9 +38,11 @@ public class CmpProjectController {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    CmpProjectDaoImpl cmpProjectDao;
+
     @RequestMapping(value = "/createProject", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
     public JsonResult createProject(@RequestBody CmpProject project) {
-        CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
         try {
             CmpProject newProject = cmpProjectDao.addProject(project);
             return ResultUtils.success(newProject);

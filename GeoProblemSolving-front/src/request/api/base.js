@@ -6,6 +6,7 @@ const cmpModel = "/cmp_model";
 const cmpData = "/cmp_data";
 const cmpInstance = "/cmp_instance";
 const cmpTask = "/cmp_task";
+const common = "/common";
 /**
  * 接口域名管理
  */
@@ -18,6 +19,7 @@ const cmpTask = "/cmp_task";
    cmpData:`${appName}${cmpData}`,
    cmpInstance:`${appName}${cmpInstance}`,
    cmpTask:`${appName}${cmpTask}`,
+   common:`${appName}${common}`,
  }
 
  export default base;

@@ -1,11 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.project;
 
-import cn.edu.njnu.geoproblemsolving.Entity.UserEntity;
-import cn.edu.njnu.geoproblemsolving.comparison.dao.dataresource.DataResourceDaoImpl;
-import cn.edu.njnu.geoproblemsolving.comparison.dao.modelresource.ModelResourceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.user.CmpUserImpl;
-import cn.edu.njnu.geoproblemsolving.comparison.entity.BaseCmpInfo;
-import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpItem;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.DaoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +10,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static cn.edu.njnu.geoproblemsolving.comparison.utils.DaoUtils.createProject;
 
 /**
  * @Author: SongJie
@@ -41,7 +36,7 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
     @Override
     public CmpProject addProject(CmpProject project) {
         String projectId = UUID.randomUUID().toString();
-        CmpProject cmpProject = DaoUtils.createProject(project,projectId, mongoTemplate);
+        CmpProject cmpProject = createProject(project,projectId, mongoTemplate);
         mongoTemplate.save(cmpProject);
         //更新父级项目
         if(project.getParentId()!=null){
