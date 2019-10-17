@@ -231,33 +231,33 @@ export default {
           {
             required: true,
             message:
-              "The title cannot be empty and no more than 100 characters",
+              "The title cannot be empty and no more than 200 characters",
             trigger: "blur",
-            max: 100
+            max: 200
           }
         ],
         description: [
           {
             required: true,
-            message: "Cannot be empty and no more than 300 characters",
+            message: "Cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 300
+            max: 800
           }
         ],
         background: [
           {
             required: true,
-            message: "Cannot be empty and no more than 300 characters",
+            message: "Cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 300
+            max: 800
           }
         ],
         goals: [
           {
             required: true,
-            message: "Cannot be empty and no more than 300 characters",
+            message: "Cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 300
+            max: 800
           }
         ]
       }

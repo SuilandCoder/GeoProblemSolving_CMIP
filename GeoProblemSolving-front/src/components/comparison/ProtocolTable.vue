@@ -112,7 +112,7 @@ export default {
             obj.title = meta.key;
             obj.slot = meta.key;
             obj.align = "center";
-            // obj.width = "100px";
+            obj.width = "100px";
             let index = _.findIndex(col, function(o) {
               return o.title === obj.title;
             });
