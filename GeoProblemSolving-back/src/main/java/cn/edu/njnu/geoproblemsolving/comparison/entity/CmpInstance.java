@@ -21,6 +21,7 @@ import java.util.List;
 @Document
 public class CmpInstance {
     String instanceId;
+    String projectId;
     String name;
     String description;
     String userId;
@@ -28,6 +29,7 @@ public class CmpInstance {
     String type;
     String modelId;
     ModelRecord record;
+    String recordId;
     List<String> cmpDataList;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date createdTime;

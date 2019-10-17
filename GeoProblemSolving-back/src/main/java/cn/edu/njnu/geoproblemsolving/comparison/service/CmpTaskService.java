@@ -234,7 +234,7 @@ public class CmpTaskService {
             String type = input.getString("type");
             if (type.equals("instance")) {
                 CmpInstanceDaoImpl cmpInstanceDao = new CmpInstanceDaoImpl(mongoTemplate);
-                CmpInstance instance = cmpInstanceDao.findInstanceByMsrId(input.getString("instanceId"));
+                CmpInstance instance = cmpInstanceDao.findInstanceByInstanceId(input.getString("instanceId"));
                 input.put("instanceName", instance.getName());
 
                 DataResourceDaoImpl dataResourceDao = new DataResourceDaoImpl(mongoTemplate);

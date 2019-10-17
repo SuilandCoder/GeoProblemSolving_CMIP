@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.controller;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Template;
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.cmpinstance.CmpInstanceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.dataresource.DataResourceDaoImpl;
@@ -11,7 +12,11 @@ import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.ModelRecord;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
 import com.alibaba.fastjson.JSONObject;
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -44,7 +49,7 @@ public class CmpInstanceController {
         return ResultUtils.success(instance);
     }
 
-    @RequestMapping(value = "getInstanceList",method = RequestMethod.GET)
+    @RequestMapping(value = "/getInstanceList",method = RequestMethod.GET)
     public JsonResult getInstanceList(@RequestParam("projectId") String projectId){
         CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
         CmpProject project = cmpProjectDao.findByProjectId(projectId);
@@ -52,4 +57,21 @@ public class CmpInstanceController {
         List<CmpInstance> instanceByIdList = cmpInstanceDao.findInstanceByIdList(project.getInstanceList());
         return ResultUtils.success(instanceByIdList);
     }
+
+
+    @RequestMapping(value = "/findInstanceByInstanceId",method = RequestMethod.GET)
+    public JsonResult findInstanceByInstanceId(@RequestParam("instanceId") String instanceId){
+        CmpInstanceDaoImpl cmpInstanceDao = new CmpInstanceDaoImpl(mongoTemplate);
+        CmpInstance instanceByInstanceId = cmpInstanceDao.findInstanceByInstanceId(instanceId);
+        return ResultUtils.success(instanceByInstanceId);
+    }
+
+    @RequestMapping(value = "/updateInstance", method = RequestMethod.POST)
+    public JsonResult updateInstance(@RequestBody CmpInstance cmpInstance) {
+        CmpInstanceDaoImpl cmpInstanceDao = new CmpInstanceDaoImpl(mongoTemplate);
+        CmpInstance instance = cmpInstanceDao.updateInstance(cmpInstance);
+        return ResultUtils.success(instance);
+    }
+
+
 }

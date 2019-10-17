@@ -347,20 +347,48 @@ body {
                         <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
                           v-for="instance of instanceList" :key="instance.instanceId">
                         <Card style="height:150px;margin:10px -15px">
-                          <div>
-                            <div class="cmpItemTitle">
-                              <a href="#" @click.prevent="instanceDetail(instance)">{{instance.name}}</a>
+                          <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
+                            <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
+                          </div>
+                        </Card>
+                      </div>
+                      </Col>
+
+                      <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
+                        v-for="instance of instanceList" :key="instance.instanceId">
+                      <Card style="height:150px;margin:10px -15px">
+                        <div>
+                          <div v-if="instance.type==='observation'" style = "float:right; margin-top:-10px;">
+                            <Icon type="md-eye" color="#20b2aa"/>
+                            <span style="font-size:10px;color:#20b2aa">Observation</span>
+                          </div>
+                          <div v-if="instance.type==='benchmark'" style = "float:right; margin-top:-10px;">
+                            <Icon type="md-speedometer" color="#daa520"/>
+                            <span style="font-size:10px;color:#daa520">Benchmark</span>
+                          </div>
+                          <div v-if="instance.type==='model'" style = "float:right; margin-top:-10px;">
+                            <Icon type="md-planet" color="#d2691e"/>
+                            <span style="font-size:10px;color:#d2691e">Model</span>
+                          </div>
+                          <div class="cmpItemTitle">
+                            <a href="#" @click.prevent="instanceDetail(instance)">{{instance.name}}</a>
+                          </div>
+                          <p class="cmpItemDesc">{{instance.description}}</p>
+                          <div id="bottom-info">
+                            <div class="info">
+                              <Icon type="md-body" :size="15" />
+                              <span style="margin-left:10px; color:#2b85e4">{{instance.userName}}</span>
                             </div>
-                            <p class="cmpItemDesc">{{instance.description}}</p>
-                            <div id="bottom-info">
-                              <div class="info">
-                                <Icon type="md-body" :size="15" />
-                                <span style="margin-left:10px; color:#2b85e4">{{instance.userName}}</span>
-                              </div>
-                              <div class="info">
+                            <div class="info">
+                              <!-- <div class="info"> -->
                                 <Icon type="md-clock" :size="15" />
                                 <span style="margin-left:10px">{{getCreatedTime(instance.createdTime)}}</span>
-                              </div>
+                              <!-- </div> -->
+                              <!-- <div class="info">
+                                <Icon type="md-clock" :size="15" />
+                                <span style="margin-left:10px">{{getCreatedTime(instance.createdTime)}}</span>
+                              </div> -->
+
                             </div>
                           </div>
                         </Card>
@@ -678,7 +706,11 @@ export default {
         path: `/create-cmp-task/${this.projectInfo.projectId}`
       });
     },
-    instanceDetail(instance) {}
+    instanceDetail(instance) {
+      this.$router.push({
+        path: `/cmp-instance-detail/${instance.instanceId}`
+      });
+    }
   },
   computed: {
     getProtocol() {
