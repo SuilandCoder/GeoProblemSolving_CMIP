@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -20,6 +21,8 @@ import java.util.List;
 @AllArgsConstructor
 @Document
 public class Template {
+    @Id
+    String id;
     String oid;
     String name;
     List<String> classifications;
@@ -27,12 +30,19 @@ public class Template {
     String detail;
     String author;
     String image;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date lastModifyTime;
     int loadCount;
+
     String xml;
+    String type;
+    String parentId;
+
+    //版本
+    String lastModifier;
+    List<String> contributors;
+    List<String> versions;
+
     boolean lock;
 
 }

@@ -71,7 +71,7 @@ public class ConceptImpl implements IConceptDao{
 
     @Override
     public List<Concept> getConcepts(String key, String value) {
-        Query query = Query.query(Criteria.where(key).regex(".*?\\"+value+".*"));
+        Query query = Query.query(Criteria.where(key).regex(value));
         List<Concept> concepts = mongoTemplate.find(query, Concept.class);
         return concepts;
     }

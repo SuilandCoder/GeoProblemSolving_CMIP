@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -20,21 +21,31 @@ import java.util.List;
 @AllArgsConstructor
 @Document
 public class SpatialReference {
+    @Id
+    String id;
     String oid;
     String name;
     String wkname;
     String wkt;
     List<String> classifications;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    String image;
+    String description;
+    String detail;
     Date createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date lastModifyTime;
     String author;
     int loadCount;
+
     String type;
     String parentId;
     String xml;
     String name_EN;
     String description_EN;
+
+    //版本
+    String lastModifier;
+    List<String> contributors;
+    List<String> versions;
+
     boolean lock;
 }

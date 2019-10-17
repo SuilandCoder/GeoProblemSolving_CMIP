@@ -2,9 +2,7 @@ package cn.edu.njnu.geoproblemsolving.comparison.entity;
 
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ProjectType;
 import com.alibaba.fastjson.JSONArray;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -35,6 +33,8 @@ public class CmpProject {
     String managerId;
     String managerName;
     JSONArray members;
+    @Getter
+            @Setter
     String createTime;
     String privacy;
     List<String> modelList = new ArrayList<>(); //todo 模型信息 此处不应该是 String 类型

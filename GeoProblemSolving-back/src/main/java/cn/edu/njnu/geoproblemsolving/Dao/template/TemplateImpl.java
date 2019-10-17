@@ -72,7 +72,7 @@ public class TemplateImpl implements ITemplateDao {
 
     @Override
     public List<Template> getTemplates(String key, String value) {
-        Query query = Query.query(Criteria.where(key).regex(".*?\\"+value+".*"));
+        Query query = Query.query(Criteria.where(key).regex(value));
         List<Template> templates = mongoTemplate.find(query, Template.class);
         return templates;
     }

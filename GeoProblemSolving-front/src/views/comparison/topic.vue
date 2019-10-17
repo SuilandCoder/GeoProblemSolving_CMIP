@@ -30,7 +30,7 @@ body {
   font-size: 18px;
   color: black;
   font-weight: 400;
-  /* margin-top:5%; */
+  margin-bottom:2%;
 }
 .stepBtn {
   margin-left: 20%;
@@ -185,106 +185,167 @@ body {
   <div class="mainContent">
     <Row>
       <Col span="22" offset="1">
-      <Row>
-        <Col :lg="5" :md="8" :sm="10" :xs="12">
-        <Card class="detailSidebar">
-          <div class="topic-title">
-            {{projectInfo.title}}
-          </div>
+        <Row>
+          <Col :lg="5" :md="8" :sm="10" :xs="12">
+            <Card class="detailSidebar">
+              <div class="topic-title">
+                Title
+              </div>
 
-          <div class="single-info">
-            <Icon type="ios-leaf" :size="20" />
-            <span>Background</span>
-            <p>{{projectInfo.background}}</p>
-          </div>
+              <div class="single-info">
+                  <Icon type="ios-leaf" :size="20" />
+                  <span>Background</span>
+              </div>
 
-          <div class="single-info">
-            <Icon type="ios-leaf" :size="20" />
-            <span>Goals</span>
-            <p>{{projectInfo.goals}}</p>
-          </div>
+              <div class="single-info" >
+                  <Icon type="md-people" :size="20" />
+                  <span>Member</span>
+              </div>
+              <div class="single-info" >
+                  <Icon type="md-person" :size="20" />
+                  <span>Creator</span>
+              </div>
+              <div class="single-info" >
+                  <Icon type="md-time" :size="20" />
+                  <span>Created Time</span>
+              </div>
 
-          <div class="single-info">
-            <Icon type="md-people" :size="20" />
-            <span>Member</span>
-          </div>
-          <div class="single-info">
-            <Icon type="md-person" :size="20" />
-            <span>Creator</span>
-          </div>
-          <div class="single-info">
-            <Icon type="md-time" :size="20" />
-            <span>Created Time</span>
-          </div>
+            </Card>
 
-        </Card>
+              <Divider />
+              <Card>
+              <div class="sub-title">
+                Information
+                <Button style="float:right" type="primary" ghost @click="modalCreate = true">Create</Button>
+              </div>
+              <Tabs size="small" @on-click="getAllConcept">
+                <TabPane label="Vocabulary"  name="concept">                   
+                    <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary" >{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true" >Choose concepts</Button>
+                </TabPane>
+                <TabPane label="Data template"  name="template">
+                   <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary" >{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                </TabPane>
+                <TabPane label="Unit"  name="unit">
+                  <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary" >{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                </TabPane>
+                <TabPane label="Reference"  name="spatialref">
+                  <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary" >{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                </TabPane>
+              </Tabs>
+              </Card>
 
-        <Divider />
-        <Card>
-          <div class="sub-title">
-            Information
-          </div>
-          <Tabs size="small">
-            <TabPane label="Vocabulary">Vocabulary</TabPane>
-            <TabPane label="Data template">Data template</TabPane>
-            <TabPane label="Unit">Unit</TabPane>
-            <TabPane label="Reference">Spatio-temporal reference</TabPane>
-          </Tabs>
-        </Card>
+              <!-- modal/drawer -->
+              <Drawer title="Concepts" :closable="false" v-model="vocabularyValue">
+                <!-- <Input search enter-button placeholder="Search" style="width: auto"   @on-search="searchCard"/> -->
+                 <Input placeholder="Enter text" style="width: auto" v-model="inputValue"/> 
+                <Button  @click="searchCard(inputValue)"></Button>
+                
+                <div v-for="list in typeResources" :key="list.oid">
+                  <Card>
+                    <div class="cardContent" @click="selectCard(list.name,list.oid)">
+                      {{list.name}}
+                    </div>
+                  </Card>
+                </div>
+              </Drawer>
 
-        </Col>
-        <!-- <Divider  type="vertical"/> -->
+              <!-- create concept -->
+              <Modal v-model="modalCreate">
+                <p slot="header" style="text-align:center">
+                  <Icon type="ios-information-circle"></Icon>
+                  <span>Create name and description</span>
+                </p>
+                <Form :label-width="120" label-position="left" :model="createForm">
+                  <FormItem label="Type" prop="type">
+                    <Select v-model="createForm.type" style="width:200px">
+                      <Option v-for="item in modalType" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    </Select>
+                  </FormItem>
+
+                  <FormItem label="Name" prop="name">
+                    <Input v-model="createForm.name" type="textarea" :autosize="{minRows: 1,maxRows: 3}" clearable />
+                  </FormItem>
+                  <FormItem label="Description" prop="description">
+                    <Input v-model="createForm.description" type="textarea" :autosize="{minRows: 1,maxRows: 3}"
+                      clearable />
+                  </FormItem>
+                </Form>
+                <div slot="footer">
+                  <Button @click="cancelCreate">Cancel</Button>
+                  <Button type="primary" @click="submitCreate">Create</Button>
+                </div>
+              </Modal>
+
+          </Col>
+
+
+        <!-- right -->
         <Col :lg="{span:18,offset:1}" :md="{span:15,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-        <div class="rightContent">
+          <div class="rightContent">
 
-          <Card>
-            <Col v-show="false" offset="1">
-            <!-- <p>当前正在进行第 {{ currentStep + 1 }} 步</p> -->
-            <Steps :current="currentStep">
-              <Step title="Data protocal"></Step>
-              <Step title="Model process protocal"></Step>
-              <Step title="Model output protocal"></Step>
-            </Steps>
-            <div class="stepBtn">
-              <Button @click="lastStep">Last Protocal</Button>
-              <Button type="primary" @click="nextStep">Next Protocal</Button>
-            </div>
+            <Card >
+              
+              <Tabs :animated="false">
+                <TabPane label="Data Protocol">
+                  <protocol-table :protocolItems="getProtocol('data')"></protocol-table>
+                </TabPane>
+                <TabPane label="Process Protocol">
+                  <protocol-table :protocolItems="getProtocol('process')"></protocol-table>
+                </TabPane>
+                <TabPane label="Output Protocol">
+                  <protocol-table :protocolItems="getProtocol('output')"></protocol-table>
+                </TabPane>
+              </Tabs>
+
+            </Card>
+            <Col :lg="11" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
+            <Card v-show="false">
+              <template>
+                instance
+              </template>
+            </Card>
             </Col>
-            <Tabs :animated="false">
-              <TabPane label="Data Protocol">
-                <protocol-table :protocolItems="getProtocol('data')"></protocol-table>
-              </TabPane>
-              <TabPane label="Process Protocol">
-                <protocol-table :protocolItems="getProtocol('process')"></protocol-table>
-              </TabPane>
-              <TabPane label="Output Protocol">
-                <protocol-table :protocolItems="getProtocol('output')"></protocol-table>
-              </TabPane>
-            </Tabs>
+            <Col :lg="{span:11,offset:1}" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
+            <Card v-show="false">
+              <template>
+                task
+              </template>
+            </Card>
+            </Col>
+            <Card style="margin-top:50px;">
+              <Tabs :animated="false">
+                <TabPane label="Instance List">
+                  <div v-if="instanceList.length>0">
+                    <div class="cmpModelBox">
+                      <Row>
+                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
+                        <div @click="createInstance">
+                          <Card style="height:150px;margin:10px -15px">
+                            <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
+                              <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
+                            </div>
+                          </Card>
+                        </div>
+                        </Col>
 
-          </Card>
-          <Col :lg="11" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-          <Card v-show="false">
-            <template>
-              instance
-            </template>
-          </Card>
-          </Col>
-          <Col :lg="{span:11,offset:1}" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-          <Card v-show="false">
-            <template>
-              task
-            </template>
-          </Card>
-          </Col>
-          <Card style="margin-top:50px;">
-            <Tabs :animated="false">
-              <TabPane label="Instance List">
-                <div v-if="instanceList.length>0">
-                  <div class="cmpModelBox">
-                    <Row>
-                      <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
-                      <div @click="createInstance">
+                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
+                          v-for="instance of instanceList" :key="instance.instanceId">
                         <Card style="height:150px;margin:10px -15px">
                           <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
                             <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
@@ -330,59 +391,58 @@ body {
 
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                      </Col>
-                    </Row>
+                        </Card>
+                        </Col>
+                      </Row>
+                    </div>
                   </div>
-                </div>
-                <blank-box v-else v-bind="blankInstanceInfo" v-on:linkClicked="createInstance"></blank-box>
-              </TabPane>
-              <TabPane label="Comparison Task">
-                <div v-if="taskList.length>0">
-                  <div class="cmpModelBox">
-                    <Row>
-                      <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
-                      <div @click="createTask">
+                  <blank-box v-else v-bind="blankInstanceInfo" v-on:linkClicked="createInstance"></blank-box>
+                </TabPane>
+                <TabPane label="Comparison Task">
+                  <div v-if="taskList.length>0">
+                    <div class="cmpModelBox">
+                      <Row>
+                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
+                        <div @click="createTask">
+                          <Card style="height:150px;margin:10px -15px">
+                            <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
+                              <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
+                            </div>
+                          </Card>
+                        </div>
+                        </Col>
+
+                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
+                          v-for="task of taskList" :key="task.recordId">
                         <Card style="height:150px;margin:10px -15px">
-                          <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
-                            <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
+                          <div>
+                            <div class="cmpItemTitle">
+                              <a href="#" @click.prevent="taskDetail(task)">{{task.name}}</a>
+                            </div>
+                            <p class="cmpItemDesc">{{task.desc}}</p>
+                            <div id="bottom-info">
+                              <div class="info">
+                                <Icon type="md-body" :size="15" />
+                                <span style="margin-left:10px; color:#2b85e4">{{task.userName}}</span>
+                              </div>
+                              <div class="info">
+                                <Icon type="md-clock" :size="15" />
+                                <span style="margin-left:10px">{{getCreatedTime(task.createdTime)}}</span>
+                              </div>
+                            </div>
                           </div>
                         </Card>
-                      </div>
-                      </Col>
-
-                      <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
-                        v-for="task of taskList" :key="task.recordId">
-                      <Card style="height:150px;margin:10px -15px">
-                        <div>
-                          <div class="cmpItemTitle">
-                            <a href="#" @click.prevent="taskDetail(task)">{{task.name}}</a>
-                          </div>
-                          <p class="cmpItemDesc">{{task.desc}}</p>
-                          <div id="bottom-info">
-                            <div class="info">
-                              <Icon type="md-body" :size="15" />
-                              <span style="margin-left:10px; color:#2b85e4">{{task.userName}}</span>
-                            </div>
-                            <div class="info">
-                              <Icon type="md-clock" :size="15" />
-                              <span style="margin-left:10px">{{getCreatedTime(task.createdTime)}}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                      </Col>
-                    </Row>
+                        </Col>
+                      </Row>
+                    </div>
                   </div>
-                </div>
-                <blank-box v-else v-bind="blankTaskInfo" v-on:linkClicked="createTask"></blank-box>
-              </TabPane>
-            </Tabs>
+                  <blank-box v-else v-bind="blankTaskInfo" v-on:linkClicked="createTask"></blank-box>
+                </TabPane>
+              </Tabs>
 
-          </Card>
+            </Card>
 
-        </div>
+          </div>
         </Col>
       </Row>
       </Col>
@@ -439,7 +499,7 @@ export default {
         input3: ""
       },
       currentStep: 0,
-      projectId: "",
+      projectId: this.$route.params.id,
       projectInfo: {},
       instanceList: [],
       taskList: [],
@@ -448,7 +508,7 @@ export default {
         welcomeInfo:
           "Comprehensive comparison of simulation capabilities from multiple perspectives improving our knowledge and understanding of models. To get started, you should",
         linkInfo: "create an comparison task."
-      },
+      },       
       blankTaskInfo: {
         welcomeTitle: "Welcome to Comparison!",
         welcomeInfo:
@@ -460,32 +520,149 @@ export default {
         welcomeInfo:
           "Comprehensive comparison of simulation capabilities from multiple perspectives improving our knowledge and understanding of models. To get started, you should",
         linkInfo: "create an comparison instance."
-      }
+      },
+       currentStep: 0,
+       vocabularyValue :false,
+       resourceType:"concept",
+       typeResources:[],
+       selectCardContent:[],
+       searchCardContent:[],
+       showTag:true,
+       modalCreate:false,
+       createForm:{
+        name: "",
+        description: "",
+        type:""
+      },
+      modalType:[
+        {
+          value:"concept",
+          label:"Vocabulary"
+        },{
+          value:"template",
+          label:"Data template"
+        },{
+          value:"unit",
+          label:"Unit"
+        },{
+          value:"spatialref",
+          label:"Spatio-temporal reference"
+        },
+        ],
+        modelType1:"concept",
+        inputValue:""
     };
   },
+
+  created() {
+    this.initSize();
+  },
+  mounted(){
+    this.getAllConcept("concept");
+    this.getProjectInfo();
+    // this.selectCardContent=[];
+  },
+
   methods: {
     // 初始化侧边栏样式
     initSize() {
       this.sidebarHeight = window.innerHeight - 290;
     },
-    nextStep() {
-      if (this.currentStep == 2) {
-        this.$Notice.info({
-          desc: "This is the final protocal !"
+    
+    // 获得后台所有的vocabulary
+    getAllConcept(type) {
+      this.selectCardContent=[];
+      this.resourceType = type;
+      this.axios
+        .get("/GeoProblemSolving/common/findAllItem?type=" + this.resourceType)
+        .then(res => {        
+            this.typeResources = res.data.data;//异步
         });
-      } else {
-        this.currentStep += 1;
+    },
+
+    selectCard(selected,oid){
+      let list = {"name":selected,"id":oid};
+      // 检查重复的tag
+      if(this.selectCardContent.length == 0){
+        this.selectCardContent.push(list);
+      }else{
+        for(let i= 0; i < this.selectCardContent.length ; i++ ){
+          if(this.selectCardContent[i].id == oid)
+          {
+            this.$Notice.info({
+                desc: "The tag has been exist!"
+            });
+            break;
+          }else if(i == this.selectCardContent.length-1 ){
+            this.selectCardContent.push(list);
+            break;
+          } 
+        }  
+      }   
+      console.log( this.selectCardContent);
+    },
+
+    // 模糊搜索card
+    searchCard(value){
+      console.log(value);
+       this.axios
+        .get("/GeoProblemSolving/common/findByX?type=" + this.resourceType+
+          "&key=name" +
+            "&value=" +
+            value
+        )
+        .then(res => {  
+            console.log(res.data);
+            this.searchCardContent = res.data.data;//异步
+      });
+    },
+
+    // 清除选择的内容
+    clearInput(id){
+      console.log(id)
+      // this.selectCardContent = "";
+      for(let i= 0; i<this.selectCardContent.length ; i++ ){
+        if(this.selectCardContent[i].id == id)
+        {
+          this.selectCardContent.splice(i,1);
+        }
       }
     },
-    lastStep() {
-      if (this.currentStep == 0) {
-        this.$Notice.info({
-          desc: "This is the first protocal !"
+
+    // modal
+    submitCreate(){
+      let obj = {};
+      let objData = {};
+      obj.type = this.createForm.type;
+      objData.name = this.createForm.name;
+      objData.description = this.createForm.description;
+      objData.author = this.$store.getters.userName;
+      objData.authorId = this.$store.getters.userId;
+      obj.data = objData;
+      // obj.append("data.name", this.createForm.name);
+      // obj.append("data.description", this.createForm.description);
+      // obj.append("type", this.createForm.type);
+
+       this.axios
+        .post("/GeoProblemSolving/common/createItem", obj)
+        .then(res => {
+          console.log(res);
+          // if (res.data != "Fail") {
+          //   this.$Notice.info({
+          //     desc: "Update successfully!"
+          //   });
+          //   this.stepContent.name = this.stepForm.name;
+          //   this.stepContent.description = this.stepForm.description;
+          // } else {
+          //   this.$Message.error("Update step failed.");
+          // }
+        })
+        .catch(err => {
+          console.log(err.data);
         });
-      } else {
-        this.currentStep -= 1;
-      }
+      this.modalCreate = false;
     },
+    
     getProjectInfo() {
       this.$api.cmp_project
         .getProjectAllInfo(this.projectId)
@@ -493,6 +670,7 @@ export default {
           console.log(res);
           this.projectInfo = res.project;
           this.modelList = res.model;
+          console.log(this.projectInfo);
         })
         .catch(err => {
           this.$Message.error(err);
@@ -552,7 +730,10 @@ export default {
       return function(time) {
         return time ? time.split(" ")[0] : "";
       };
-    }
+    },
+     handleClose() {
+       this.showTag = false;
+     }
   }
 };
 </script>
