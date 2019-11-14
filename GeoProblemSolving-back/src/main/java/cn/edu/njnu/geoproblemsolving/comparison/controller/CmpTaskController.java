@@ -90,6 +90,8 @@ public class CmpTaskController {
         return ResultUtils.success(dpm);
     }
 
+
+
     // 创建对比任务
     @RequestMapping(value = "/createTask", method = RequestMethod.POST)
     public JsonResult createTask(@RequestBody JSONObject tasksInfo) {
@@ -103,7 +105,7 @@ public class CmpTaskController {
             List<CmpMetirc> cmpMetircs = checkedMetrics.toJavaList(CmpMetirc.class);
             List<CmpInstance> cmpInstanceList = targetInstanceList.toJavaList(CmpInstance.class);
             //创建比较任务记录
-            CmpTaskRecord cmpTaskRecord = new CmpTaskRecord(UUID.randomUUID().toString(), tasksInfo.getString("userId"), tasksInfo.getString("userName"), tasksInfo.getString("name"), tasksInfo.getString("description"), cmpInstanceList, cmpMetircs);
+            CmpTaskRecord cmpTaskRecord = new CmpTaskRecord(UUID.randomUUID().toString(),projectId, tasksInfo.getString("userId"), tasksInfo.getString("userName"), tasksInfo.getString("name"), tasksInfo.getString("description"), cmpInstanceList, cmpMetircs);
             List<CmpTaskModel> cmpTaskModelList = new ArrayList<>();
             for (int i = 0; i < computableModels.size(); i++) {
                 JSONObject computableModel = computableModels.getJSONObject(i);
@@ -178,5 +180,15 @@ public class CmpTaskController {
     public JsonResult getCmpMethodRecordList(@RequestBody List<String> recordList){
         List<CmpMethodRecord> cmpMethodRecordList = cmpMethodRecordDao.findByRecordIdList(recordList);
         return ResultUtils.success(cmpMethodRecordList);
+    }
+
+
+    @RequestMapping(value="/updateCmpMethodRecord",method = RequestMethod.POST)
+    public JsonResult updateCmpMethodRecord(JSONArray recordsJSONArr){
+        List<CmpMethodRecord> cmrList = recordsJSONArr.toJavaList(CmpMethodRecord.class);
+        for(CmpMethodRecord cmr:cmrList){
+            cmpMethodRecordDao.updateRecord(cmr);
+        }
+        return ResultUtils.success();
     }
 }

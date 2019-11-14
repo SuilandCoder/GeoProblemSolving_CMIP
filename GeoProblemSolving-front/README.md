@@ -53,3 +53,6 @@
     - [ ] 对比结果可视化信息
     - [ ] 项目创建者总结信息
     - [ ] 留言
+### 注意事项
+1. 数据容器配置python环境
+   1. [Python 3.X安装basemap包详细步骤（windows环境)](https://zhuanlan.zhihu.com/p/34509847)

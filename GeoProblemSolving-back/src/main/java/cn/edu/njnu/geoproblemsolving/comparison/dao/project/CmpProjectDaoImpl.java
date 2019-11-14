@@ -1,8 +1,10 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.project;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Unit;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.user.CmpUserImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.DaoUtils;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -54,8 +56,13 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
     }
 
     @Override
-    public String updateProject(CmpProject project) {
-        return null;
+    public CmpProject updateProject(CmpProject project) {
+        Query query = Query.query(Criteria.where("projectId").is(project.getProjectId()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(project, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, CmpProject.class);
+        return project;
     }
 
     @Override
@@ -140,6 +147,18 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
             update.addToSet("modelList",modelId);
         }else{
             update.pull("modelList",modelId);
+        }
+        mongoTemplate.updateFirst(query,update,CmpProject.class);
+    }
+
+
+    public void updateList(String projectId,String listName,String id,boolean isAdd){
+        Query query = Query.query(Criteria.where("projectId").is(projectId));
+        Update update = new Update();
+        if(isAdd){
+            update.addToSet(listName,id);
+        }else{
+            update.pull(listName,id);
         }
         mongoTemplate.updateFirst(query,update,CmpProject.class);
     }

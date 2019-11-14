@@ -11,6 +11,7 @@ import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpMethodRecord;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataProcessMethod;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
+import cn.edu.njnu.geoproblemsolving.comparison.exception.MethodRunFailedException;
 import cn.edu.njnu.geoproblemsolving.comparison.exception.MyException;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.MyHttpUtils;
 import com.alibaba.fastjson.JSONArray;
@@ -168,7 +169,7 @@ public class CmpTaskService {
 
 
 
-    public JSONObject runScript(JSONObject cmpMethodItem) throws IOException {
+    public JSONObject runScript(JSONObject cmpMethodItem) throws IOException,MethodRunFailedException{
         String url = "http://" + HttpContant.DATA_CONTAINER_IP + ":" + HttpContant.DATA_CONTAINER_PORT + "/cmpTask/runCmpTask";
         String res = MyHttpUtils.post_RESCODE(url, cmpMethodItem,"0");
 //        System.out.println(res);
@@ -177,7 +178,7 @@ public class CmpTaskService {
             CmpMethodRecord cmr = cmpMethodItem.toJavaObject(CmpMethodRecord.class);
             cmr.setStatus("-1");
             cmpMethodRecordDao.updateRecord(cmr);
-            throw new MyException(ResultEnum.FAILED_TO_EXCUTE_SCRIPT);
+            throw new MethodRunFailedException(ResultEnum.FAILED_TO_EXCUTE_SCRIPT);
         }else{
             JSONObject resJSON = JSONObject.parseObject(res);
             CmpMethodRecord cmr = resJSON.toJavaObject(CmpMethodRecord.class);

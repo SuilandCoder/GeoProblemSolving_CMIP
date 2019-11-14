@@ -25,7 +25,6 @@ public class CmpProject {
     ProjectType projectType;
     String category;
     List<String> subprojects = new ArrayList<>();
-    List<Protocol> protocols;
     String title;
     String description;
     String background;
@@ -33,10 +32,13 @@ public class CmpProject {
     String managerId;
     String managerName;
     JSONArray members;
-    @Getter
-            @Setter
     String createTime;
     String privacy;
+    List<Protocol> protocols;
+    List<String> unitList;
+    List<String> conceptList;
+    List<String> templateList;
+    List<String> spatialRefList;
     List<String> modelList = new ArrayList<>(); //todo 模型信息 此处不应该是 String 类型
     List<String> instanceList = new ArrayList<>(); // instance
     List<String> taskList = new ArrayList<>();     // task

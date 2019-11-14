@@ -17,6 +17,9 @@ const cmp_model = {
   getComputableModelInfo(modelId){
     return axios.get(`${base.cmpModel}/getComputableModelInfo?modelId=${modelId}`);
   },
+  getComputableModelById(oid){
+    return axios.get(`${base.cmpModel}/getComputableModelById?oid=${oid}`);
+  },
   getTaskServer(pid){
     return axios.get(`${base.cmpModel}/getTaskServer?pid=${pid}`);
   },
@@ -43,8 +46,11 @@ const cmp_model = {
   },
   getRecordList(recordList){
     return axios.get(`${base.cmpModel}/getRecordList?recordList=${recordList}`);
+  },
+  updateModelResource(modelInfo){
+    return axios.post(`${base.cmpModel}/updateModelResource`,modelInfo);
   }
-  
+
 }
 
 export default cmp_model;

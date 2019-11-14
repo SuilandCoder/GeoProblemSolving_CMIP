@@ -69,6 +69,7 @@ public class CommonController {
             return ResultUtils.success(spatialReference);
         } else if ("metrics".equals(type)) {
             Metrics metrics = data.toJavaObject(Metrics.class);
+            metricsDao.createMetrics(metrics);
             return ResultUtils.success(metrics);
         }
         return ResultUtils.error(ResultEnum.NO_OBJECT);
@@ -116,6 +117,27 @@ public class CommonController {
             return ResultUtils.success(metrics);
         }
         return ResultUtils.error(ResultEnum.NO_OBJECT);
+    }
+
+    @RequestMapping(value = "/findResList", method = RequestMethod.POST)
+    public JsonResult findResList(@RequestBody JSONObject requestJson) {
+        String type = requestJson.getString("type");
+        List idList = requestJson.getObject("idList", List.class);
+        if ("unit".equals(type)) {
+            List<Unit> units = unitDao.findUnitByIdList(idList);
+            return ResultUtils.success(units);
+        } else if ("template".equals(type)) {
+            List<Template> all = templateDao.findTemplateByIdList(idList);
+            return ResultUtils.success(all);
+        } else if ("concept".equals(type)) {
+            List<Concept> all = conceptDao.findConceptByIdList(idList);
+            return ResultUtils.success(all);
+        }else if("spatialref".equals(type)){
+            List<SpatialReference> all = spatialRefDao.findSpatialReferenceByIdList(idList);
+            return ResultUtils.success(all);
+        }
+        return ResultUtils.error(ResultEnum.NO_OBJECT);
+
     }
 
 }

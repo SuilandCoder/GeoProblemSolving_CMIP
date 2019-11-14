@@ -13,6 +13,7 @@ import cn.edu.njnu.geoproblemsolving.comparison.service.CmpModelService;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +43,11 @@ public class CmpModelController {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    ModelResourceDaoImpl modelResourceDao;
+
+    @Autowired
+    ComputableModelImpl computableModel;
 
     @RequestMapping(value = "/getModelInfo", method = RequestMethod.GET)
     public JsonResult getModelInfo(@RequestParam("modelId") String modelId) {
@@ -159,6 +165,25 @@ public class CmpModelController {
         String cmId = computableModels.get(0);
         ComputableModelImpl computableModelDao = new ComputableModelImpl(mongoTemplate);
         ComputableModel cm = computableModelDao.findItemByOid(cmId);
+        ModelServiceNode serviceNode = cm.getServiceNode();
+        //如果模型服务节点地址为空，表示未部署成功
+        if (serviceNode == null) {
+            return ResultUtils.error(ResultEnum.NO_COMPUTABLE_MODEL);
+        }
+        //获取 state 信息
+        try {
+            List<ModelState> modelState = CmpModelService.getModelState(cm, mongoTemplate);
+            cm.setStates(modelState);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultUtils.error(ResultEnum.FAILED_TO_GET_INFO);
+        }
+        return ResultUtils.success(cm);
+    }
+
+    @RequestMapping(value = "/getComputableModelById", method = RequestMethod.GET)
+    public JsonResult getComputableModelById(@RequestParam("oid")String oid){
+        ComputableModel cm = computableModel.findItemByOid(oid);
         ModelServiceNode serviceNode = cm.getServiceNode();
         //如果模型服务节点地址为空，表示未部署成功
         if (serviceNode == null) {
@@ -383,6 +408,13 @@ public class CmpModelController {
             e.printStackTrace();
             return ResultUtils.error(ResultEnum.FAILED_TO_UPLOAD_DATA);
         }
+    }
+
+
+    @RequestMapping(value="/updateModelResource",method = RequestMethod.POST)
+    public JsonResult updateModelResource(@RequestBody ModelResource mr){
+        ModelResource modelResource = modelResourceDao.updateModel(mr);
+        return ResultUtils.success(modelResource);
     }
 
 

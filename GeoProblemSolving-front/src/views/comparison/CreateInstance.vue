@@ -23,11 +23,11 @@
 
     <div v-if="instanceInfo.type === 'model'">
       <Form ref="modelInfo" :rules="modelRules" :model="modelInfo">
-        <FormItem prop="modelName" label="Name" :label-width="150">
+        <FormItem prop="modelName" label="Model Name" :label-width="150">
           <Input v-model="modelInfo.modelName" placeholder="Enter Model Name ..." />
         </FormItem>
 
-        <FormItem prop="description" label="Description" :label-width="150">
+        <FormItem prop="description" label="Model Description" :label-width="150">
           <div>
             <Input type="textarea" v-model="modelInfo.description"
               placeholder="Enter detailed introduction about this model" />
@@ -164,9 +164,9 @@ export default {
         description: [
           {
             required: true,
-            message: "Cannot be empty and no more than 300 characters",
+            message: "Cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 300
+            max: 800
           }
         ]
       },
@@ -194,9 +194,9 @@ export default {
           {
             required: true,
             message:
-              "The description cannot be empty and no more than 600 characters",
+              "The description cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 600
+            max: 800
           }
         ]
       },

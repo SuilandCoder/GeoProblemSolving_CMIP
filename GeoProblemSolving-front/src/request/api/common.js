@@ -10,8 +10,10 @@ const common = {
   },
   findByX(type,key,value){
     return axios.get(`${base.common}/findByX?type=${type}&key=${key}&value=${value}`);
+  },
+  findResList(reqJson){
+    return axios.post(`${base.common}/findResList`, reqJson);
   }
-
 }
 
 export default common;

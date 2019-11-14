@@ -53,7 +53,8 @@
       create
     </Button>
     <Modal v-model="modal13" draggable scrollable title="Create Metric">
-      <create-metrics-form></create-metrics-form>
+      <create-metrics-form  v-on:createMetricSuccess="onCreateSuccess"></create-metrics-form>
+      <span slot="footer"></span>
     </Modal>
 
     <Modal v-model="modal12" draggable scrollable title="Search Metric">
@@ -233,6 +234,11 @@ export default {
             });
         }
       });
+    },
+    onCreateSuccess(data){
+      this.modal13 = false;
+      this.metrics.push(data);
+      console.log("metric创建成功:",data);
     },
     search() {
       this.findMetric();

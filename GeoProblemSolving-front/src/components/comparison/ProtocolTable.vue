@@ -1,6 +1,6 @@
 <template>
-  <div style="width:100%;">
-    <Table width="auto" border :columns="getCol" :data="protocolItems" size="small" >
+  <div >
+    <Table  class="table" :max-height="400" border :columns="getCol" :data="protocolItems" size="small" >
       <template slot-scope="{row,index}" slot="name">
         <strong>{{row.name}}</strong>
       </template>
@@ -112,7 +112,9 @@ export default {
             obj.title = meta.key;
             obj.slot = meta.key;
             obj.align = "center";
-            obj.width = "100px";
+            // obj.width = "150";
+            obj.minWidth = 100;
+            // obj.resizable = true;
             let index = _.findIndex(col, function(o) {
               return o.title === obj.title;
             });
@@ -158,4 +160,8 @@ export default {
 };
 </script>
 <style scoped>
+
+.table{
+  width: 100% !important;
+}
 </style>

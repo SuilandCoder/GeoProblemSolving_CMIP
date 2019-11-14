@@ -20,4 +20,6 @@ public interface IModelResourceDao {
     List<ModelResource> findModelByIdList(List<String> idList);
 
     List<String> createModelResByNameList(List<String> nameList, UserEntity user);
+
+    ModelResource updateModel(ModelResource rm);
 }

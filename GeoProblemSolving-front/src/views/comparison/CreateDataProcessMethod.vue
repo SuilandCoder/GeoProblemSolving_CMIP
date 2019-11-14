@@ -73,8 +73,17 @@
             <Radio v-for="type of itemTypeList" :key="type.name" :label="type.label">{{type.name}}</Radio>
           </RadioGroup>
         </FormItem>
+        <FormItem label="Optional" v-if="modalType==='parameter'" :label-width="150">
+          <RadioGroup v-model="item.optional">
+            <Radio key="day" label="true">True</Radio>
+            <Radio key="month" label="false">False</Radio>
+          </RadioGroup>
+        </FormItem>
         <FormItem label="Description" v-if="modalType!='dependency'" :label-width="150">
           <Input v-model="item.desc" style="width: 300px" placeholder="" />
+        </FormItem>
+        <FormItem label="Default Value" v-if="modalType!='dependency'" :label-width="150">
+          <Input v-model="item.value" style="width: 300px" placeholder="" />
         </FormItem>
       </Form>
     </Modal>
@@ -91,13 +100,13 @@ export default {
         url: "/GeoProblemSolving/user/state",
         type: "GET",
         async: false,
-        success: function(data) {
+        success: function (data) {
           if (!data) {
             vm.$store.commit("userLogout");
             vm.$router.push({ name: "Login" });
           }
         },
-        error: function(err) {
+        error: function (err) {
           console.log("Get user state fail.");
         }
       });
@@ -118,7 +127,7 @@ export default {
   },
   data() {
     return {
-      newMethod:"",
+      newMethod: "",
       dpmInfo: {
         name: "",
         type: "",
@@ -304,7 +313,7 @@ export default {
         this.dpmInfo.outputList.push(this.item);
       }
     },
-    modalCancel() {},
+    modalCancel() { },
     uploadCM() {
       console.log(JSON.stringify(this.dpmInfo));
       this.$refs["dpmInfo"].validate(valid => {
@@ -324,7 +333,7 @@ export default {
   },
   computed: {
     getTitle() {
-      return function(type) {
+      return function (type) {
         return type === "normal"
           ? "Upload Data Process Method"
           : "Upload Comparison Method";

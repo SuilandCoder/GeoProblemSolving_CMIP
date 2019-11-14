@@ -27,7 +27,7 @@ public class CmpMethodRecord {
     TaskOutputItem output;
     DataItem input; // 创建对比方法时的输入数据配置信息
     String interpretor;
-    String status; // 0 运行中 1 成功 -1 失败
+    String status; // 0 运行中 1 成功 -1 失败 2 终止
     String metricName;
     String metricId;
     String methodId;

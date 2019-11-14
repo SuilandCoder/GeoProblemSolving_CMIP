@@ -43,6 +43,15 @@ const state = {
     },{
       label:"boolean",
       name:"boolean"
+    },{
+      label:"date",
+      name:"date"
+    },{
+      label:"time_unit",
+      name:"time_unit"
+    },{
+      label:"coordinate",
+      name:"coordinate"
     }
   ]
 }

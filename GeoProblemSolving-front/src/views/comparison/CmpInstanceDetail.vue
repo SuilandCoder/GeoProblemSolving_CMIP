@@ -65,16 +65,19 @@
       <div class="right">
         <Card>
           <h3>Data List</h3>
-          <Table border :max-height="getMaxHeight" :columns="dataColumn" :data="dataList">
+          <Table border :max-height="800" :columns="dataColumn" :data="dataList">
             <template slot-scope="{ row, index }" slot="name">
               <strong>{{ row.name }}</strong>
             </template>
             <template slot-scope="{ row, index }" slot="metric">
               <span>{{ row.metrics?row.metrics.alias:"-" }}</span>
             </template>
+            <template slot-scope="{row,index}" slot="fileSize">
+              <span>{{formateFileSize(row.fileSize)}}</span>
+            </template>
           </Table>
         </Card>
-        <Card style="margin-top:20px;">
+        <!-- <Card style="margin-top:20px;">
           <h3>Model Record Info</h3>
           <p style="margin-top:20px;text-align:center;" v-if="!instanceInfo.recordId">No Record</p>
           <div v-else id="recordRoom">
@@ -122,6 +125,46 @@
               </Card>
             </div>
           </div>
+        </Card> -->
+        <Card v-for="(state,stateIndex) of states" :bordered="false" :key="state.stateId" class="stateCard">
+          <p slot="title">
+            {{state.stateName}}
+          </p>
+          <span slot="title">
+            <Icon type="md-nutrition" />
+            {{state.description}}
+          </span>
+          <Form label-position="right" :label-width="150" :ref="state.stateName">
+            <h4>Input:</h4>
+            <FormItem v-for="(event,eventIndex) of getInputEvent(state.events)" :key="event.name"
+              :required="!event.optional">
+              <span slot="label">{{event.name}}</span>
+              <Input style="width: 200px" v-model="event.fileName" placeholder="Please upload or choose input date…"
+                :ref="event.name">
+
+              <Upload :max-size="1024*1024" :before-upload="beforeDataUpload" slot="append" :state="state.stateName"
+                :event="event.name" action="/GeoProblemSolving/cmp_model/uploadData_DC" style="display:inline-block;"
+                :show-upload-list="false" :data="uploadDataInfo" :on-success="dataUploadSuccess"
+                :on-error="dataUploadError">
+                <Button>
+                  <Icon type="md-cloud-upload" size="18" />
+                </Button>
+              </Upload>
+              <!-- <Button slot="append">
+              <Icon type="md-cloud-done" size="18" /> </Button>
+
+            <Button slot="append">
+              <Icon type="md-folder" size="18" /> </Button> -->
+              </Input>
+              <span style="color:#6a737d">{{event.description}}</span>
+            </FormItem>
+            <h4>Output:</h4>
+            <FormItem v-for="(event,eventIndex) of getOutputEvent(state.events)" :key="event.name">
+              <span slot="label">{{event.name}}</span>
+              <Input style="width: 200px" v-model="event.fileName" :ref="event.name"></Input>
+              <span style="color:#6a737d">{{event.description}}</span>
+            </FormItem>
+          </Form>
         </Card>
       </div>
     </div>
@@ -211,7 +254,7 @@ export default {
         },
         {
           title: "File Size",
-          key: "fileSize",
+          slot: "fileSize",
           align: "center"
         }
       ],
@@ -470,6 +513,9 @@ export default {
                 console.log("该文件已存在：", res);
                 this.computableModelOid = res;
                 this.modelInfo.computableModels.push(res);
+                this.uploadModel();
+                this.getComputableModelById(res);
+                //* update model info
                 this.creatable = true;
                 reject();
               }
@@ -495,6 +541,8 @@ export default {
       if (response.code == 0) {
         this.creatable = true;
         this.modelInfo.computableModels.push(response.data.oid);
+        this.uploadModel();
+        this.getComputableModelById(response.data.oid);
       } else {
         this.$Message.error(response.msg);
       }
@@ -503,6 +551,26 @@ export default {
       this.$Message.error("upload model failed!");
       this.creatable = false;
       this.modelInfo.computableModels = [];
+    },
+    uploadModel() {
+      this.$api.cmp_model
+        .updateModelResource(this.modelInfo)
+        .then(res => {
+          this.modelInfo = res;
+        })
+        .catch(err => {
+          this.$Message.error(response.msg);
+        });
+    },
+    getComputableModelById(oid) {
+      this.$api.cmp_model
+        .getComputableModelById(oid)
+        .then(res => {
+          this.computableModelInfo = res;
+        })
+        .catch(err => {
+          this.$Message.error(response.msg);
+        });
     },
     invokeModel() {
       //* 检查数据是否准备完毕
@@ -622,6 +690,24 @@ export default {
           return event.type === "noresponse" && event.url;
         });
       };
+    },
+    formateFileSize(){
+      return function(fileSize){
+        let kb = fileSize/1024;
+        if(kb<0){
+          return "1Kb";
+        }else if(kb>0 && kb<1024){
+          return kb.toFixed(2) + "Kb";
+        }
+
+        let mb = kb/1024;
+        if(mb<1024){
+          return mb.toFixed(2)+"Mb";
+        }
+
+        let gb = mb/1024;
+        return gb.toFixed(2)+'G';
+      }
     }
   }
 };

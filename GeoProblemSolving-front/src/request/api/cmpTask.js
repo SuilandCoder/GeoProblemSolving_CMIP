@@ -27,8 +27,11 @@ const cmp_task = {
   getCmpMethodRecord(recordId){
     return axios.get(`${base.cmpTask}/getCmpMethodRecord?recordId=${recordId}`);
   },
-  getCmpMethodRecordList(recordList){
-    return axios.post(`${base.cmpTask}/getCmpMethodRecordList`, recordList);
+  getCmpMethodRecordList(recordIdList){
+    return axios.post(`${base.cmpTask}/getCmpMethodRecordList`, recordIdList);
+  },
+  updateCmpMethodRecord(recordList){
+    return axios.post(`${base.cmpTask}/updateCmpMethodRecord`, recordList);
   }
 
 }
