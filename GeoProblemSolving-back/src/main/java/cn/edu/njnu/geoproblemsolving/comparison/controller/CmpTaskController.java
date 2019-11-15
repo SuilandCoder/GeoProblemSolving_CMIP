@@ -184,11 +184,12 @@ public class CmpTaskController {
 
 
     @RequestMapping(value="/updateCmpMethodRecord",method = RequestMethod.POST)
-    public JsonResult updateCmpMethodRecord(JSONArray recordsJSONArr){
+    public JsonResult updateCmpMethodRecord(@RequestBody JSONArray recordsJSONArr){
         List<CmpMethodRecord> cmrList = recordsJSONArr.toJavaList(CmpMethodRecord.class);
         for(CmpMethodRecord cmr:cmrList){
             cmpMethodRecordDao.updateRecord(cmr);
         }
+//        System.out.println(recordsJSONArr);
         return ResultUtils.success();
     }
 }

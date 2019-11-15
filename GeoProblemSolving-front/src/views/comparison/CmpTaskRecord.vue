@@ -89,6 +89,7 @@
           <Icon v-if="getMethodRecordBySelectVertex.status==='1'" type="md-checkmark" color="rgb(10, 171, 67)" />
           <Icon v-if="getMethodRecordBySelectVertex.status==='-1'" type="md-close" color="#f00" />
           <Icon v-if="getMethodRecordBySelectVertex.status==='0'" type="md-pulse" color="coral" />
+          <Icon v-if="getMethodRecordBySelectVertex.status==='2'" type="md-pulse" color="#efae39" />
           <span
             :style="{'color':getColorofStatus(getMethodRecordBySelectVertex.status)}">{{getExcuteStatus(getMethodRecordBySelectVertex.status)}}</span>
         </div>
@@ -315,10 +316,18 @@ export default {
         });
     },
     startTaskQueue() {
+      let that = this;
       return this.timer = setInterval(() => {
-        if (this.methodRequestList.length > 0) {
+        if (that.methodRequestList.length > 0) {
+          if(that.excuteFailed){
+            //* 当有方法执行失败时 发送请求，将 methodRequestList(正在运行)中的记录状态设为 2(终止)；
+            that.methodRequestList.forEach(mr=>{
+              mr.status = "2";
+            })
+            that.$api.cmp_task.updateCmpMethodRecord(that.methodRequestList);
+          }
           //* 发送请求
-          this.requestRunningMethod();
+          that.requestRunningMethod();
         }
       }, 5000);
     },
@@ -389,6 +398,15 @@ export default {
             ) {
               graph.setStyle(vert, "fillColor=#B9E0A5;shadow=0;");
             }
+          }
+        });
+      } else if(record.status === "2"){
+        vertices.forEach(vert => {
+          if (
+            vert.data.type !== "instance" &&
+            vert.data.oid === record.methodId
+          ) {
+            graph.setStyle(vert, "fillColor=#FFE599;shadow=0;");
           }
         });
       }
@@ -624,8 +642,10 @@ export default {
         return status === "1"
           ? "Success"
           : status === "0"
-            ? "Running"
-            : "Failed";
+          ? "Running"
+          : status === "2"
+          ? "Abort"
+          : "Failed";
       };
     },
     getColorofStatus() {
@@ -633,8 +653,10 @@ export default {
         return status === "1"
           ? "rgb(10, 171, 67)"
           : status === "0"
-            ? "coral"
-            : "#f00";
+          ? "coral"
+          : status === "2"
+          ? "#efae39"
+          : "#f00";
       };
     },
 
