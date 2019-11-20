@@ -34,7 +34,8 @@ public enum ResultEnum {
     UNKNOWN_METHOD_TYPE_ERROR(-22,"Unknown method type error"),
     COMPARISON_METHOD_LACKS_INPUT_DATA(-23, "Comparison method lacks input data"),
     FAILED_TO_EXCUTE_SCRIPT(-24,"Failed to excute scripte"),
-    FAILED_TO_COMPARING(-25,"Failed to comparing.");
+    FAILED_TO_COMPARING(-25,"Failed to comparing."),
+    EVENT_NOT_BIND_METRICS(-26,"Output Event haven't bind metrics.");
 
     private Integer code;
 

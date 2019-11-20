@@ -13,6 +13,9 @@ const cmp_instance={
   },
   updateInstance(instance){
     return axios.post(`${base.cmpInstance}/updateInstance`,instance);
+  },
+  updateInstanceCmpData(jsonData){
+    return axios.post(`${base.cmpInstance}/updateInstanceCmpData`,jsonData);
   }
 }
 

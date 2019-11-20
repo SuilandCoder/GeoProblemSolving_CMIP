@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.UUID;
  * @Date: Created in 14:33 2019/9/21
  * @Modified By:
  **/
+@Service
 public class CmpInstanceDaoImpl implements ICmpInstanceDao {
 
     private final MongoTemplate mongoTemplate;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 style="text-align:center;margin-top:30px;">Comparison Instance</h1>
-    <div style="display:flex;width:1200px;margin:auto">
+    <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
         <Card style="height:260px;">
           <p slot="title" style=" font-size: 20px;">
@@ -50,7 +50,7 @@
                 <Button icon="ios-cloud-upload-outline">Upload Model</Button>
               </Upload>
               <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
-                style="width:100px;text-align:center;" type="success" @click="showInvokeModal">Invoke</Button>
+                style="width:100px;text-align:center;" type="success" @click="invokeModel">Invoke</Button>
             </div>
           </div>
           <Divider />
@@ -60,6 +60,19 @@
               {{modelInfo.description}}
             </p>
           </div>
+          <div class="display_flex mb_5" v-if="JSON.stringify(this.recordInfo) !== '{}'">
+            <span class="w_100 fw_600">Invoked Time:</span>
+            <p class="desc">
+              {{this.recordInfo.startTime}}
+            </p>
+          </div>
+          <div class="display_flex mb_5" v-if="JSON.stringify(this.recordInfo) !== '{}'">
+            <span class="w_100 fw_600">Running Status:</span>
+            <p class="desc" :style="{'color':getColorofStatus}">
+              {{getStatus}}
+            </p>
+          </div>
+
         </Card>
       </div>
       <div class="right">
@@ -77,148 +90,86 @@
             </template>
           </Table>
         </Card>
-        <!-- <Card style="margin-top:20px;">
-          <h3>Model Record Info</h3>
-          <p style="margin-top:20px;text-align:center;" v-if="!instanceInfo.recordId">No Record</p>
-          <div v-else id="recordRoom">
-            <div class="infoBox">
-              <span class="infoTag">Name:</span>
-              <span class="infoContent">{{this.recordInfo.recordName}}</span>
-            </div>
-            <div class="infoBox" v-if="this.recordInfo.description">
-              <span class="infoTag">Description:</span>
-              <span class="infoContent">{{this.recordInfo.description}}</span>
-            </div>
 
-            <div class="infoBox">
-              <span class="infoTag">Start Time:</span>
-              <span class="infoContent">{{this.recordInfo.startTime}}</span>
-            </div>
+        <Card class="stateCard">
+          <h2 slot="title">
+            Model Configuration
+          </h2>
+          <div v-for="(state,stateIndex) of states" :key="state.stateId">
+            <h3>{{state.stateName}}</h3>
+            <Table border :columns="eventColumn" :data="state.events">
+              <template slot-scope="{ row, index }" slot="eventName">
+                <strong>{{ row.name }}</strong>
+              </template>
+              <template slot-scope="{ row, index }" slot="type">
+                <span>{{row.type==='response'?'input':'output'}}</span>
+              </template>
+              <template slot-scope="{ row, index }" slot="desc">
+                <span>{{ row.description }}</span>
+              </template>
+              <template slot-scope="{ row, index }" slot="data">
+                <Input style="width: 300px" v-model="row.fileName" :ref="row.name" disabled>
+                <Upload v-if="row.type==='response'" :max-size="1024*1024" :before-upload="beforeDataUpload"
+                  slot="append" :state="state.stateName" :event="row.name"
+                  action="/GeoProblemSolving/cmp_model/uploadData_DC" style="display:inline-block;"
+                  :show-upload-list="false" :data="uploadDataInfo" :on-success="dataUploadSuccess"
+                  :on-error="dataUploadError">
+                  <Button title="Upload Data">
+                    <Icon type="md-cloud-upload" size="18" />
+                  </Button>
+                </Upload>
+                <Button slot="append" :disabled="!row.fileName" title="Download Data" @click="downloadData(row)">
+                  <Icon type="md-cloud-download" size="18" /> </Button>
+                </Input>
 
-            <div class="infoBox" v-if="recordInfo.time_span>0">
-              <span class="infoTag">Time Span:</span>
-              <span class="infoContent">{{this.recordInfo.time_span}}s</span>
-            </div>
-            <div class="infoBox">
-              <span class="infoTag">Running state:</span>
-              <span class="infoContent">{{getStatus}}</span>
-            </div>
-
-            <div id="stateRoom">
-              <Card v-for="(state,stateIndex) of recordInfo.states" :bordered="false" :key="state.stateId"
-                class="stateCard">
-                <p slot="title">
-                  {{state.stateName}}
-                </p>
-                <span slot="title">
-                  <Icon type="md-nutrition" />
-                  {{state.description}}
-                </span>
-                <h3>Inputs:</h3>
-                <Table border :columns="eventColumn" :data="getInputData(state)"></Table>
-                <div style="margin-top:20px" v-if="recordInfo.status===1">
-                  <h3>Outputs:</h3>
-                  <Table border :columns="eventColumn" :data="getOutputData(state)">
-
-                  </Table>
-                </div>
-              </Card>
-            </div>
+                <!-- <Input v-if="row.type==='noresponse'" enter-button placeholder="Enter metric name"  :value="row.metrics?row.metrics.alise:''"
+                  style="width: auto" disabled>
+                <Button slot="append" icon="ios-search" @click="search(row.name)"></Button>
+                </Input> -->
+              </template>
+            </Table>
           </div>
-        </Card> -->
-        <Card v-for="(state,stateIndex) of states" :bordered="false" :key="state.stateId" class="stateCard">
-          <p slot="title">
-            {{state.stateName}}
-          </p>
-          <span slot="title">
-            <Icon type="md-nutrition" />
-            {{state.description}}
-          </span>
-          <Form label-position="right" :label-width="150" :ref="state.stateName">
-            <h4>Input:</h4>
-            <FormItem v-for="(event,eventIndex) of getInputEvent(state.events)" :key="event.name"
-              :required="!event.optional">
-              <span slot="label">{{event.name}}</span>
-              <Input style="width: 200px" v-model="event.fileName" placeholder="Please upload or choose input date…"
-                :ref="event.name">
 
-              <Upload :max-size="1024*1024" :before-upload="beforeDataUpload" slot="append" :state="state.stateName"
-                :event="event.name" action="/GeoProblemSolving/cmp_model/uploadData_DC" style="display:inline-block;"
-                :show-upload-list="false" :data="uploadDataInfo" :on-success="dataUploadSuccess"
-                :on-error="dataUploadError">
-                <Button>
-                  <Icon type="md-cloud-upload" size="18" />
-                </Button>
-              </Upload>
-              <!-- <Button slot="append">
-              <Icon type="md-cloud-done" size="18" /> </Button>
-
-            <Button slot="append">
-              <Icon type="md-folder" size="18" /> </Button> -->
-              </Input>
-              <span style="color:#6a737d">{{event.description}}</span>
-            </FormItem>
-            <h4>Output:</h4>
-            <FormItem v-for="(event,eventIndex) of getOutputEvent(state.events)" :key="event.name">
-              <span slot="label">{{event.name}}</span>
-              <Input style="width: 200px" v-model="event.fileName" :ref="event.name"></Input>
-              <span style="color:#6a737d">{{event.description}}</span>
-            </FormItem>
-          </Form>
         </Card>
+        <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
+          style="width:100px;float:right;margin-top:20px;text-align:center;" type="success"
+          @click="invokeModel">Invoke</Button>
       </div>
     </div>
+    <Modal v-model="modal13" draggable scrollable title="Create Metric">
+      <create-metrics-form v-on:createMetricSuccess="onCreateSuccess"></create-metrics-form>
+      <span slot="footer"></span>
+    </Modal>
 
-    <Modal title="Invoke Model" v-model="invokeModal" @on-ok="invokeModel" @on-cancel="cancel">
-      <Card v-for="(state,stateIndex) of states" :bordered="false" :key="state.stateId" class="stateCard">
-        <p slot="title">
-          {{state.stateName}}
-        </p>
-        <span slot="title">
-          <Icon type="md-nutrition" />
-          {{state.description}}
-        </span>
-        <Form label-position="right" :label-width="150" :ref="state.stateName">
-          <h4>Input:</h4>
-          <FormItem v-for="(event,eventIndex) of getInputEvent(state.events)" :key="event.name"
-            :required="!event.optional">
-            <span slot="label">{{event.name}}</span>
-            <Input style="width: 200px" v-model="event.fileName" placeholder="Please upload or choose input date…"
-              :ref="event.name">
+    <Modal v-model="modal12" draggable scrollable title="Search Metric">
+      <div slot="header" style="display:flex;align-items:center">
+        <h3 style="display:inline;margin-right:20px;">Search Metric:</h3>
+        <Input enter-button placeholder="Enter metric name" v-model="metricAlias"
+          style="width: auto; display:inline-table">
+        <Button slot="append" icon="ios-search" @click="search(selectEventName)"></Button>
+        <Button slot="append" icon="md-add" @click="createMetric"></Button>
+        </Input>
+      </div>
 
-            <Upload :max-size="1024*1024" :before-upload="beforeDataUpload" slot="append" :state="state.stateName"
-              :event="event.name" action="/GeoProblemSolving/cmp_model/uploadData_DC" style="display:inline-block;"
-              :show-upload-list="false" :data="uploadDataInfo" :on-success="dataUploadSuccess"
-              :on-error="dataUploadError">
-              <Button>
-                <Icon type="md-cloud-upload" size="18" />
-              </Button>
-            </Upload>
-            <!-- <Button slot="append">
-              <Icon type="md-cloud-done" size="18" /> </Button>
-
-            <Button slot="append">
-              <Icon type="md-folder" size="18" /> </Button> -->
-            </Input>
-            <span style="color:#6a737d">{{event.description}}</span>
-          </FormItem>
-          <!-- <h4>Output:</h4>
-          <FormItem v-for="(event,eventIndex) of getOutputEvent(state.events)" :key="event.name">
-            <span slot="label">{{event.name}}</span>
-            <Input style="width: 200px" v-model="event.fileName" :ref="event.name"></Input>
-            <span style="color:#6a737d">{{event.description}}</span>
-          </FormItem> -->
-        </Form>
-      </Card>
+      <CellGroup>
+        <Cell v-for="(metric,index) of metrics" :title="metric.wkName? metric.wkName: metric.alias" :key="metric.oid"
+          @click="chooseMetric(metric)">
+          <Button icon="ios-add" type="dashed" size="small" @click="chooseMetric(metric)" slot="extra"></Button>
+        </Cell>
+      </CellGroup>
     </Modal>
   </div>
 </template>
 <script>
 import Util from "@/utils/comparison/cmpUtils";
+import CreateMetricForm from "@/components/comparison/CreateMetricsForm";
 export default {
   created() {
     this.instanceId = this.$route.params.id;
     this.getInstance();
+  },
+  components: {
+    "create-metrics-form": CreateMetricForm
   },
   data() {
     return {
@@ -258,6 +209,28 @@ export default {
           align: "center"
         }
       ],
+      eventColumn: [
+        {
+          title: "Event Name",
+          slot: 'eventName',
+          align: "center",
+          width: "180px"
+        }, {
+          title: "Type",
+          slot: 'type',
+          align: "center",
+          width: "100px"
+        }, {
+          title: "Description",
+          slot: "desc",
+          align: "center",
+        }, {
+          title: "Data",
+          slot: "data",
+          align: "center",
+          width: "350px"
+        }
+      ],
       dataList: [],
       deployRequestInfo: {
         md5: "",
@@ -284,7 +257,7 @@ export default {
       },
       inputData: [],
       outputBindMetric: [],
-      eventColumn: [
+      eventColumn_old: [
         {
           title: "Event",
           key: "name"
@@ -325,14 +298,60 @@ export default {
             ]);
           }
         }
-      ]
+      ],
+      metrics: [],
+      modal12: false,
+      modal13: false,
+      metricAlias: "",
+      selectEventName: {},
     };
   },
   methods: {
+    chooseMetric(metric) {
+      this.states.forEach(state => {
+        return state.events.forEach(event => {
+          if (event.name === this.selectEventName && event.type === 'noresponse') {
+            event.metrics = metric;
+          }
+        });
+      });
+      // this.metricAlias = metric.alias;
+      this.modal12 = false;
+    },
+    search(eventName) {
+      this.selectEventName = eventName;
+      this.findMetric(this.metricAlias);
+
+      this.modal12 = true;
+    },
+    findMetric(item) {
+      this.$api.common
+        .findByX("metrics", "alias", item)
+        .then(res => {
+          this.metrics = res;
+          this.metricAlias = "";
+        })
+        .catch(error => {
+          this.$Message.error(error);
+        });
+    },
+    createMetric() {
+      this.modal12 = false;
+      this.modal13 = true;
+    },
+    onCreateSuccess(data) {
+      this.modal13 = false;
+      this.metrics.push(data);
+      console.log("metric创建成功:", data);
+    },
+    downloadData(event) {
+      console.log("download:", event);
+      window.open(event.url, "_self");
+    },
     updateInstance(instance) {
       this.$api.cmp_instance
         .updateInstance(instance)
-        .then(res => {})
+        .then(res => { })
         .catch(err => {
           this.$Message.error(err);
         });
@@ -342,7 +361,9 @@ export default {
         .getComputableModelInfo(modelId)
         .then(res => {
           this.computableModelInfo = res;
-          this.states = res.states;
+          if (JSON.stringify(this.recordInfo) === '{}') {
+            this.states = res.states;
+          }
         })
         .catch(err => {
           this.$Message.error(err);
@@ -351,8 +372,7 @@ export default {
     showInvokeModal() {
       this.invokeModal = true;
     },
-    invokeModel() {},
-    cancel() {},
+    cancel() { },
     getInstance() {
       this.$api.cmp_instance
         .findInstanceByInstanceId(this.instanceId)
@@ -395,9 +415,9 @@ export default {
             this.getComputableModelInfo(this.modelId);
           }
 
-          if (this.modelInfo.modelRecordId) {
-            this.getModelRecordInfo(this.modelInfo.modelRecordId);
-          }
+          // if (this.modelInfo.modelRecordId) {
+          //   this.getModelRecordInfo(this.modelInfo.modelRecordId);
+          // }
         })
         .catch(err => {
           this.$Message.error(err);
@@ -408,6 +428,18 @@ export default {
         .getRecordInfo(recordId)
         .then(res => {
           this.recordInfo = res;
+          this.states = res.states;
+          if (res.status === 1 && this.instanceInfo.cmpDataList.length == 0) {
+            //* 更新 instance cmpData
+            let jsonData = {
+              ownerId: this.$store.getters.userId,
+              ownerName: this.$store.getters.userName,
+              action: "update",
+              instanceId: this.instanceId,
+              states:this.states
+            }
+            this.updateInstanceCmpData(jsonData);
+          }
         })
         .catch(err => {
           this.$Message.error(err);
@@ -579,18 +611,13 @@ export default {
         this.$Message.error("data not ready");
         return;
       }
-      this.inputData = [];
+      // this.inputData = [];
       this.states.forEach(state => {
         return state.events.forEach(event => {
-          if (event.url) {
-            this.inputData.push({
-              statename: state.stateName,
-              event: event.name,
-              url: event.url,
-              md5: event.md5,
-              fileName: event.fileName,
-              sourceStoreId: event.sourceStoreId
-            });
+          if (event.url && event.type === 'noresponse') {
+            event.fileName = "";
+            event.url = "";
+            event.mcDataId = "";
           }
         });
       });
@@ -611,19 +638,19 @@ export default {
         .invokeModel_MC(formData)
         .then(res => {
           console.log("record:", res);
-          // sessionStorage.setItem("recordInfo", JSON.stringify(res));
-          // this.$router.push({
-          //   path: `/cmp-model-record`,
-          //   name: "cmp-model-record",
-          //   params: {
-          //     id: res.msrId
-          //   }
-          // });
-
           this.getModelRecordInfo(res.msrId);
           //* 更新 instance 信息：
           this.instanceInfo.recordId = res.msrId;
           this.updateInstance(this.instanceInfo);
+          this.$Message.info("Invoke Model Success.");
+          //* 更新 instance cmpData
+          let jsonData = {
+            ownerId: this.$store.getters.userId,
+            ownerName: this.$store.getters.userName,
+            action: "reset",
+            instanceId: this.instanceId
+          }
+          this.updateInstanceCmpData(jsonData);
         })
         .catch(err => {
           if (err == "Failed to get record") {
@@ -632,7 +659,7 @@ export default {
           this.$Message.error(err);
         });
 
-      console.log("inputData:", this.inputData);
+      // console.log("inputData:", this.inputData);
     },
     checkInputData() {
       return this.states.every(state => {
@@ -646,8 +673,15 @@ export default {
       });
     },
     downData(event) {
-      // this.$Message.info(event);
       window.open(event.url, "_self");
+    },
+    updateInstanceCmpData(jsonData) {
+      this.$api.cmp_instance.updateInstanceCmpData(jsonData)
+        .then(res => {
+
+        }).catch(err => {
+          this.$Message.error(err);
+        });
     }
   },
   computed: {
@@ -655,14 +689,14 @@ export default {
       return this.modelId ? "200" : "400";
     },
     getInputEvent() {
-      return function(events) {
+      return function (events) {
         return events.filter(event => {
           return event.type === "response";
         });
       };
     },
     getOutputEvent() {
-      return function(events) {
+      return function (events) {
         return events.filter(event => {
           return event.type === "noresponse";
         });
@@ -678,37 +712,44 @@ export default {
       }
     },
     getInputData() {
-      return function(state) {
+      return function (state) {
         return state.events.filter(event => {
           return event.type === "response" && event.url;
         });
       };
     },
     getOutputData() {
-      return function(state) {
+      return function (state) {
         return state.events.filter(event => {
           return event.type === "noresponse" && event.url;
         });
       };
     },
-    formateFileSize(){
-      return function(fileSize){
-        let kb = fileSize/1024;
-        if(kb<0){
+    formateFileSize() {
+      return function (fileSize) {
+        let kb = fileSize / 1024;
+        if (kb < 0) {
           return "1Kb";
-        }else if(kb>0 && kb<1024){
+        } else if (kb > 0 && kb < 1024) {
           return kb.toFixed(2) + "Kb";
         }
 
-        let mb = kb/1024;
-        if(mb<1024){
-          return mb.toFixed(2)+"Mb";
+        let mb = kb / 1024;
+        if (mb < 1024) {
+          return mb.toFixed(2) + "Mb";
         }
 
-        let gb = mb/1024;
-        return gb.toFixed(2)+'G';
+        let gb = mb / 1024;
+        return gb.toFixed(2) + 'G';
       }
-    }
+    },
+    getColorofStatus() {
+      return this.recordInfo.status === 1
+        ? "rgb(10, 171, 67)"
+        : this.recordInfo.status === 0
+          ? "coral"
+          : "#f00";
+    },
   }
 };
 </script>
@@ -742,7 +783,7 @@ export default {
 
 .right {
   margin-top: 20px;
-  width: 800px;
+  width: 1200px;
   margin-left: 20px;
   margin-right: 20px;
   margin-bottom: 20px;
@@ -755,7 +796,7 @@ export default {
   margin-bottom: 5px;
 }
 .w_100 {
-  width: 100px;
+  width: 120px;
 }
 .fw_600 {
   font-weight: 600;
@@ -796,7 +837,7 @@ export default {
 
 .stateCard {
   margin-top: 20px;
-  width: 90%;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
 }

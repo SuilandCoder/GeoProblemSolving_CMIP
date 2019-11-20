@@ -356,7 +356,7 @@ import Avatar from "vue-avatar";
 import ProtocolTable from "@/components/comparison/ProtocolTable";
 import BlankBox from "@/components/comparison/BlankBox";
 import CreateMetricForm from "@/components/comparison/CreateMetricsForm";
-var uuid = function() {
+var uuid = function () {
   var s = [];
   var hexDigits = "0123456789abcdef";
   for (var i = 0; i < 36; i++) {
@@ -371,7 +371,11 @@ var uuid = function() {
 };
 export default {
   beforeRouteEnter: (to, from, next) => {
-    to.meta.keepAlive = true;
+    if (from.name === "cmp-projectlist") {
+      to.meta.keepAlive = false;
+    } else {
+      to.meta.keepAlive = true;
+    }
     next(vm => {
       if (!vm.$store.getters.userState) {
         next("/login");
@@ -379,6 +383,11 @@ export default {
         next();
       }
     });
+  },
+  beforeRouteLeave(to, from, next) {
+    // ...
+    from.meta.keepAlive = true;
+    next();
   },
   created() {
     this.initSize();
@@ -407,7 +416,7 @@ export default {
       //走马灯属性
       carouseValue: 0,
       currentStep: 0,
-      projectId: this.$route.params.id,
+      projectId: "",
       projectInfo: {},
       instanceList: [],
       taskList: [],
@@ -602,7 +611,7 @@ export default {
           }
           protocol[0].protocolItems.push(item);
           let vm = this;
-          let index = _.findIndex(this.projectInfo.protocols, function(o) {
+          let index = _.findIndex(this.projectInfo.protocols, function (o) {
             return o.type === vm.currentType;
           });
           if (index >= 0) {
@@ -702,10 +711,10 @@ export default {
       this.axios
         .get(
           "/GeoProblemSolving/common/findByX?type=" +
-            this.resourceType +
-            "&key=name" +
-            "&value=" +
-            value
+          this.resourceType +
+          "&key=name" +
+          "&value=" +
+          value
         )
         .then(res => {
           console.log(res.data);
@@ -853,7 +862,7 @@ export default {
     updateResList(obj) {
       this.$api.cmp_project
         .updateList(obj)
-        .then(res => {})
+        .then(res => { })
         .catch(error => {
           this.$Message.error(error);
         });
@@ -861,7 +870,7 @@ export default {
   },
   computed: {
     getProtocol() {
-      return function(type) {
+      return function (type) {
         if (this.projectInfo.protocols) {
           let res = this.projectInfo.protocols.filter(protocol => {
             return protocol.type === type;
@@ -874,7 +883,7 @@ export default {
       };
     },
     getCreatedTime() {
-      return function(time) {
+      return function (time) {
         return time ? time.split(" ")[0] : "";
       };
     },
