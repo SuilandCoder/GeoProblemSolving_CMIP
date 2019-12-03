@@ -16,7 +16,6 @@ import cn.edu.njnu.geoproblemsolving.comparison.exception.MyException;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.MyHttpUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.xml.internal.ws.util.CompletedFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -170,6 +169,7 @@ public class CmpTaskService {
 
 
     public JSONObject runScript(JSONObject cmpMethodItem) throws IOException,MethodRunFailedException{
+        System.out.println(cmpMethodItem);
         String url = "http://" + HttpContant.DATA_CONTAINER_IP + ":" + HttpContant.DATA_CONTAINER_PORT + "/cmpTask/runCmpTask";
         String res = MyHttpUtils.post_RESCODE(url, cmpMethodItem,"0");
 //        System.out.println(res);

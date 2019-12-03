@@ -74,7 +74,7 @@
                 :key="cmpMethodInfo.methodId">
                 <h4 style="margin-top: 30px;  font-size: 18px;margin-left: 10px;">
                   {{index+1}}.{{cmpMethodInfo.methodInfo.name}}</h4>
-                <img v-if="cmpMethodInfo.status==='1'" style="width:600px;display:block;margin:auto;" :src="cmpMethodInfo.output.downloadUrl"
+                <img v-if="cmpMethodInfo.status==='1'" preview preview-text="描述文字" style="width:600px;display:block;margin:auto;" :src="cmpMethodInfo.output.downloadUrl"
                   :alt="cmpMethodInfo.methodInfo.name">
                 <!-- <img style="" src="http://127.0.0.1:8082/dataResource/getResource?sourceStoreId=e541ba3f-05b2-4c5a-b1a3-848f19c8b770" alt="sd"> -->
               </div>

@@ -24,6 +24,7 @@ public class CmpInstance {
     String projectId;
     String name;
     String description;
+    String descMarkDown;
     String userId;
     String userName;
     String type;

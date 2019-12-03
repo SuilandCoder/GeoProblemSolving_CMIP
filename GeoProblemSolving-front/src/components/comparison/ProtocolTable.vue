@@ -1,11 +1,11 @@
 <template>
   <div >
-    <Table  class="table" :max-height="400" border :columns="getCol" :data="protocolItems" size="small" >
+    <Table  class="table" size="small"  :max-height="400" border :columns="getCol" :data="protocolItems" >
       <template slot-scope="{row,index}" slot="name">
-        <strong>{{row.name}}</strong>
+        <strong style="word-break:keep-all;font-size:16px">{{row.name}}</strong>
       </template>
       <template slot-scope="{row,index}" v-for="metaCol of getItemCol(getCol)" :slot="metaCol.slot">
-        <span>{{getMetaValue(metaCol.slot,row.metaDoc)}}</span>
+        <span style="word-break:keep-all;font-size:16px">{{getMetaValue(metaCol.slot,row.metaDoc)}}</span>
       </template>
 
       <template slot-scope="{row,index}" slot="action">
@@ -19,74 +19,6 @@ export default {
   name: "protocol-table",
   data() {
     return {
-      protocolItems_test: [
-        {
-          name: "aaa",
-          extendDoc: "asdgasdg",
-          metaDoc: [
-            {
-              key: "a",
-              value: "bbb"
-            },
-            {
-              key: "aa",
-              value: "bbb"
-            },
-            {
-              key: "aaa",
-              value: "bbb"
-            },
-            {
-              key: "bb",
-              value: "bbb"
-            }
-          ]
-        },
-        {
-          name: "bbb",
-          extendDoc: "asdgasdg",
-          metaDoc: [
-            {
-              key: "avv",
-              value: "bbb"
-            },
-            {
-              key: "ad",
-              value: "bbb"
-            },
-            {
-              key: "aaa",
-              value: "bbb"
-            },
-            {
-              key: "bb",
-              value: "bbb"
-            }
-          ]
-        },
-        {
-          name: "ccc",
-          extendDoc: "asdgasdg",
-          metaDoc: [
-            {
-              key: "a",
-              value: "bbb"
-            },
-            {
-              key: "aa",
-              value: "bbb"
-            },
-            {
-              key: "bbb",
-              value: "bbb"
-            },
-            {
-              key: "gad",
-              value: "bbb"
-            }
-          ]
-        }
-      ]
     };
   },
   props: {
@@ -103,7 +35,8 @@ export default {
             slot: "name",
             align: "center",
             fixed: "left",
-            width: "100px"
+            width: "150px",
+            className: "font_size_18",
           }
         ];
         this.protocolItems.forEach(item => {
@@ -112,8 +45,8 @@ export default {
             obj.title = meta.key;
             obj.slot = meta.key;
             obj.align = "center";
-            // obj.width = "150";
-            obj.minWidth = 100;
+            obj.className = "font_size_18";
+            obj.minWidth = 150;
             // obj.resizable = true;
             let index = _.findIndex(col, function(o) {
               return o.title === obj.title;
@@ -128,7 +61,8 @@ export default {
           slot: "action",
           align: "center",
           width: "100px",
-          fixed: "right"
+          fixed: "right",
+          "font-size":"18px"
         };
         col.push(action);
         return col;

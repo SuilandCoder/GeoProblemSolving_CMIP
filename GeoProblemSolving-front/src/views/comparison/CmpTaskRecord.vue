@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="overflow:auto">
     <h1 style="text-align:center;margin-top:30px;">Comparison Task</h1>
     <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
@@ -67,10 +67,18 @@
             <div v-for="(cmpTaskModel,index) in cmpTaskModelList">
               <div style="margin-top:10px;" v-for="(cmpMethodInfo,index) in cmpTaskModel.cmpMethodInfoList">
                 <h4 style="margin-top: 30px;  font-size: 18px;margin-left: 10px;">
-                  {{index+1}}.{{cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:""}}</h4>
-                <img v-if="cmpMethodInfo.status==='1'" style="width:600px;display:block;margin:auto;"
+                  <li>{{cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:""}}</li></h4>
+                <!-- <img v-if="cmpMethodInfo.status==='1'" style="width:600px;display:block;margin:auto;"
                   :src="cmpMethodInfo.output.downloadUrl"
-                  :alt="cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:''">
+                  :alt="cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:''"> -->
+
+                  <!-- 如果是表，则前端绘制 -->
+                  <async-table v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='table'"
+                  :json-url="cmpMethodInfo.output.downloadUrl"
+                  :file-name="cmpMethodInfo.output.fileName"
+                  :suffix="cmpMethodInfo.output.suffix" style="width:800px;display:block;margin:auto;margin-top:20px;"></async-table>
+
+                  <async-img v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='file'" style="width:600px;display:block;margin:auto;" :img-url="cmpMethodInfo.output.downloadUrl"></async-img>
               </div>
             </div>
           </div>
@@ -102,7 +110,7 @@
         <div style="margin-top:10px;">
           <h3>Params:</h3>
         </div>
-        <Form style="margin-left:60px">
+        <Form style="margin-left:60px;max-height:300px;overflow:auto;">
           <FormItem v-for="(param,index) in getMethodRecordBySelectVertex.params" :key="index" :label="param.name"
             :label-width="60">
             <DatePicker v-if="param.type==='date'" v-model="param.value" type="date" :start-date="new Date(1982, 0, 1)"
@@ -119,7 +127,7 @@
         </Form>
 
         <Button :style="{float:'right'}" type="info" v-if="getMethodRecordBySelectVertex.status==='1'"
-          @click="downData(getMethodRecordBySelectVertex.output.downloadUrl)">Download Data</Button>
+          @click="downData(getMethodRecordBySelectVertex.output)">Download Data</Button>
       </div>
 
       <div slot="footer"></div>
@@ -130,7 +138,8 @@
 <script>
 import mxgraph from "@/utils/comparison/graph/index";
 import { genGraph, destroyGraph, Graph } from "@/utils/comparison/graph/Graph";
-
+import AsyncImg from "@/components/comparison/AsyncImg";
+import AsyncTable from "@/components/comparison/AsyncTable";
 const {
   mxGraph,
   mxOutline,
@@ -209,6 +218,10 @@ export default {
     clearInterval(this.timer);
     next();
   },
+  components: {
+    "async-img": AsyncImg,
+    "async-table": AsyncTable
+  },
   created() {
     this.taskRecordId = this.$route.params.id;
 
@@ -269,7 +282,7 @@ export default {
         let vertices = graph.getChildVertices(graph.getDefaultParent());
         vertices.forEach(vert => {
           if (vert.data.type === "instance") {
-            graph.setStyle(vert, "fillColor=#B9E0A5;shadow=0;");
+            // graph.setStyle(vert, "strokeWidth=3;");
           }
         });
 
@@ -386,7 +399,7 @@ export default {
             vert.data.type !== "instance" &&
             vert.data.oid === record.methodId
           ) {
-            graph.setStyle(vert, "fillColor=#FF6666;shadow=0;");
+            graph.setStyle(vert, "fillColor=#FF6666;shadow=0;strokeWidth=3;");
           }
         });
       } else if (record.status === "1") {
@@ -396,7 +409,7 @@ export default {
               vert.data.type !== "instance" &&
               vert.data.oid === record.methodId
             ) {
-              graph.setStyle(vert, "fillColor=#B9E0A5;shadow=0;");
+              graph.setStyle(vert, "strokeWidth=3;");
             }
           }
         });
@@ -406,7 +419,7 @@ export default {
             vert.data.type !== "instance" &&
             vert.data.oid === record.methodId
           ) {
-            graph.setStyle(vert, "fillColor=#FFE599;shadow=0;");
+            graph.setStyle(vert, "fillColor=#FFE599;strokeWidth=3;");
           }
         });
       }
@@ -584,10 +597,36 @@ export default {
         // vm.$Message.info(`改变了连线`);
       });
     },
-    downData(path) {
+    downData(output) {
       // this.$Message.info(event);
-      window.open(path, "_self");
-    }
+      // window.open(path, "_self");
+      let fileName = output.fileName + "."+output.suffix;
+      let reqJson = { dataUrl: output.downloadUrl, fileName: fileName };
+      this.axios
+        .post(`/GeoProblemSolving/cmp_data/downloadDataFromDataContainer`, reqJson)
+        .then(res => {
+          if (res.data) {
+            let content = res.headers["content-disposition"];
+            let fileName = content.substring(content.indexOf("filename=")+9);
+            this.downloadLink(res.data,fileName);
+          } else {
+            this.$Message.error("Failed to download data");
+          }
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        })
+    },
+    downloadLink(data,fileName) {
+      let url = window.URL.createObjectURL(new Blob([data]))
+      let link = document.createElement('a')
+      link.style.display = 'none'
+      link.href = url
+      link.setAttribute('download', fileName)
+
+      document.body.appendChild(link)
+      link.click()
+    },
   },
   computed: {
     createMetricsColumn() {

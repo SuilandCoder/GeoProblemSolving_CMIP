@@ -37,10 +37,10 @@
               <strong> Goals </strong>
               <p slot="content">{{this.projectInfo.goals}}</p>
             </Panel>
-            <Panel name="description" :hide-arrow="true">
+            <!-- <Panel name="description" :hide-arrow="true">
               <strong> Description </strong>
               <p slot="content">{{this.projectInfo.description}}</p>
-            </Panel>
+            </Panel> -->
             <Panel name="background" :hide-arrow="true">
               <strong> Background </strong>
               <p slot="content">{{this.projectInfo.background}}</p>
@@ -49,63 +49,8 @@
           </Collapse>
         </Card>
 
-        <Divider />
-        <Card>
-          <div class="sub-title">
-            Information
-            <Button style="float:right" type="primary" ghost @click="modalCreate = true">Create</Button>
-          </div>
-          <Tabs size="small" @on-click="getAllConcept" :animated="false">
-            <TabPane label="Vocabulary" name="concept">
-              <div v-for="sellist in selectCardContent" :key="sellist.id">
-                <Tag color="primary">{{sellist.name}}</Tag>
-                <Icon type="md-close" @click="clearInput(sellist.id)" />
-              </div>
-              <Button @click="vocabularyValue = true">Choose concepts</Button>
-              <Table border :columns="resColumns" :data="conceptList">
-                <template slot-scope="{row,index}" slot="description">
-                  <span>{{row.description?row.description:"-"}}</span>
-                </template>
-              </Table>
-            </TabPane>
-            <TabPane label="Data template" name="template">
-              <div v-for="sellist in selectCardContent" :key="sellist.id">
-                <Tag color="primary">{{sellist.name}}</Tag>
-                <Icon type="md-close" @click="clearInput(sellist.id)" />
-              </div>
-              <Button @click="vocabularyValue = true">Choose templates</Button>
-              <Table border :columns="resColumns" :data="templateList">
-                <template slot-scope="{row,index}" slot="description">
-                  <span>{{row.description?row.description:"-"}}</span>
-                </template>
-              </Table>
-            </TabPane>
-            <TabPane label="Unit" name="unit">
-              <div v-for="sellist in selectCardContent" :key="sellist.id">
-                <Tag color="primary">{{sellist.name}}</Tag>
-                <Icon type="md-close" @click="clearInput(sellist.id)" />
-              </div>
-              <Button @click="vocabularyValue = true">Choose unit</Button>
-              <Table border :columns="resColumns" :data="unitList">
-                <template slot-scope="{row,index}" slot="description">
-                  <span>{{row.description?row.description:row.description_ZH?row.description_ZH:"-"}}</span>
-                </template>
-              </Table>
-            </TabPane>
-            <TabPane label="Reference" name="spatialref">
-              <div v-for="sellist in selectCardContent" :key="sellist.id">
-                <Tag color="primary">{{sellist.name}}</Tag>
-                <Icon type="md-close" @click="clearInput(sellist.id)" />
-              </div>
-              <Button @click="vocabularyValue = true">Choose reference</Button>
-              <Table border :columns="resColumns" :data="spatialRefList">
-                <template slot-scope="{row,index}" slot="description">
-                  <span>{{row.description?row.description:row.description_EN?row.description_EN:"-"}}</span>
-                </template>
-              </Table>
-            </TabPane>
-          </Tabs>
-        </Card>
+        <!-- <Divider /> -->
+
         <!-- modal/drawer -->
         <Drawer title="Concepts" :closable="false" v-model="vocabularyValue" width="300">
           <div slot="header" style="display:flex;align-items:center">
@@ -119,7 +64,7 @@
             <Cell v-for="list in typeResources" :key="list.oid">
               <strong class="list-item-text">{{list.name}}</strong>
               <span class="list-item-text"
-                slot="label">{{list.description?list.description:list.description_ZH?list.description_ZH:list.description_EN}}</span>
+                slot="label">{{list.description?list.description:list.description_EN?list.description_EN:list.description_ZH}}</span>
               <Button icon="ios-add" type="dashed" size="small" @click="chooseInfo(list)" slot="extra"></Button>
             </Cell>
           </CellGroup>
@@ -156,33 +101,110 @@
         <Col :lg="{span:18,offset:1}" :md="{span:15,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
         <div class="rightContent">
           <Card>
-            <Tabs :animated="false">
-              <TabPane label="Data Protocol">
-                <div>
-                  <Button @click="addProtocol('data')" type="dashed" size="small" style="margin-bottom:10px;">
-                    Add Item
-                  </Button>
-                </div>
+            <Collapse v-model="collapseRight">
+              <Panel name="protocol">
+                <strong style="font-size:18px;"> Protocols </strong>
+                <Tabs slot="content" :animated="false">
+                  <TabPane label="Data Protocols" style="font-size:18px;">
+                    <div>
+                      <Button @click="addProtocol('data')" type="dashed" size="small" style="margin-bottom:10px;">
+                        Add Item
+                      </Button>
+                    </div>
 
-                <protocol-table :protocolItems="getProtocol('data')"></protocol-table>
-              </TabPane>
-              <TabPane label="Process Protocol">
-                <div>
-                  <Button @click="addProtocol('process')" type="dashed" size="small" style="margin-bottom:10px;">
-                    Add Item
-                  </Button>
-                </div>
-                <protocol-table :protocolItems="getProtocol('process')"></protocol-table>
-              </TabPane>
-              <TabPane label="Output Protocol">
-                <div>
-                  <Button @click="addProtocol('output')" type="dashed" size="small" style="margin-bottom:10px;">
-                    Add Item
-                  </Button>
-                </div>
-                <protocol-table :protocolItems="getProtocol('output')"></protocol-table>
-              </TabPane>
-            </Tabs>
+                    <protocol-table :protocolItems="getProtocol('data')"></protocol-table>
+                  </TabPane>
+                  <TabPane label="Process Protocols">
+                    <div>
+                      <Button @click="addProtocol('process')" type="dashed" size="small" style="margin-bottom:10px;">
+                        Add Item
+                      </Button>
+                    </div>
+                    <protocol-table :protocolItems="getProtocol('process')"></protocol-table>
+                  </TabPane>
+                  <TabPane label="Output Protocols">
+                    <div>
+                      <Button @click="addProtocol('output')" type="dashed" size="small" style="margin-bottom:10px;">
+                        Add Item
+                      </Button>
+                    </div>
+                    <protocol-table :protocolItems="getProtocol('output')"></protocol-table>
+                  </TabPane>
+                </Tabs>
+              </Panel>
+              <Panel name="repositories">
+                <strong  style="font-size:18px;"> Basic Repositories </strong>
+                <Tabs slot="content" @on-click="getAllConcept" :animated="false"
+                  :style="{overflow:'unset'}">
+                  <TabPane label="Concept" name="concept">
+                    <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary">{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose concepts</Button>
+                    <Table border :columns="resColumns" :data="conceptList" :max-height="300">
+                      <template slot-scope="{row,index}" slot="name">
+                        <span style="font-size:16px;">{{row.name}}</span>
+                      </template>
+                      <template slot-scope="{row,index}" slot="description">
+                        <span style="font-size:16px;">{{row.description?row.description:"-"}}</span>
+                      </template>
+                    </Table>
+                  </TabPane>
+                  <TabPane label="Data template" name="template">
+                    <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary">{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                    <Table border :columns="resColumns" :data="templateList" :max-height="300">
+                      <template slot-scope="{row,index}" slot="name">
+                        <span style="font-size:16px;">{{row.name}}</span>
+                      </template>
+                      <template slot-scope="{row,index}" slot="description">
+                        <span style="font-size:16px;">{{row.description?row.description:"-"}}</span>
+                      </template>
+                    </Table>
+                  </TabPane>
+                  <TabPane label="Unit" name="unit">
+                    <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary">{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose unit</Button>
+                    <Table border :columns="resColumns" :data="unitList" :max-height="300">
+                      <template slot-scope="{row,index}" slot="name">
+                        <span style="font-size:16px;">{{row.name}}</span>
+                      </template>
+                      <template slot-scope="{row,index}" slot="description">
+                        <span
+                          style="font-size:16px;">{{row.description?row.description:row.description_EN?row.description_EN:"-"}}</span>
+                        <!-- {{row.description?row.description:row.description_EN?row.description_EN:list.description_ZH}} -->
+                      </template>
+                    </Table>
+                  </TabPane>
+                  <TabPane label="Spatiotemporal Reference" name="spatialref">
+                    <div v-for="sellist in selectCardContent" :key="sellist.id">
+                      <Tag color="primary">{{sellist.name}}</Tag>
+                      <Icon type="md-close" @click="clearInput(sellist.id)" />
+                    </div>
+                    <Button @click="vocabularyValue = true">Choose reference</Button>
+                    <Table border :columns="resColumns" :data="spatialRefList" :max-height="300">
+                      <template slot-scope="{row,index}" slot="name">
+                        <span style="font-size:16px;">{{row.name}}</span>
+                      </template>
+                      <template slot-scope="{row,index}" slot="description">
+                        <span
+                          style="font-size:16px;">{{row.description?row.description:row.description_EN?row.description_EN:"-"}}</span>
+                      </template>
+                    </Table>
+                  </TabPane>
+                  <Button style="float:right" type="primary" ghost @click="modalCreate = true"
+                    slot="extra">Create</Button>
+                </Tabs>
+              </Panel>
+            </Collapse>
+
             <Modal v-model="modal1" title="Add Protocol" @on-ok="ok" @on-cancel="cancel" draggable scrollable>
               <Form ref="protocolItem" :model="protocolItem" style="margin-top:30px;" :rules="modalRule" inline>
                 <FormItem prop="name" label="Name" :label-width="100">
@@ -240,7 +262,7 @@
           </Card>
           <Card style="margin-top:50px;">
             <Tabs :animated="false">
-              <TabPane label="Instance List">
+              <TabPane label="PIC Instance List">
                 <div v-if="instanceList.length>0">
                   <div class="cmpModelBox">
                     <Row>
@@ -299,7 +321,7 @@
 
                 <blank-box v-else v-bind="blankInstanceInfo" v-on:linkClicked="createInstance"></blank-box>
               </TabPane>
-              <TabPane label="Comparison Task">
+              <TabPane label="PIC Task List">
                 <div v-if="taskList.length>0">
                   <div class="cmpModelBox">
                     <Row>
@@ -370,23 +392,23 @@ var uuid = function () {
   return uuid;
 };
 export default {
-  beforeRouteEnter: (to, from, next) => {
-    if (from.name === "cmp-projectlist") {
-      to.meta.keepAlive = false;
-    } else {
-      to.meta.keepAlive = true;
-    }
-    next(vm => {
-      if (!vm.$store.getters.userState) {
-        next("/login");
-      } else {
-        next();
-      }
-    });
-  },
+  // beforeRouteEnter: (to, from, next) => {
+  //   if (from.name === "cmp-projectlist") {
+  //     to.meta.keepAlive = false;
+  //   } else {
+  //     to.meta.keepAlive = true;
+  //   }
+  //   next(vm => {
+  //     if (!vm.$store.getters.userState) {
+  //       next("/login");
+  //     } else {
+  //       next();
+  //     }
+  //   });
+  // },
   beforeRouteLeave(to, from, next) {
     // ...
-    from.meta.keepAlive = true;
+    // from.meta.keepAlive = true;
     next();
   },
   created() {
@@ -411,7 +433,8 @@ export default {
   data() {
     return {
       modal1: false,
-      collapseVal: "goals",
+      collapseVal: ["goals", "background"],
+      collapseRight: ["protocol"],
       searchVal: "",
       //走马灯属性
       carouseValue: 0,
@@ -454,7 +477,7 @@ export default {
       modalType: [
         {
           value: "concept",
-          label: "Vocabulary"
+          label: "Concept"
         },
         {
           value: "template",
@@ -478,15 +501,17 @@ export default {
       resColumns: [
         {
           title: "Name",
-          key: "name",
+          slot: "name",
           align: "center",
-          width: "100px"
+          width: "200px",
+          className: "font_size_18"
         },
         {
           title: "Description",
           slot: "description",
           align: "center",
-          minWidth: 180
+          minWidth: 180,
+          className: "font_size_18",
         }
       ],
       protocolItem: {

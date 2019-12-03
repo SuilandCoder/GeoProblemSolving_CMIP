@@ -17,10 +17,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -94,9 +99,25 @@ public class CmpTaskController {
 
     // 创建对比任务
     @RequestMapping(value = "/createTask", method = RequestMethod.POST)
-    public JsonResult createTask(@RequestBody JSONObject tasksInfo) {
-        System.out.println(tasksInfo);
+    public JsonResult createTask(HttpServletRequest request) {
         try {
+            ServletInputStream inputStream = request.getInputStream();
+//            inputStream.
+            String taskInfoStr = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            taskInfoStr = buffer.toString();
+
+//            String taskInfoStr = request.getParameter("taskInfo");
+//            String ip = request.getParameter("ip");
+
+            JSONObject tasksInfo = JSONObject.parseObject(taskInfoStr);
+            System.out.println(tasksInfo);
+
             String projectId = tasksInfo.getString("projectId");
             JSONArray computableModels = tasksInfo.getJSONArray("computableModels");
             JSONArray targetInstanceList = tasksInfo.getJSONArray("targetInstanceList");
@@ -112,6 +133,7 @@ public class CmpTaskController {
 
                 String metricId = computableModel.getString("metricId");
                 String metricName = computableModel.getString("metricName");
+
                 JSONArray cmpMethodList = computableModel.getJSONArray("cmpMethodList");
                 JSONArray dataProcessMethodList = computableModel.getJSONArray("dataProcessMethodList");
 

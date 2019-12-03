@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="overflow:auto">
     <h2 style="text-align:center;margin:20px;">Create Comparison Task</h2>
     <Steps :current="currentStep" style="width:800px;margin-left:38%">
       <Step title="Step 1">
@@ -117,16 +117,16 @@
                   </div>
                   <Form v-if="hackReset">
                     <FormItem v-for="(param,index) in selectVertex.data.parameterList" :key="index" :label="param.name"
-                      :label-width="60">
+                      :label-width="100">
                       <!-- <Input ref="inputParam" v-model="param.value" :placeholder="param.type" style="width:100px" /> -->
                       <DatePicker v-if="param.type==='date'" v-model="param.value" type="date"
                         :start-date="new Date(1982, 0, 1)" :options="model_time_32" placeholder="1982-2013" size="small"
                         style="width:120px;margin-left:10px;"></DatePicker>
                       <RadioGroup v-else-if="param.type==='time_unit'" v-model="param.value">
                         <!-- <Radio v-for="type of itemTypeList" :key="type.name" :label="type.label">{{type.name}}</Radio> -->
-                        <Radio  label="D" border>day</Radio>
-                        <Radio  label="M" border>month</Radio>
-                        <Radio  label="Y" border>year</Radio>
+                        <Radio label="D" border>day</Radio>
+                        <Radio label="M" border>month</Radio>
+                        <Radio label="Y" border>year</Radio>
                       </RadioGroup>
                       <input v-else v-model="param.value" :placeholder="param.type"
                         style="width:100px;height:25px;margin-left:10px;" />
@@ -157,9 +157,12 @@ const {
   mxGeometry,
   mxUtils,
   mxEventObject,
-  mxConnectionHandler
+  mxConnectionHandler,
+  mxStencilRegistry
   // mxGraphHandler
 } = mxgraph;
+
+
 
 Date.prototype.format = function (fmt) { //author: meizz
   var o = {
@@ -188,18 +191,21 @@ let graph = null;
 let outline = null;
 let idSeed = 0;
 let ellipse = "ellipse;whiteSpace=wrap;html=1;";
-let rounded = "rounded=1;whiteSpace=wrap;html=1;";
-let hexagon = "shape=hexagon;whiteSpace=wrap;html=1;";
-let rhombus = "rhombus;whiteSpace=wrap;html=1;";
+let rounded = "rounded;whiteSpace=wrap;html=1;rounded=1;shadow=0;comic=0;strokeColor=#000000;fillColor=#FFE599;";
+let hexagon = "shape=hexagon;whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;fontSize=18;strokeColor=#000000;fillColor=#F8CECC;";
+// let rhombus = "rhombus;whiteSpace=wrap;html=1;";// 菱形
+let data_Cell = "shape=Parallelepiped;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2"
 // const vm = this;
 
 const insertVertex = (type, idx, target, x, y, instance) => {
+  var parent = graph.getDefaultParent();
+  // graph.insertVertex(parent, null, '演员', 50, 300, 150, 150, "shape=parallelogram;perimeter=ellipsePerimeter;");
   const id = idx;
   let nodeRootVertex = null;
   if (type === "instance") {
-    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), ellipse);
+    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 130, 85), "img;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2");
   } else if (type === "dataProcess") {
-    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), rhombus);
+    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), hexagon);
   } else {
     nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), rounded);
   }
@@ -445,7 +451,7 @@ export default {
         }
       },
       startTime_1982: "1982-01-01",
-      hackReset:true,
+      hackReset: true,
     };
   },
   methods: {
@@ -643,7 +649,7 @@ export default {
 
       if (cell.vertex) {
         this.hackReset = false;
-        this.$nextTick(()=>{
+        this.$nextTick(() => {
           this.hackReset = true;
         })
         this.selectVertex = cell;
@@ -673,10 +679,13 @@ export default {
     },
     createTask() {
       // console.log("taskInfo:", this.taskInfo);
+
       let taskReady = this.saveTask();
+      // let formData = new FormData();
+      // formData.set("taskInfo", JSON.stringify(this.taskInfo));
       if (taskReady) {
         this.$api.cmp_task
-          .createTask(this.taskInfo)
+          .createTask(JSON.stringify(this.taskInfo))
           .then(res => {
             let recordId = res.recordId;
             this.$router.push({

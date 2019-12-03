@@ -73,7 +73,7 @@ public class UnitDaoImpl implements IUnitDao {
     // 模糊查询
     @Override
     public List<Unit> getUnits(String key, String value) {
-        Query query = Query.query(Criteria.where(key).regex(".*?\\"+value+".*"));
+        Query query = Query.query(Criteria.where(key).regex(value));
         List<Unit> units = mongoTemplate.find(query, Unit.class);
         return units;
     }

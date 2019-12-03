@@ -37,7 +37,8 @@ public class CmpDataService {
         if (code!=0) {
             return null;
         }
-        String sourceStoreId = bodyJSONObj.getString("data");
+        JSONObject data = bodyJSONObj.getJSONObject("data");
+        String sourceStoreId = data.getString("source_store_id");
         if(sourceStoreId==null){
             return null;
         }

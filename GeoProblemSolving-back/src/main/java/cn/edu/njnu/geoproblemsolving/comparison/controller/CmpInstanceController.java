@@ -107,6 +107,7 @@ public class CmpInstanceController {
                             dataResource.setPrivacy("public");
                             dataResource.setMd5(event.getMd5());
                             dataResource.setDcSourceStoreId(event.getDcSourceStoreId());
+                            dataResource.setAbstractInfo(event.getDescription());
                             dataResource.setUrl(event.getUrl());
                             dataResource.setMetrics(event.getMetrics());
                             dataResource = dataResourceDao.createDataResource(dataResource);
@@ -117,6 +118,8 @@ public class CmpInstanceController {
             }
             instance.setCmpDataList(cmdDataId);
         } else if ("reset".equals(action)) {
+            String recordId = jsonData.getString("recordId");
+            instance.setRecordId(recordId);
             instance.setCmpDataList(new ArrayList<String>());
         }
         cmpInstanceDao.updateInstance(instance);

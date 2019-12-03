@@ -1,9 +1,11 @@
 <template>
-  <div>
-    <h1 style="text-align:center;margin-top:30px;">Comparison Instance</h1>
+  <div style="overflow:auto">
+    <h1 style="text-align:center;margin-top:30px;">Comparison Instance
+      <span :style="{color:getTitleColor}">({{instanceInfo.type}})</span>
+    </h1>
     <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
-        <Card style="height:260px;">
+        <Card>
           <p slot="title" style=" font-size: 20px;">
             <Icon type="md-analytics" />
             <span style="margin-left:10px;"></span>
@@ -28,16 +30,26 @@
             </span>
           </div>
 
-          <div class="display_flex mb_5">
+          <!-- <div class="display_flex mb_5">
             <span class="w_100 fw_600">Description:</span>
             <p class="desc">
               {{instanceInfo.description}}
             </p>
-          </div>
+          </div> -->
+
+          <Collapse v-model="collapseVal">
+            <Panel name="description" :hide-arrow="true">
+              <strong> Description </strong>
+              <p slot="content"> {{instanceInfo.description}}</p>
+            </Panel>
+          </Collapse>
 
         </Card>
         <Divider v-if="modelId" />
         <Card v-if="modelId">
+          <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0" id="fork_btn" size="small"
+            type="dashed" shape="circle" title="fork as a new instance" @click="forkInstanceModal=true">
+            <Icon size="18" type="md-git-network" /></Button>
           <div style="display:flex;">
             <img id="model_img" src="@/assets/images/comparison/model.png" alt="model img">
             <div id="model_btn_box">
@@ -50,7 +62,7 @@
                 <Button icon="ios-cloud-upload-outline">Upload Model</Button>
               </Upload>
               <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
-                style="width:100px;text-align:center;" type="success" @click="invokeModel">Invoke</Button>
+                style="width:100px;text-align:center;" type="success" @click="invokeModal=true">Invoke</Button>
             </div>
           </div>
           <Divider />
@@ -78,7 +90,7 @@
       <div class="right">
         <Card>
           <h3>Data List</h3>
-          <Table border :max-height="800" :columns="dataColumn" :data="dataList">
+          <Table border :max-height="800" :columns="dataColumn" :data="dataList" no-data-text="-">
             <template slot-scope="{ row, index }" slot="name">
               <strong>{{ row.name }}</strong>
             </template>
@@ -86,12 +98,18 @@
               <span>{{ row.metrics?row.metrics.alias:"-" }}</span>
             </template>
             <template slot-scope="{row,index}" slot="fileSize">
-              <span>{{formateFileSize(row.fileSize)}}</span>
+              <span>{{row.fileSize===0?"-":formateFileSize(row.fileSize)}}</span>
             </template>
           </Table>
         </Card>
 
-        <Card class="stateCard">
+        <!-- <article v-html="instanceInfo.descMarkDown"></article> -->
+        <div>
+          <mavon-editor v-if="instanceInfo.descMarkDown" :subfield="false" defaultOpen="preview" :toolbarsFlag="false"
+            v-model="instanceInfo.descMarkDown" style="margin-top:20px;" />
+        </div>
+
+        <Card class="stateCard" v-if="modelId">
           <h2 slot="title">
             Model Configuration
           </h2>
@@ -133,7 +151,7 @@
         </Card>
         <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
           style="width:100px;float:right;margin-top:20px;text-align:center;" type="success"
-          @click="invokeModel">Invoke</Button>
+          @click="invokeModal=true">Invoke</Button>
       </div>
     </div>
     <Modal v-model="modal13" draggable scrollable title="Create Metric">
@@ -158,6 +176,24 @@
         </Cell>
       </CellGroup>
     </Modal>
+
+    <Modal v-model="invokeModal" title="Notice" @on-ok="invokeModel">
+      <h2>This operation will reset the data of this instance.</h2>
+    </Modal>
+
+    <Modal v-model="forkInstanceModal" title="Fork this model to a new instance：" @on-ok="forkNewInstance">
+      <Form ref="newInstanceInfo" :model="newInstanceInfo" :rules="rules">
+        <FormItem prop="name" label="Instance Name" :label-width="150">
+          <Input v-model="newInstanceInfo.name" style="width: 300px" placeholder="Enter instance name" />
+        </FormItem>
+        <FormItem prop="description" label="Instance Description" :label-width="150">
+          <div>
+            <Input type="textarea" v-model="newInstanceInfo.description"
+              placeholder="Enter description about this instance" />
+          </div>
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 <script>
@@ -173,8 +209,10 @@ export default {
   },
   data() {
     return {
+      collapseVal: "description",
       instanceId: "",
       instanceInfo: {},
+      newInstanceInfo: {},
       modelId: "",
       modelInfo: {},
       dataColumn: [
@@ -191,7 +229,7 @@ export default {
         {
           title: "Type",
           key: "fileType",
-          align: "center"
+          align: "center",
         },
         {
           title: "AbstractInfo",
@@ -243,6 +281,7 @@ export default {
       creatable: false,
       recordInfo: {},
       invokeModal: false,
+      forkInstanceModal: false,
       computableModelInfo: {},
       states: [],
       uploadDataInfo: {
@@ -304,9 +343,54 @@ export default {
       modal13: false,
       metricAlias: "",
       selectEventName: {},
+      rules: {
+        name: [
+          {
+            required: true,
+            message: "Cannot be empty and no more than 100 characters",
+            trigger: "blur",
+            max: 100
+          }
+        ],
+        description: [
+          {
+            required: true,
+            message: "Cannot be empty and no more than 800 characters",
+            trigger: "blur",
+            max: 800
+          }
+        ]
+      }
     };
   },
   methods: {
+    forkNewInstance() {
+      this.$refs["newInstanceInfo"].validate(valid => {
+        if (valid) {
+          this.newInstanceInfo.projectId = this.instanceInfo.projectId;
+          this.newInstanceInfo.userId = this.$store.getters.userId;
+          this.newInstanceInfo.userName = this.$store.getters.userName;
+          this.newInstanceInfo.type = this.instanceInfo.type;
+          this.newInstanceInfo.modelId = this.instanceInfo.modelId;
+          this.newInstanceInfo.recordId = this.instanceInfo.recordId;
+          this.newInstanceInfo.cmpDataList = [];
+          this.$api.cmp_instance
+            .createInstance(this.newInstanceInfo)
+            .then(res => {
+              console.log("返回的数据信息：", res);
+              this.$router.replace({
+                path: `/cmp-instance-detail/${res.instanceId}`
+              });
+              location.reload();
+            })
+            .catch(err => {
+              this.$Message.error(err);
+            });
+        }
+      });
+
+
+    },
     chooseMetric(metric) {
       this.states.forEach(state => {
         return state.events.forEach(event => {
@@ -345,8 +429,33 @@ export default {
       console.log("metric创建成功:", data);
     },
     downloadData(event) {
-      console.log("download:", event);
-      window.open(event.url, "_self");
+      // console.log("download:", event);
+      // window.open(event.url, "_self");
+      let reqJson = { dataUrl: event.url, fileName: event.fileName };
+      this.axios
+        .post(`/GeoProblemSolving/cmp_data/downloadDataFromDataContainer`, reqJson)
+        .then(res => {
+          if (res.data) {
+            let content = res.headers["content-disposition"];
+            let fileName = content.substring(content.indexOf("filename=")+9);
+            this.downloadLink(res.data,fileName);
+          } else {
+            this.$Message.error("Failed to download data");
+          }
+        })
+        .catch(err => {
+          this.$Message.error(err);
+        })
+    },
+    downloadLink(data,fileName) {
+      let url = window.URL.createObjectURL(new Blob([data]))
+      let link = document.createElement('a')
+      link.style.display = 'none'
+      link.href = url
+      link.setAttribute('download', fileName)
+
+      document.body.appendChild(link)
+      link.click()
     },
     updateInstance(instance) {
       this.$api.cmp_instance
@@ -436,7 +545,7 @@ export default {
               ownerName: this.$store.getters.userName,
               action: "update",
               instanceId: this.instanceId,
-              states:this.states
+              states: this.states
             }
             this.updateInstanceCmpData(jsonData);
           }
@@ -641,16 +750,18 @@ export default {
           this.getModelRecordInfo(res.msrId);
           //* 更新 instance 信息：
           this.instanceInfo.recordId = res.msrId;
-          this.updateInstance(this.instanceInfo);
+          //   this.updateInstance(this.instanceInfo);
           this.$Message.info("Invoke Model Success.");
-          //* 更新 instance cmpData
+          //* 更新 instance cmpData 和 recordId
           let jsonData = {
             ownerId: this.$store.getters.userId,
             ownerName: this.$store.getters.userName,
             action: "reset",
-            instanceId: this.instanceId
+            instanceId: this.instanceId,
+            recordId: this.instanceInfo.recordId
           }
           this.updateInstanceCmpData(jsonData);
+          this.instanceInfo.cmpDataList = [];
         })
         .catch(err => {
           if (err == "Failed to get record") {
@@ -678,7 +789,10 @@ export default {
     updateInstanceCmpData(jsonData) {
       this.$api.cmp_instance.updateInstanceCmpData(jsonData)
         .then(res => {
-
+          this.instanceInfo = res;
+          if (this.instanceInfo.cmpDataList.length >= 0) {
+            this.getCmpDataList(this.instanceInfo.cmpDataList);
+          }
         }).catch(err => {
           this.$Message.error(err);
         });
@@ -750,10 +864,18 @@ export default {
           ? "coral"
           : "#f00";
     },
+    getTitleColor() {
+      return this.instanceInfo.type === "observation" ? "#20b2aa" : this.instanceInfo.type === "benchmark" ? "#daa520" : "#d2691e";
+    }
   }
 };
 </script>
 <style scoped>
+#fork_btn {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+}
 .recordRoom {
   margin-top: 30px;
   margin-left: 30px;
@@ -813,6 +935,7 @@ export default {
 
 #model_img {
   width: 80px;
+  height: 80px;
   margin-left: 10px;
 }
 

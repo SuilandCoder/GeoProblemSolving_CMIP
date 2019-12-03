@@ -5,3 +5,7 @@ GeoProblemSolving-back/src/main/resources/templates/staticPage
 GeoProblemSolving-front/target.md
 GeoProblemSolving-front/node_modules
 GeoProblemSolving-back/geoproblemsolving.iml
+
+/GeoProblemSolving-front/dist
+/GeoProblemSolving-back/src/main/resources/static/static
+/deploy

@@ -1,35 +1,24 @@
 package cn.edu.njnu.geoproblemsolving.comparison.utils;
 
-import cn.edu.njnu.geoproblemsolving.comparison.constant.HttpContant;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.BASE64Encoder;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +100,49 @@ public class MyHttpUtils {
             return null;
         }
         return resObj.getString("data");
+    }
+
+    public static String myImgBase64(String urlString) throws IOException, URISyntaxException {
+//        String body="";
+        CloseableHttpClient client = HttpClients.createDefault();
+//        String requestUrl = url;
+        URL url=new URL(urlString);
+        URI uri=new URI(url.getProtocol(), url.getHost()+":"+url.getPort(), url.getPath(), url.getQuery(),null);
+        HttpGet httpGet = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(httpGet);
+        HttpEntity responseEntity = response.getEntity();
+        int statusCode= response.getStatusLine().getStatusCode();
+        if(statusCode == 200){
+            InputStream content = responseEntity.getContent();
+            BASE64Encoder encoder = new BASE64Encoder();
+            byte[] bytes = IOUtils.toByteArray(content);
+            String base64Str = encoder.encode(bytes);
+            return base64Str;
+        }else{
+            String content = EntityUtils.toString(responseEntity);
+            System.out.println(content);
+            return null;
+        }
+    }
+
+    public static byte[] getDataBlob(String urlString) throws IOException, URISyntaxException {
+//        String body="";
+        CloseableHttpClient client = HttpClients.createDefault();
+//        String requestUrl = url;
+        URL url=new URL(urlString);
+        URI uri=new URI(url.getProtocol(), url.getHost()+":"+url.getPort(), url.getPath(), url.getQuery(),null);
+        HttpGet httpGet = new HttpGet(uri);
+        CloseableHttpResponse response = client.execute(httpGet);
+        HttpEntity responseEntity = response.getEntity();
+        int statusCode= response.getStatusLine().getStatusCode();
+        if(statusCode == 200){
+            InputStream content = responseEntity.getContent();
+            return IOUtils.toByteArray(content);
+        }else{
+            String content = EntityUtils.toString(responseEntity);
+            System.out.println(content);
+            return null;
+        }
     }
 
     public static String post_JSONObj(String urlString, JSONObject jsonObj) throws IOException {

@@ -16,7 +16,11 @@ const cmp_task = {
     return axios.get(`${base.cmpTask}/getDataProcessMethodById?methodId=${methodId}`);
   },
   createTask(taskJsonInfo){
-    return axios.post(`${base.cmpTask}/createTask`, taskJsonInfo);
+    return axios.post(`${base.cmpTask}/createTask`,taskJsonInfo,{
+      headers:{
+        "Content-Type":'text/plain'
+      }
+    } );
   },
   getCmpTasks(projectId){
     return axios.get(`${base.cmpTask}/getCmpTasks?projectId=${projectId}`);

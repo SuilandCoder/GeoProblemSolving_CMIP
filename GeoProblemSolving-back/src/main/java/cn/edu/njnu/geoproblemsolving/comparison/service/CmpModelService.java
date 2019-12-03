@@ -409,14 +409,12 @@ public class CmpModelService {
                         JSONObject outputJson = (JSONObject) obj;
                         String stateName = outputJson.getString("StateName");
                         String eventName = outputJson.getString("Event");
-                        String url = outputJson.getString("Url");
+                        JSONObject urlJson = outputJson.getJSONObject("Url");
+                        String url = urlJson.getString("url");
+                        String suffix = urlJson.getString("suffix");
                         String sourceStoreId = "";
-                        if(url.contains("&sourceStoreId=")){
-                            sourceStoreId = url.substring(url.indexOf("&sourceStoreId=")+15,url.lastIndexOf("&"));
-                        }
-                        String suffix = "";
-                        if(url.contains("&suffix=")){
-                            suffix = url.substring(url.indexOf("&suffix=")+8);
+                        if(url.contains("?sourceStoreId=")){
+                            sourceStoreId = url.substring(url.indexOf("?sourceStoreId=")+15);
                         }
                         for (ModelState state : modelStates) {
                             List<ModelEvent> events = state.getEvents();
