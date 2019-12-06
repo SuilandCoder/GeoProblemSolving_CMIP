@@ -15,13 +15,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -297,17 +301,30 @@ public class CmpModelController {
     // 输入参数为 模型容器 ip 和 端口
     @RequestMapping(value = "/invokeModel_MC", method = RequestMethod.POST)
     public JsonResult invokeModel_MC(HttpServletRequest request){
-        String ip = request.getParameter("ip");
-        String port = request.getParameter("port");
-        String msid = request.getParameter("msid");
-        String inputs = request.getParameter("inputs");
-        String userId = request.getParameter("userId");
-        String username = request.getParameter("username");
-        String modelId = request.getParameter("modelId");
-        String modelName = request.getParameter("modelName");
-        String computableModelId = request.getParameter("computableModelId");
-        String instanceId = request.getParameter("instanceId");
         try {
+            ServletInputStream inputStream = request.getInputStream();
+            String jsonData = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            jsonData = buffer.toString();
+            JSONObject requstJSON = JSONObject.parseObject(jsonData);
+
+            String ip = requstJSON.getString("ip");
+            String port = requstJSON.getString("port");
+            String msid = requstJSON.getString("msid");
+            String inputs = requstJSON.getString("inputs");
+            String userId = requstJSON.getString("userId");
+            String username = requstJSON.getString("username");
+            String modelId = requstJSON.getString("modelId");
+            String modelName = requstJSON.getString("modelName");
+            String computableModelId = requstJSON.getString("computableModelId");
+            String instanceId = requstJSON.getString("instanceId");
+
+
             //调用模型
 //            String recordId = CmpModelService.invokeModel_MC(ip, port, msid, inputs);
             String recordId = CmpModelService.invokeModel_MC(ip, port, msid, inputs);

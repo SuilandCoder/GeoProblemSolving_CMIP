@@ -1,21 +1,26 @@
 import base from "./base"
 import axios from "../http"
 
-const cmp_instance={
-  createInstance(instance){
-    return axios.post(`${base.cmpInstance}/createInstance`,instance);
+const cmp_instance = {
+  createInstance(instance) {
+    return axios.post(`${base.cmpInstance}/createInstance`, instance,
+      {
+        headers: {
+          "Content-Type": 'text/plain'
+        }
+      });
   },
-  getInstanceList(projectId){
+  getInstanceList(projectId) {
     return axios.get(`${base.cmpInstance}/getInstanceList?projectId=${projectId}`)
   },
-  findInstanceByInstanceId(instanceId){
+  findInstanceByInstanceId(instanceId) {
     return axios.get(`${base.cmpInstance}/findInstanceByInstanceId?instanceId=${instanceId}`)
   },
-  updateInstance(instance){
-    return axios.post(`${base.cmpInstance}/updateInstance`,instance);
+  updateInstance(instance) {
+    return axios.post(`${base.cmpInstance}/updateInstance`, instance);
   },
-  updateInstanceCmpData(jsonData){
-    return axios.post(`${base.cmpInstance}/updateInstanceCmpData`,jsonData);
+  updateInstanceCmpData(jsonData) {
+    return axios.post(`${base.cmpInstance}/updateInstanceCmpData`, jsonData);
   }
 }
 

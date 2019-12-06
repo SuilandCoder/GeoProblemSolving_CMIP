@@ -35,7 +35,8 @@ public enum ResultEnum {
     COMPARISON_METHOD_LACKS_INPUT_DATA(-23, "Comparison method lacks input data"),
     FAILED_TO_EXCUTE_SCRIPT(-24,"Failed to excute scripte"),
     FAILED_TO_COMPARING(-25,"Failed to comparing."),
-    EVENT_NOT_BIND_METRICS(-26,"Output Event haven't bind metrics.");
+    EVENT_NOT_BIND_METRICS(-26,"Output Event haven't bind metrics."),
+    FAILED_TO_CREATE_INSTANCE(-27, "Failed to create instance");
 
     private Integer code;
 

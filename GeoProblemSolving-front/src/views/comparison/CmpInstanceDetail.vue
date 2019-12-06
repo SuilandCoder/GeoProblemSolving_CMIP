@@ -375,7 +375,7 @@ export default {
           this.newInstanceInfo.recordId = this.instanceInfo.recordId;
           this.newInstanceInfo.cmpDataList = [];
           this.$api.cmp_instance
-            .createInstance(this.newInstanceInfo)
+            .createInstance(JSON.stringify(this.newInstanceInfo))
             .then(res => {
               console.log("返回的数据信息：", res);
               this.$router.replace({
@@ -731,20 +731,20 @@ export default {
         });
       });
 
-      let formData = new FormData();
-      formData.set("ip", this.computableModelInfo.serviceNode.host);
-      formData.set("port", this.computableModelInfo.serviceNode.port);
-      formData.set("msid", this.computableModelInfo.serviceNode.msid);
-      formData.set("userId", this.$store.getters.userId);
-      formData.set("username", this.$store.getters.userName);
-      formData.set("instanceId", this.instanceId);
-      // formData.set("inputs", JSON.stringify(this.inputData));
-      formData.set("inputs", JSON.stringify(this.states));
-      formData.set("modelId", this.modelId);
-      formData.set("modelName", this.modelInfo.modelName);
-      formData.set("computableModelId", this.computableModelInfo.oid);
+      let reqJson = {};
+      reqJson["ip"]=this.computableModelInfo.serviceNode.host;
+      reqJson["port"]=this.computableModelInfo.serviceNode.port;
+      reqJson["msid"]=this.computableModelInfo.serviceNode.msid;
+      reqJson["userId"]=this.$store.getters.userId;
+      reqJson["username"]=this.$store.getters.userName;
+      reqJson["instanceId"]=this.instanceId;
+      reqJson["inputs"]=JSON.stringify(this.states);
+      reqJson["modelId"]=this.modelId;
+      reqJson["modelName"]=this.modelInfo.modelName;
+      reqJson["computableModelId"]=this.computableModelInfo.oid;
+
       this.$api.cmp_model
-        .invokeModel_MC(formData)
+        .invokeModel_MC(JSON.stringify(reqJson))
         .then(res => {
           console.log("record:", res);
           this.getModelRecordInfo(res.msrId);
@@ -769,8 +769,6 @@ export default {
           }
           this.$Message.error(err);
         });
-
-      // console.log("inputData:", this.inputData);
     },
     checkInputData() {
       return this.states.every(state => {

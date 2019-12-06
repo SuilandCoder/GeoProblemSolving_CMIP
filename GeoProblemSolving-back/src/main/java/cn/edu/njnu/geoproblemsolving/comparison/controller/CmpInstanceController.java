@@ -17,9 +17,15 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,17 +49,32 @@ public class CmpInstanceController {
     DataResourceDaoImpl dataResourceDao;
 
     @RequestMapping(value = "/createInstance", method = RequestMethod.POST)
-    public JsonResult createInstance(@RequestBody String jsonData) {
-        JSONObject requstJSON = JSONObject.parseObject(jsonData);
-        String projectId = requstJSON.getString("projectId");
-        CmpInstance ci = requstJSON.toJavaObject(CmpInstance.class);
-        CmpInstanceDaoImpl dataResourceDao = new CmpInstanceDaoImpl(mongoTemplate);
-        CmpInstance instance = dataResourceDao.createInstance(ci);
+    public JsonResult createInstance(HttpServletRequest request) {
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String jsonData = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            jsonData = buffer.toString();
 
-        //更新 project 信息
-        CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
-        cmpProjectDao.updateInstanceList(projectId, instance.getInstanceId(), true);
-        return ResultUtils.success(instance);
+            JSONObject requstJSON = JSONObject.parseObject(jsonData);
+            String projectId = requstJSON.getString("projectId");
+            CmpInstance ci = requstJSON.toJavaObject(CmpInstance.class);
+            CmpInstanceDaoImpl dataResourceDao = new CmpInstanceDaoImpl(mongoTemplate);
+            CmpInstance instance = dataResourceDao.createInstance(ci);
+
+            //更新 project 信息
+            CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
+            cmpProjectDao.updateInstanceList(projectId, instance.getInstanceId(), true);
+            return ResultUtils.success(instance);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResultUtils.error(ResultEnum.FAILED_TO_CREATE_INSTANCE);
+        }
     }
 
     @RequestMapping(value = "/getInstanceList", method = RequestMethod.GET)
