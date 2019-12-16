@@ -21,10 +21,17 @@ import * as socketApi from './api/socket'
 import './assets/css/style.css'
 
 //*********add by songjie******/
+import mavonEditor from 'mavon-editor';
+import 'mavon-editor/dist/css/index.css';
 import api from "./request/api";
 import _ from 'lodash';
+import preview from 'vue-photo-preview'
+import 'vue-photo-preview/dist/skin.css'
+
 Vue.prototype.$api = api; //* 封装的 api，设置为Vue原型可避免每次使用都 import
 Vue.prototype._ = _;
+Vue.use(mavonEditor);
+Vue.use(preview)
 //*****************************/
 
 axios.defaults.withCredentials=true;

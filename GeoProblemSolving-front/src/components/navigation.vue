@@ -82,13 +82,16 @@ footer {
           <MenuItem name="home" class="menuItem" style="margin-left:35%">
           <span>Home</span>
           </MenuItem>
-          <Submenu name="projects" class="menuItem">
+          <!-- <Submenu name="projects" class="menuItem">
             <template slot="title">
               <span>Projects</span>
             </template>
             <MenuItem name="projects">GeoProblem Solving</MenuItem>
             <MenuItem name="geoModel-compare-projects">GeoModel Compare</MenuItem>
-          </Submenu>
+          </Submenu> -->
+          <MenuItem name="geoModel-compare-projects" class="menuItem">
+          <span>Projects</span>
+          </MenuItem>
           <MenuItem name="resources" class="menuItem">
           <span>Resources</span>
           </MenuItem>
@@ -330,7 +333,7 @@ export default {
     changeSelect(name) {
       if (name == "logout") {
         this.axios
-          .get("/GeoProblemSolving/user/logout")
+          .get("/GeoProblemSolving_Backend/user/logout")
           .then(res => {
             this.$store.commit("userLogout");
             this.noticeSocket.close();

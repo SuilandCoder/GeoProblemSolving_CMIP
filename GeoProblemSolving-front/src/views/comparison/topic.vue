@@ -30,7 +30,7 @@ body {
   font-size: 18px;
   color: black;
   font-weight: 400;
-  margin-bottom:2%;
+  margin-bottom: 2%;
 }
 .stepBtn {
   margin-left: 20%;
@@ -182,273 +182,7 @@ body {
 }
 </style>
 <template>
-  <div class="mainContent">
-    <Row>
-      <Col span="22" offset="1">
-        <Row>
-          <Col :lg="5" :md="8" :sm="10" :xs="12">
-            <Card class="detailSidebar">
-              <div class="topic-title">
-                Title
-              </div>
 
-              <div class="single-info">
-                  <Icon type="ios-leaf" :size="20" />
-                  <span>Background</span>
-              </div>
-
-              <div class="single-info" >
-                  <Icon type="md-people" :size="20" />
-                  <span>Member</span>
-              </div>
-              <div class="single-info" >
-                  <Icon type="md-person" :size="20" />
-                  <span>Creator</span>
-              </div>
-              <div class="single-info" >
-                  <Icon type="md-time" :size="20" />
-                  <span>Created Time</span>
-              </div>
-
-            </Card>
-
-              <Divider />
-              <Card>
-              <div class="sub-title">
-                Information
-                <Button style="float:right" type="primary" ghost @click="modalCreate = true">Create</Button>
-              </div>
-              <Tabs size="small" @on-click="getAllConcept">
-                <TabPane label="Vocabulary"  name="concept">                   
-                    <div v-for="sellist in selectCardContent" :key="sellist.id">
-                      <Tag color="primary" >{{sellist.name}}</Tag>
-                      <Icon type="md-close" @click="clearInput(sellist.id)" />
-                    </div>
-                    <Button @click="vocabularyValue = true" >Choose concepts</Button>
-                </TabPane>
-                <TabPane label="Data template"  name="template">
-                   <div v-for="sellist in selectCardContent" :key="sellist.id">
-                      <Tag color="primary" >{{sellist.name}}</Tag>
-                      <Icon type="md-close" @click="clearInput(sellist.id)" />
-                    </div>
-                    <Button @click="vocabularyValue = true">Choose templates</Button>
-                </TabPane>
-                <TabPane label="Unit"  name="unit">
-                  <div v-for="sellist in selectCardContent" :key="sellist.id">
-                      <Tag color="primary" >{{sellist.name}}</Tag>
-                      <Icon type="md-close" @click="clearInput(sellist.id)" />
-                    </div>
-                    <Button @click="vocabularyValue = true">Choose templates</Button>
-                </TabPane>
-                <TabPane label="Reference"  name="spatialref">
-                  <div v-for="sellist in selectCardContent" :key="sellist.id">
-                      <Tag color="primary" >{{sellist.name}}</Tag>
-                      <Icon type="md-close" @click="clearInput(sellist.id)" />
-                    </div>
-                    <Button @click="vocabularyValue = true">Choose templates</Button>
-                </TabPane>
-              </Tabs>
-              </Card>
-
-              <!-- modal/drawer -->
-              <Drawer title="Concepts" :closable="false" v-model="vocabularyValue">
-                <!-- <Input search enter-button placeholder="Search" style="width: auto"   @on-search="searchCard"/> -->
-                 <Input placeholder="Enter text" style="width: auto" v-model="inputValue"/> 
-                <Button  @click="searchCard(inputValue)"></Button>
-                
-                <div v-for="list in typeResources" :key="list.oid">
-                  <Card>
-                    <div class="cardContent" @click="selectCard(list.name,list.oid)">
-                      {{list.name}}
-                    </div>
-                  </Card>
-                </div>
-              </Drawer>
-
-              <!-- create concept -->
-              <Modal v-model="modalCreate">
-                <p slot="header" style="text-align:center">
-                  <Icon type="ios-information-circle"></Icon>
-                  <span>Create name and description</span>
-                </p>
-                <Form :label-width="120" label-position="left" :model="createForm">
-                  <FormItem label="Type" prop="type">
-                    <Select v-model="createForm.type" style="width:200px">
-                      <Option v-for="item in modalType" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                    </Select>
-                  </FormItem>
-
-                  <FormItem label="Name" prop="name">
-                    <Input v-model="createForm.name" type="textarea" :autosize="{minRows: 1,maxRows: 3}" clearable />
-                  </FormItem>
-                  <FormItem label="Description" prop="description">
-                    <Input v-model="createForm.description" type="textarea" :autosize="{minRows: 1,maxRows: 3}"
-                      clearable />
-                  </FormItem>
-                </Form>
-                <div slot="footer">
-                  <Button @click="cancelCreate">Cancel</Button>
-                  <Button type="primary" @click="submitCreate">Create</Button>
-                </div>
-              </Modal>
-
-          </Col>
-
-
-        <!-- right -->
-        <Col :lg="{span:18,offset:1}" :md="{span:15,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-          <div class="rightContent">
-
-            <Card >
-              
-              <Tabs :animated="false">
-                <TabPane label="Data Protocol">
-                  <protocol-table :protocolItems="getProtocol('data')"></protocol-table>
-                </TabPane>
-                <TabPane label="Process Protocol">
-                  <protocol-table :protocolItems="getProtocol('process')"></protocol-table>
-                </TabPane>
-                <TabPane label="Output Protocol">
-                  <protocol-table :protocolItems="getProtocol('output')"></protocol-table>
-                </TabPane>
-              </Tabs>
-
-            </Card>
-            <Col :lg="11" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-            <Card v-show="false">
-              <template>
-                instance
-              </template>
-            </Card>
-            </Col>
-            <Col :lg="{span:11,offset:1}" :md="{span:11,offset:1}" :sm="{span:13,offset:1}" :xs="{span:11,offset:1}">
-            <Card v-show="false">
-              <template>
-                task
-              </template>
-            </Card>
-            </Col>
-            <Card style="margin-top:50px;">
-              <Tabs :animated="false">
-                <TabPane label="Instance List">
-                  <div v-if="instanceList.length>0">
-                    <div class="cmpModelBox">
-                      <Row>
-                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
-                        <div @click="createInstance">
-                          <Card style="height:150px;margin:10px -15px">
-                            <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
-                              <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
-                            </div>
-                          </Card>
-                        </div>
-                        </Col>
-
-                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
-                          v-for="instance of instanceList" :key="instance.instanceId">
-                        <Card style="height:150px;margin:10px -15px">
-                          <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
-                            <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
-                          </div>
-                        </Card>
-                      </div>
-                      </Col>
-
-                      <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
-                        v-for="instance of instanceList" :key="instance.instanceId">
-                      <Card style="height:150px;margin:10px -15px">
-                        <div>
-                          <div v-if="instance.type==='observation'" style = "float:right; margin-top:-10px;">
-                            <Icon type="md-eye" color="#20b2aa"/>
-                            <span style="font-size:10px;color:#20b2aa">Observation</span>
-                          </div>
-                          <div v-if="instance.type==='benchmark'" style = "float:right; margin-top:-10px;">
-                            <Icon type="md-speedometer" color="#daa520"/>
-                            <span style="font-size:10px;color:#daa520">Benchmark</span>
-                          </div>
-                          <div v-if="instance.type==='model'" style = "float:right; margin-top:-10px;">
-                            <Icon type="md-planet" color="#d2691e"/>
-                            <span style="font-size:10px;color:#d2691e">Model</span>
-                          </div>
-                          <div class="cmpItemTitle">
-                            <a href="#" @click.prevent="instanceDetail(instance)">{{instance.name}}</a>
-                          </div>
-                          <p class="cmpItemDesc">{{instance.description}}</p>
-                          <div id="bottom-info">
-                            <div class="info">
-                              <Icon type="md-body" :size="15" />
-                              <span style="margin-left:10px; color:#2b85e4">{{instance.userName}}</span>
-                            </div>
-                            <div class="info">
-                              <!-- <div class="info"> -->
-                                <Icon type="md-clock" :size="15" />
-                                <span style="margin-left:10px">{{getCreatedTime(instance.createdTime)}}</span>
-                              <!-- </div> -->
-                              <!-- <div class="info">
-                                <Icon type="md-clock" :size="15" />
-                                <span style="margin-left:10px">{{getCreatedTime(instance.createdTime)}}</span>
-                              </div> -->
-
-                            </div>
-                          </div>
-                        </Card>
-                        </Col>
-                      </Row>
-                    </div>
-                  </div>
-                  <blank-box v-else v-bind="blankInstanceInfo" v-on:linkClicked="createInstance"></blank-box>
-                </TabPane>
-                <TabPane label="Comparison Task">
-                  <div v-if="taskList.length>0">
-                    <div class="cmpModelBox">
-                      <Row>
-                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }">
-                        <div @click="createTask">
-                          <Card style="height:150px;margin:10px -15px">
-                            <div style="display:flex; justify-content: center;  height: 120px; align-items: center;">
-                              <img style="width:70px" src="@/assets/images/comparison/add.png" alt="add instance">
-                            </div>
-                          </Card>
-                        </div>
-                        </Col>
-
-                        <Col :xs="{ span: 21, offset: 1 }" :md="{ span: 11, offset: 1 }" :lg="{ span: 6 }"
-                          v-for="task of taskList" :key="task.recordId">
-                        <Card style="height:150px;margin:10px -15px">
-                          <div>
-                            <div class="cmpItemTitle">
-                              <a href="#" @click.prevent="taskDetail(task)">{{task.name}}</a>
-                            </div>
-                            <p class="cmpItemDesc">{{task.desc}}</p>
-                            <div id="bottom-info">
-                              <div class="info">
-                                <Icon type="md-body" :size="15" />
-                                <span style="margin-left:10px; color:#2b85e4">{{task.userName}}</span>
-                              </div>
-                              <div class="info">
-                                <Icon type="md-clock" :size="15" />
-                                <span style="margin-left:10px">{{getCreatedTime(task.createdTime)}}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                        </Col>
-                      </Row>
-                    </div>
-                  </div>
-                  <blank-box v-else v-bind="blankTaskInfo" v-on:linkClicked="createTask"></blank-box>
-                </TabPane>
-              </Tabs>
-
-            </Card>
-
-          </div>
-        </Col>
-      </Row>
-      </Col>
-    </Row>
-
-  </div>
 </template>
 <script>
 import Avatar from "vue-avatar";
@@ -508,7 +242,7 @@ export default {
         welcomeInfo:
           "Comprehensive comparison of simulation capabilities from multiple perspectives improving our knowledge and understanding of models. To get started, you should",
         linkInfo: "create an comparison task."
-      },       
+      },
       blankTaskInfo: {
         welcomeTitle: "Welcome to Comparison!",
         welcomeInfo:
@@ -521,43 +255,46 @@ export default {
           "Comprehensive comparison of simulation capabilities from multiple perspectives improving our knowledge and understanding of models. To get started, you should",
         linkInfo: "create an comparison instance."
       },
-       currentStep: 0,
-       vocabularyValue :false,
-       resourceType:"concept",
-       typeResources:[],
-       selectCardContent:[],
-       searchCardContent:[],
-       showTag:true,
-       modalCreate:false,
-       createForm:{
+      currentStep: 0,
+      vocabularyValue: false,
+      resourceType: "concept",
+      typeResources: [],
+      selectCardContent: [],
+      searchCardContent: [],
+      showTag: true,
+      modalCreate: false,
+      createForm: {
         name: "",
         description: "",
-        type:""
+        type: ""
       },
-      modalType:[
+      modalType: [
         {
-          value:"concept",
-          label:"Vocabulary"
-        },{
-          value:"template",
-          label:"Data template"
-        },{
-          value:"unit",
-          label:"Unit"
-        },{
-          value:"spatialref",
-          label:"Spatio-temporal reference"
+          value: "concept",
+          label: "Vocabulary"
         },
-        ],
-        modelType1:"concept",
-        inputValue:""
+        {
+          value: "template",
+          label: "Data template"
+        },
+        {
+          value: "unit",
+          label: "Unit"
+        },
+        {
+          value: "spatialref",
+          label: "Spatio-temporal reference"
+        }
+      ],
+      modelType1: "concept",
+      inputValue: ""
     };
   },
 
   created() {
     this.initSize();
   },
-  mounted(){
+  mounted() {
     this.getAllConcept("concept");
     this.getProjectInfo();
     // this.selectCardContent=[];
@@ -568,69 +305,69 @@ export default {
     initSize() {
       this.sidebarHeight = window.innerHeight - 290;
     },
-    
+
     // 获得后台所有的vocabulary
     getAllConcept(type) {
-      this.selectCardContent=[];
+      this.selectCardContent = [];
       this.resourceType = type;
       this.axios
         .get("/GeoProblemSolving/common/findAllItem?type=" + this.resourceType)
-        .then(res => {        
-            this.typeResources = res.data.data;//异步
+        .then(res => {
+          this.typeResources = res.data.data; //异步
         });
     },
 
-    selectCard(selected,oid){
-      let list = {"name":selected,"id":oid};
+    selectCard(selected, oid) {
+      let list = { name: selected, id: oid };
       // 检查重复的tag
-      if(this.selectCardContent.length == 0){
+      if (this.selectCardContent.length == 0) {
         this.selectCardContent.push(list);
-      }else{
-        for(let i= 0; i < this.selectCardContent.length ; i++ ){
-          if(this.selectCardContent[i].id == oid)
-          {
+      } else {
+        for (let i = 0; i < this.selectCardContent.length; i++) {
+          if (this.selectCardContent[i].id == oid) {
             this.$Notice.info({
-                desc: "The tag has been exist!"
+              desc: "The tag has been exist!"
             });
             break;
-          }else if(i == this.selectCardContent.length-1 ){
+          } else if (i == this.selectCardContent.length - 1) {
             this.selectCardContent.push(list);
             break;
-          } 
-        }  
-      }   
-      console.log( this.selectCardContent);
+          }
+        }
+      }
+      console.log(this.selectCardContent);
     },
 
     // 模糊搜索card
-    searchCard(value){
+    searchCard(value) {
       console.log(value);
-       this.axios
-        .get("/GeoProblemSolving/common/findByX?type=" + this.resourceType+
-          "&key=name" +
+      this.axios
+        .get(
+          "/GeoProblemSolving/common/findByX?type=" +
+            this.resourceType +
+            "&key=name" +
             "&value=" +
             value
         )
-        .then(res => {  
-            console.log(res.data);
-            this.searchCardContent = res.data.data;//异步
-      });
+        .then(res => {
+          console.log(res.data);
+          this.searchCardContent = res.data.data; //异步
+        });
     },
 
     // 清除选择的内容
-    clearInput(id){
-      console.log(id)
+    clearInput(id) {
+      console.log(id);
       // this.selectCardContent = "";
-      for(let i= 0; i<this.selectCardContent.length ; i++ ){
-        if(this.selectCardContent[i].id == id)
-        {
-          this.selectCardContent.splice(i,1);
+      for (let i = 0; i < this.selectCardContent.length; i++) {
+        if (this.selectCardContent[i].id == id) {
+          this.selectCardContent.splice(i, 1);
         }
       }
     },
 
     // modal
-    submitCreate(){
+    submitCreate() {
       let obj = {};
       let objData = {};
       obj.type = this.createForm.type;
@@ -643,7 +380,7 @@ export default {
       // obj.append("data.description", this.createForm.description);
       // obj.append("type", this.createForm.type);
 
-       this.axios
+      this.axios
         .post("/GeoProblemSolving/common/createItem", obj)
         .then(res => {
           console.log(res);
@@ -662,7 +399,7 @@ export default {
         });
       this.modalCreate = false;
     },
-    
+
     getProjectInfo() {
       this.$api.cmp_project
         .getProjectAllInfo(this.projectId)
@@ -731,9 +468,9 @@ export default {
         return time ? time.split(" ")[0] : "";
       };
     },
-     handleClose() {
-       this.showTag = false;
-     }
+    handleClose() {
+      this.showTag = false;
+    }
   }
 };
 </script>

@@ -113,4 +113,32 @@ public class CmpProjectController {
         }
         return ResultUtils.success(jsonObject);
     }
+
+    @RequestMapping(value = "/updateList",method = RequestMethod.POST)
+    public JsonResult updateList(@RequestBody JSONObject requestJson){
+        String projectId = requestJson.getString("projectId");
+        String type = requestJson.getString("type");
+        String id = requestJson.getString("id");
+        Boolean isAdd = requestJson.getBoolean("isAdd");
+        String listName = "";
+        if ("concept".equals(type)) {
+            listName = "conceptList";
+        } else if ("template".equals(type)) {
+            listName = "templateList";
+        } else if ("unit".equals(type)) {
+            listName = "unitList";
+        } else if ("spatialref".equals(type)) {
+            listName = "spatialRefList";
+        } else {
+            return ResultUtils.error(ResultEnum.NO_OBJECT);
+        }
+        cmpProjectDao.updateList(projectId, listName, id, isAdd);
+        return ResultUtils.success();
+    }
+
+    @RequestMapping(value = "/updateProject",method = RequestMethod.POST)
+    public JsonResult updateProject(@RequestBody CmpProject project){
+        CmpProject cmpProject = cmpProjectDao.updateProject(project);
+        return ResultUtils.success(cmpProject);
+    }
 }

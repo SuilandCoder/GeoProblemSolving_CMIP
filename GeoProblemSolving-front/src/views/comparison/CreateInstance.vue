@@ -5,7 +5,7 @@
       <FormItem prop="name" label="Name" :label-width="150">
         <Input v-model="instanceInfo.name" style="width: 300px" placeholder="Enter instance name" />
       </FormItem>
-      <FormItem prop="description" label="Description" :label-width="150">
+      <FormItem prop="description" label="Abstraction" :label-width="150">
         <div>
           <Input type="textarea" v-model="instanceInfo.description" placeholder="Enter description about this instance"
             style="width: 500px" />
@@ -23,13 +23,13 @@
 
     <div v-if="instanceInfo.type === 'model'">
       <Form ref="modelInfo" :rules="modelRules" :model="modelInfo">
-        <FormItem prop="modelName" label="Name" :label-width="150">
-          <Input v-model="modelInfo.modelName" placeholder="Enter Model Name ..." />
+        <FormItem prop="modelName" label="Model Name" :label-width="150">
+          <Input v-model="modelInfo.modelName" style="width: 300px" placeholder="Enter Model Name ..." />
         </FormItem>
 
-        <FormItem prop="description" label="Description" :label-width="150">
+        <FormItem prop="description" label="Model Description" :label-width="150">
           <div>
-            <Input type="textarea" v-model="modelInfo.description"
+            <Input type="textarea" v-model="modelInfo.description" style="width: 500px"
               placeholder="Enter detailed introduction about this model" />
           </div>
         </FormItem>
@@ -37,7 +37,7 @@
         <FormItem label="Model" :label-width="150">
           <Upload :max-size="1024*1024" :before-upload="beforeUpload" :data="deployRequestInfo"
             accept="application/zip,application/x-zip,application/x-zip-compressed"
-            action="/GeoProblemSolving/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
+            action="/GeoProblemSolving_Backend/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
             :on-success="uploadSuccess" :on-error="uploadError">
             <Button icon="ios-cloud-upload-outline">Upload Model</Button>
           </Upload>
@@ -60,6 +60,13 @@
       </Table>
     </div>
 
+    <div>
+      <div style="height:30px; display: flex; justify-content: space-between; margin-left:100px;margin-top:20px;">
+        <h3 style="display:inline">Description:</h3>
+      </div>
+      <mavon-editor  v-model="instanceInfo.descMarkDown" style="margin-left:150px;z-index:1;"/>
+    </div>
+
     <Button style="margin-top: 50px;  margin-bottom: 20px; margin-left: 150px;" type="primary" :loading="loading"
       @click="creataInstance">Create</Button>
 
@@ -80,22 +87,22 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
-        success: function(data) {
+        success: function (data) {
           if (!data) {
             vm.$store.commit("userLogout");
             vm.$router.push({ name: "Login" });
           }
         },
-        error: function(err) {
+        error: function (err) {
           console.log("Get user state fail.");
         }
       });
     });
   },
-  created: function() {
+  created: function () {
     this.baseUrl = base.cmpSolution;
     //获取 project 指定的输出数据信息
     this.instanceInfo.projectId = this.$route.params.id;
@@ -110,7 +117,8 @@ export default {
         userName: this.$store.getters.userName,
         userId: this.$store.getters.userId,
         projectId: "",
-        modelId: ""
+        modelId: "",
+        descMarkDown:""
       },
       dataList: [],
       dataColumn: [
@@ -164,9 +172,9 @@ export default {
         description: [
           {
             required: true,
-            message: "Cannot be empty and no more than 300 characters",
+            message: "Cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 300
+            max: 800
           }
         ]
       },
@@ -194,9 +202,9 @@ export default {
           {
             required: true,
             message:
-              "The description cannot be empty and no more than 600 characters",
+              "The description cannot be empty and no more than 800 characters",
             trigger: "blur",
-            max: 600
+            max: 800
           }
         ]
       },
@@ -228,6 +236,7 @@ export default {
       this.uploadmodal = false;
     },
     creataInstance() {
+      console.log("descMarkdown:",this.instanceInfo.descMarkdown);
       this.$refs["instanceInfo"].validate(valid => {
         if (valid) {
           this.instanceInfo.cmpDataList = this.dataList.map(data => {

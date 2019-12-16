@@ -7,6 +7,9 @@ const cmp_data={
   },
   getDataResourceByIdList(idList){
     return axios.post(`${base.cmpData}/getDataResourceByIdList`,idList);
+  },
+  getImgFromDataContainer(imgUrl){
+    return axios.get(`${base.cmpData}/getImgFromDataContainer?imgUrl=${imgUrl}`)
   }
 }
 

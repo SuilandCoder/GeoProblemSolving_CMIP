@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.entity;
 
+import cn.edu.njnu.geoproblemsolving.Entity.Metrics;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,5 @@ public class ModelEvent {
     public String mcDataId;//模型容器 数据ID
     public String dataResourceId;//比较平台 数据ID
     public String md5;
+    public Metrics metrics;
 }

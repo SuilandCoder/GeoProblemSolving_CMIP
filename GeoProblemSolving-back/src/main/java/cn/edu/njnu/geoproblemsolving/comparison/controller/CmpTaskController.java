@@ -17,10 +17,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -90,11 +95,29 @@ public class CmpTaskController {
         return ResultUtils.success(dpm);
     }
 
+
+
     // 创建对比任务
     @RequestMapping(value = "/createTask", method = RequestMethod.POST)
-    public JsonResult createTask(@RequestBody JSONObject tasksInfo) {
-        System.out.println(tasksInfo);
+    public JsonResult createTask(HttpServletRequest request) {
         try {
+            ServletInputStream inputStream = request.getInputStream();
+//            inputStream.
+            String taskInfoStr = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            taskInfoStr = buffer.toString();
+
+//            String taskInfoStr = request.getParameter("taskInfo");
+//            String ip = request.getParameter("ip");
+
+            JSONObject tasksInfo = JSONObject.parseObject(taskInfoStr);
+            System.out.println(tasksInfo);
+
             String projectId = tasksInfo.getString("projectId");
             JSONArray computableModels = tasksInfo.getJSONArray("computableModels");
             JSONArray targetInstanceList = tasksInfo.getJSONArray("targetInstanceList");
@@ -103,13 +126,14 @@ public class CmpTaskController {
             List<CmpMetirc> cmpMetircs = checkedMetrics.toJavaList(CmpMetirc.class);
             List<CmpInstance> cmpInstanceList = targetInstanceList.toJavaList(CmpInstance.class);
             //创建比较任务记录
-            CmpTaskRecord cmpTaskRecord = new CmpTaskRecord(UUID.randomUUID().toString(), tasksInfo.getString("userId"), tasksInfo.getString("userName"), tasksInfo.getString("name"), tasksInfo.getString("description"), cmpInstanceList, cmpMetircs);
+            CmpTaskRecord cmpTaskRecord = new CmpTaskRecord(UUID.randomUUID().toString(),projectId, tasksInfo.getString("userId"), tasksInfo.getString("userName"), tasksInfo.getString("name"), tasksInfo.getString("description"), cmpInstanceList, cmpMetircs);
             List<CmpTaskModel> cmpTaskModelList = new ArrayList<>();
             for (int i = 0; i < computableModels.size(); i++) {
                 JSONObject computableModel = computableModels.getJSONObject(i);
 
                 String metricId = computableModel.getString("metricId");
                 String metricName = computableModel.getString("metricName");
+
                 JSONArray cmpMethodList = computableModel.getJSONArray("cmpMethodList");
                 JSONArray dataProcessMethodList = computableModel.getJSONArray("dataProcessMethodList");
 
@@ -178,5 +202,16 @@ public class CmpTaskController {
     public JsonResult getCmpMethodRecordList(@RequestBody List<String> recordList){
         List<CmpMethodRecord> cmpMethodRecordList = cmpMethodRecordDao.findByRecordIdList(recordList);
         return ResultUtils.success(cmpMethodRecordList);
+    }
+
+
+    @RequestMapping(value="/updateCmpMethodRecord",method = RequestMethod.POST)
+    public JsonResult updateCmpMethodRecord(@RequestBody JSONArray recordsJSONArr){
+        List<CmpMethodRecord> cmrList = recordsJSONArr.toJavaList(CmpMethodRecord.class);
+        for(CmpMethodRecord cmr:cmrList){
+            cmpMethodRecordDao.updateRecord(cmr);
+        }
+//        System.out.println(recordsJSONArr);
+        return ResultUtils.success();
     }
 }

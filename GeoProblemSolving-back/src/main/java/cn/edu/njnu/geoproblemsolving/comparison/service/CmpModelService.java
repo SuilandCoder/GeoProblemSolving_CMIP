@@ -403,32 +403,33 @@ public class CmpModelService {
             if (status == 1) {
                 //将输出数据上传至数据容器
                 String res = CmpDataService.uploadOutputToDc(ip, port, recordId);
-                JSONArray outputJSONArr = JSONArray.parseArray(res);
-                for(Object obj:outputJSONArr){
-                    JSONObject outputJson = (JSONObject) obj;
-                    String stateName = outputJson.getString("StateName");
-                    String eventName = outputJson.getString("Event");
-                    String url = outputJson.getString("Url");
-                    String sourceStoreId = "";
-                    if(url.contains("&sourceStoreId=")){
-                        sourceStoreId = url.substring(url.indexOf("&sourceStoreId=")+15,url.lastIndexOf("&"));
-                    }
-                    String suffix = "";
-                    if(url.contains("&suffix=")){
-                        suffix = url.substring(url.indexOf("&suffix=")+8);
-                    }
-                    for (ModelState state : modelStates) {
-                        List<ModelEvent> events = state.getEvents();
-                        for(ModelEvent event:events){
-                            if(state.getStateName().equals(stateName)&&event.getName().equals(eventName)){
-                                event.setUrl(url);
-                                event.setDcSourceStoreId(sourceStoreId);
-                                event.setFileName(event.getName()+"."+suffix);
-                                break;
+                if (res != null) {
+                    JSONArray outputJSONArr = JSONArray.parseArray(res);
+                    for(Object obj:outputJSONArr){
+                        JSONObject outputJson = (JSONObject) obj;
+                        String stateName = outputJson.getString("StateName");
+                        String eventName = outputJson.getString("Event");
+                        JSONObject urlJson = outputJson.getJSONObject("Url");
+                        String url = urlJson.getString("url");
+                        String suffix = urlJson.getString("suffix");
+                        String sourceStoreId = "";
+                        if(url.contains("?sourceStoreId=")){
+                            sourceStoreId = url.substring(url.indexOf("?sourceStoreId=")+15);
+                        }
+                        for (ModelState state : modelStates) {
+                            List<ModelEvent> events = state.getEvents();
+                            for(ModelEvent event:events){
+                                if(state.getStateName().equals(stateName)&&event.getName().equals(eventName)){
+                                    event.setUrl(url);
+                                    event.setDcSourceStoreId(sourceStoreId);
+                                    event.setFileName(event.getName()+"."+suffix);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+
             }
         }else{
             modelRecord.setStatus(0);

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.UUID;
  * @Date: Created in 16:43 2019/7/19
  * @Modified By:
  **/
+@Service
 public class DataResourceDaoImpl implements IDataResourceDao {
 
     private final MongoTemplate mongoTemplate;

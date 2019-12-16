@@ -43,7 +43,7 @@
         </Input>
       </FormItem>
       <FormItem prop="dcSourceStoreId" label="File" :label-width="150">
-        <Upload action="/GeoProblemSolving/cmp_model/uploadData_DC" :before-upload="beforeUpload" :data="uploadDataInfo"
+        <Upload action="/GeoProblemSolving_Backend/cmp_model/uploadData_DC" :before-upload="beforeUpload" :data="uploadDataInfo"
           :on-success="uploadSuccess" :on-error="uploadError" :on-remove="removeData" ref="upload">
           <Button icon="ios-cloud-upload-outline">Upload files</Button>
         </Upload>
@@ -53,7 +53,8 @@
       create
     </Button>
     <Modal v-model="modal13" draggable scrollable title="Create Metric">
-      <create-metrics-form></create-metrics-form>
+      <create-metrics-form  v-on:createMetricSuccess="onCreateSuccess"></create-metrics-form>
+      <span slot="footer"></span>
     </Modal>
 
     <Modal v-model="modal12" draggable scrollable title="Search Metric">
@@ -233,6 +234,11 @@ export default {
             });
         }
       });
+    },
+    onCreateSuccess(data){
+      this.modal13 = false;
+      this.metrics.push(data);
+      console.log("metric创建成功:",data);
     },
     search() {
       this.findMetric();

@@ -16,7 +16,11 @@ const cmp_task = {
     return axios.get(`${base.cmpTask}/getDataProcessMethodById?methodId=${methodId}`);
   },
   createTask(taskJsonInfo){
-    return axios.post(`${base.cmpTask}/createTask`, taskJsonInfo);
+    return axios.post(`${base.cmpTask}/createTask`,taskJsonInfo,{
+      headers:{
+        "Content-Type":'text/plain'
+      }
+    } );
   },
   getCmpTasks(projectId){
     return axios.get(`${base.cmpTask}/getCmpTasks?projectId=${projectId}`);
@@ -27,8 +31,11 @@ const cmp_task = {
   getCmpMethodRecord(recordId){
     return axios.get(`${base.cmpTask}/getCmpMethodRecord?recordId=${recordId}`);
   },
-  getCmpMethodRecordList(recordList){
-    return axios.post(`${base.cmpTask}/getCmpMethodRecordList`, recordList);
+  getCmpMethodRecordList(recordIdList){
+    return axios.post(`${base.cmpTask}/getCmpMethodRecordList`, recordIdList);
+  },
+  updateCmpMethodRecord(recordList){
+    return axios.post(`${base.cmpTask}/updateCmpMethodRecord`, recordList);
   }
 
 }

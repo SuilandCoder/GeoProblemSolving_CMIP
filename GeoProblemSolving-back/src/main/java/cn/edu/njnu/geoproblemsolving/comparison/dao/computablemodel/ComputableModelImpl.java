@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * @Date: Created in 19:59 2019/7/31
  * @Modified By:
  **/
+@Service
 public class ComputableModelImpl implements IComputableModelDao {
 
     private final MongoTemplate mongoTemplate;

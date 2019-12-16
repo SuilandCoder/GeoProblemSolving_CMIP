@@ -1,28 +1,14 @@
 package cn.edu.njnu.geoproblemsolving.comparison.controller;
 
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
-import cn.edu.njnu.geoproblemsolving.comparison.dao.computablemodel.ComputableModelImpl;
-import cn.edu.njnu.geoproblemsolving.comparison.dao.project.CmpProjectDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.solution.SolutionImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpSolution;
-import cn.edu.njnu.geoproblemsolving.comparison.entity.ComputableModel;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ResultEnum;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
-import jdk.internal.util.xml.impl.Input;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @Author: SongJie

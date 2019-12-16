@@ -2,12 +2,16 @@ package cn.edu.njnu.geoproblemsolving.comparison.dao.modelresource;
 
 import cn.edu.njnu.geoproblemsolving.Entity.UserEntity;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.project.CmpProjectDaoImpl;
+import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.DataResource;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.ModelResource;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +25,7 @@ import java.util.UUID;
  * @Date: Created in 20:03 2019/7/19
  * @Modified By:
  **/
+@Service
 public class ModelResourceDaoImpl implements IModelResourceDao {
 
     private final MongoTemplate mongoTemplate;
@@ -80,5 +85,15 @@ public class ModelResourceDaoImpl implements IModelResourceDao {
         }else{
             return null;
         }
+    }
+
+    @Override
+    public ModelResource updateModel(ModelResource rm) {
+        Query query = Query.query(Criteria.where("oid").is(rm.getOid()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(rm, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, ModelResource.class);
+        return rm;
     }
 }

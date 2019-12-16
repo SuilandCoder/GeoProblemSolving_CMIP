@@ -16,6 +16,12 @@ const cmp_project = {
   },
   getProjectAllInfo(projectId){
     return axios.get(`${base.cmpProjcet}/getProjectAllInfo?projectId=${projectId}`)
+  },
+  updateList(requestJson){
+    return axios.post(`${base.cmpProjcet}/updateList`,requestJson);
+  },
+  updateProject(project){
+    return axios.post(`${base.cmpProjcet}/updateProject`,project);
   }
 }
 

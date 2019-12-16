@@ -24,7 +24,7 @@
             <Input style="width: 500px" v-model="event.fileName"  placeholder="Please upload or choose input date…" :ref="event.name">
 
             <Upload :max-size="1024*1024" :before-upload="beforeUpload" slot="append" :state="state.stateName"
-              :event="event.name" action="/GeoProblemSolving/cmp_model/uploadData" style="display:inline-block;"
+              :event="event.name" action="/GeoProblemSolving_Backend/cmp_model/uploadData" style="display:inline-block;"
               :show-upload-list="false" :data="dataServerNode" :on-success="uploadSuccess" :on-error="uploadError">
               <Button>
                 <Icon type="md-cloud-upload" size="18" />
@@ -52,7 +52,7 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
         success: function(data) {

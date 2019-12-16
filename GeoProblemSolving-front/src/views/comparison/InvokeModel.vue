@@ -55,7 +55,7 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
         success: function(data) {

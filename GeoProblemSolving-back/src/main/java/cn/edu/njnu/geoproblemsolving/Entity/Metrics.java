@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Document
 public class Metrics {
+    @Id
     String oid;
     String wkName;
     String name;
@@ -26,9 +28,9 @@ public class Metrics {
     String description;
     String min;
     String max;
-    Unit unit;
-    SpatialReference srf;
-    Template template;
+    String unit;
+    String srf;
+    String template;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     Date updateTime;
 }

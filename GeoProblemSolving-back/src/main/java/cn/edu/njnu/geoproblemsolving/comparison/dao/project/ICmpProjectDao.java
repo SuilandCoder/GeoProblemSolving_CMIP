@@ -15,7 +15,7 @@ public interface ICmpProjectDao {
 
     String deleteProject(CmpProject project);
 
-    String updateProject(CmpProject project);
+    CmpProject updateProject(CmpProject project);
 
     CmpProject updateCmpItems(String projectId,String cmpItemId);
 
@@ -28,6 +28,8 @@ public interface ICmpProjectDao {
     CmpProject updateTaskList(String projectId,String taskId,boolean isAdd);
 
     void updateModelList(String projectId,String modelId,boolean isAdd);
+
+    void updateList(String projectId,String listName,String id,boolean isAdd);
 
     List<CmpProject> getAllProject();
 

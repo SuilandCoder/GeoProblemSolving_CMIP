@@ -74,7 +74,7 @@ public class SpatialRefImpl implements ISpatialRefDao {
 
     @Override
     public List<SpatialReference> getSpatialReferences(String key, String value) {
-        Query query = Query.query(Criteria.where(key).regex(".*?\\"+value+".*"));
+        Query query = Query.query(Criteria.where(key).regex(value));
         List<SpatialReference> spatialReferences = mongoTemplate.find(query, SpatialReference.class);
         return spatialReferences;
     }

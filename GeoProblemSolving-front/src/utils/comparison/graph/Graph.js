@@ -21,8 +21,11 @@ const {
   mxImageExport,
   mxXmlCanvas2D,
   mxCodecRegistry,
-  mxRubberband
+  mxRubberband,
+  mxStencilRegistry
 } = mxgraph;
+
+
 
 Object.assign(mxEvent, {
   EDGE_START_MOVE: 'edgeStartMove',
@@ -31,14 +34,57 @@ Object.assign(mxEvent, {
 
 let pokeElementIdSeed = 0;
 
-// export class PokeElement {
-//   constructor(element) {
-//     this.id = pokeElementIdSeed;
-//     pokeElementIdSeed++;
-//     this.element = element;
-//     this.normalType = '';
-//   }
-// }
+function parseStencilSet(root, postStencilLoad, install) {
+  if (root.nodeName == 'stencils') {
+    var shapes = root.firstChild;
+
+    while (shapes != null) {
+      if (shapes.nodeName == 'shapes') {
+        mxStencilRegistry.parseStencilSet(shapes, postStencilLoad, install);
+      }
+
+      shapes = shapes.nextSibling;
+    }
+  }
+  else {
+    install = (install != null) ? install : true;
+    var shape = root.firstChild;
+    var packageName = '';
+    var name = root.getAttribute('name');
+
+    if (name != null) {
+      packageName = name + '.';
+    }
+
+    while (shape != null) {
+      if (shape.nodeType == mxConstants.NODETYPE_ELEMENT) {
+        name = shape.getAttribute('name');
+
+        if (name != null) {
+          packageName = packageName.toLowerCase();
+          var stencilName = name.replace(/ /g, "_");
+
+          if (install) {
+            mxStencilRegistry.addStencil(packageName + stencilName.toLowerCase(), new mxStencil(shape));
+          }
+
+          if (postStencilLoad != null) {
+            var w = shape.getAttribute('w');
+            var h = shape.getAttribute('h');
+
+            w = (w == null) ? 80 : parseInt(w, 10);
+            h = (h == null) ? 80 : parseInt(h, 10);
+
+            postStencilLoad(packageName, stencilName, name, w, h);
+          }
+        }
+      }
+      shape = shape.nextSibling;
+    }
+  }
+};
+
+
 
 export class Graph extends mxGraph {
   static getStyleDict(cell) {
@@ -140,42 +186,23 @@ export class Graph extends mxGraph {
   }
 
   _putVertexStyle() {
-    const normalTypeStyle = {
-      [mxConstants.STYLE_SHAPE]: mxConstants.SHAPE_IMAGE,
-      [mxConstants.STYLE_PERIMETER]: mxPerimeter.RectanglePerimeter,
-    };
-    this.getStylesheet().putCellStyle('normalType', normalTypeStyle);
 
-    const nodeStyle = {
-      // 图片样式参考这个例子
-      // https://github.com/jinzhanye/mxgraph-demos/blob/master/src/06.image.html
-      [mxConstants.STYLE_SHAPE]: mxConstants.SHAPE_LABEL,
-      [mxConstants.STYLE_PERIMETER]: mxPerimeter.RectanglePerimeter,
-      [mxConstants.STYLE_ROUNDED]: true,
-      [mxConstants.STYLE_ARCSIZE]: 6, // 设置圆角程度
+    var style = this.getStylesheet().getDefaultVertexStyle();
+    style = mxUtils.clone(style);
+    style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+    style[mxConstants.STYLE_IMAGE] = '/GeoProblemSolving/static/Images/parall.svg';
+    style[mxConstants.DEFAULT_IMAGESIZE] = 100;
+    style[mxConstants.STYLE_IMAGE_WIDTH] = 500;
+    style[mxConstants.STYLE_IMAGE_HEIGHT] = 500;
+    style[mxConstants.STYLE_VERTICAL_ALIGN] = 'middle';
+    this.getStylesheet().putCellStyle('img', style);
 
-      [mxConstants.STYLE_STROKECOLOR]: '#333333',
-      [mxConstants.STYLE_FONTCOLOR]: '#333333',
-      [mxConstants.STYLE_FILLCOLOR]: '#ffffff',
-      //
-      [mxConstants.STYLE_LABEL_BACKGROUNDCOLOR]: 'none',
-
-      [mxConstants.STYLE_ALIGN]: mxConstants.ALIGN_CENTER,
-      [mxConstants.STYLE_VERTICAL_ALIGN]: mxConstants.ALIGN_TOP,
-      [mxConstants.STYLE_IMAGE_ALIGN]: mxConstants.ALIGN_CENTER,
-      [mxConstants.STYLE_IMAGE_VERTICAL_ALIGN]: mxConstants.ALIGN_TOP,
-
-      [mxConstants.STYLE_IMAGE_WIDTH]: '72',
-      [mxConstants.STYLE_IMAGE_HEIGHT]: '72',
-      [mxConstants.STYLE_SPACING_TOP]: '100',
-      [mxConstants.STYLE_SPACING]: '8',
-    };
-    this.getStylesheet().putCellStyle('node', nodeStyle);
 
     var style = this.getStylesheet().getDefaultVertexStyle();
     style = mxUtils.clone(style);
     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;
     style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
+    style[mxConstants.STYLE_FONTSIZE] = '14';
     delete style[mxConstants.STYLE_ROUNDED];
     this.getStylesheet().putCellStyle('ellipse', style);
 
@@ -183,27 +210,33 @@ export class Graph extends mxGraph {
     var style = this.getStylesheet().getDefaultVertexStyle();
     style = mxUtils.clone(style);
     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-    style[mxConstants.STYLE_FONTSIZE] = 10;
+    // style[mxConstants.STYLE_FONTSIZE] = 10;
     style[mxConstants.STYLE_ROUNDED] = true;
     style[mxConstants.STYLE_HORIZONTAL] = true;
     style[mxConstants.STYLE_VERTICAL_ALIGN] = 'middle';
-    delete style[mxConstants.STYLE_STARTSIZE];
-    style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'none';
+    style[mxConstants.STYLE_FONTSIZE] = '18';
+    // delete style[mxConstants.STYLE_STARTSIZE];
+    // style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'none';
     this.getStylesheet().putCellStyle('rounded', style);
+
 
     var style = this.getStylesheet().getDefaultVertexStyle();
     style = mxUtils.clone(style);
     style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RHOMBUS;
     style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RhombusPerimeter;
-    // style[mxConstants.STYLE_VERTICAL_ALIGN] = 'top';
-    // style[mxConstants.STYLE_SPACING_TOP] = 40;
-    // style[mxConstants.STYLE_SPACING_RIGHT] = 64;
     style[mxConstants.STYLE_HORIZONTAL] = true;
-    // style[mxConstants.STYLE_VERTICAL_ALIGN] = 'middle';
+    style[mxConstants.STYLE_FONTSIZE] = '18';
     delete style[mxConstants.STYLE_STARTSIZE];
-    // style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'none';
     this.getStylesheet().putCellStyle('rhombus', style);
 
+
+
+    var style = this.getStylesheet().getDefaultVertexStyle();
+    style = mxUtils.clone(style);
+    style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+    style[mxConstants.STYLE_FONTSIZE] = '18';
+    delete style[mxConstants.STYLE_STARTSIZE];
+    this.getStylesheet().putCellStyle('shape', style);
 
     // 设置选中状态节点的边角为圆角，默认是直角
     const oldCreateSelectionShape = mxVertexHandler.prototype.createSelectionShape;

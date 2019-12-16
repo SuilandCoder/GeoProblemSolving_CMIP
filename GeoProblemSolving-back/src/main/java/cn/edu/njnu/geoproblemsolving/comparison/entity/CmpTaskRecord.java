@@ -26,6 +26,7 @@ import java.util.List;
 @Document
 public class CmpTaskRecord {
     String recordId;
+    String projectId;
     String name;
     String desc;
     String userId;
@@ -38,6 +39,17 @@ public class CmpTaskRecord {
 
     public CmpTaskRecord(String recordId, String userId, String userName,String name, String description, List<CmpInstance> cmpInstanceList, List<CmpMetirc> cmpMetircs) {
         this.recordId = recordId;
+        this.userId = userId;
+        this.userName = userName;
+        this.name = name;
+        this.desc = description;
+        this.instanceList = cmpInstanceList;
+        this.metrics = cmpMetircs;
+    }
+
+    public CmpTaskRecord(String recordId,String projectId, String userId, String userName,String name, String description, List<CmpInstance> cmpInstanceList, List<CmpMetirc> cmpMetircs) {
+        this.recordId = recordId;
+        this.projectId = projectId;
         this.userId = userId;
         this.userName = userName;
         this.name = name;

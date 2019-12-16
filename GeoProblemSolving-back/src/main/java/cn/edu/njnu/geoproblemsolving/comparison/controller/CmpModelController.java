@@ -13,14 +13,19 @@ import cn.edu.njnu.geoproblemsolving.comparison.service.CmpModelService;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.ResultUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,6 +47,11 @@ public class CmpModelController {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    ModelResourceDaoImpl modelResourceDao;
+
+    @Autowired
+    ComputableModelImpl computableModel;
 
     @RequestMapping(value = "/getModelInfo", method = RequestMethod.GET)
     public JsonResult getModelInfo(@RequestParam("modelId") String modelId) {
@@ -175,6 +185,25 @@ public class CmpModelController {
         return ResultUtils.success(cm);
     }
 
+    @RequestMapping(value = "/getComputableModelById", method = RequestMethod.GET)
+    public JsonResult getComputableModelById(@RequestParam("oid")String oid){
+        ComputableModel cm = computableModel.findItemByOid(oid);
+        ModelServiceNode serviceNode = cm.getServiceNode();
+        //如果模型服务节点地址为空，表示未部署成功
+        if (serviceNode == null) {
+            return ResultUtils.error(ResultEnum.NO_COMPUTABLE_MODEL);
+        }
+        //获取 state 信息
+        try {
+            List<ModelState> modelState = CmpModelService.getModelState(cm, mongoTemplate);
+            cm.setStates(modelState);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultUtils.error(ResultEnum.FAILED_TO_GET_INFO);
+        }
+        return ResultUtils.success(cm);
+    }
+
     @RequestMapping(value = "getRecordList",method = RequestMethod.GET)
     public JsonResult getRecordList(@RequestParam("recordList") List<String> recordList){
         ModelRecordDaoImpl modelRecordDao = new ModelRecordDaoImpl(mongoTemplate);
@@ -272,17 +301,30 @@ public class CmpModelController {
     // 输入参数为 模型容器 ip 和 端口
     @RequestMapping(value = "/invokeModel_MC", method = RequestMethod.POST)
     public JsonResult invokeModel_MC(HttpServletRequest request){
-        String ip = request.getParameter("ip");
-        String port = request.getParameter("port");
-        String msid = request.getParameter("msid");
-        String inputs = request.getParameter("inputs");
-        String userId = request.getParameter("userId");
-        String username = request.getParameter("username");
-        String modelId = request.getParameter("modelId");
-        String modelName = request.getParameter("modelName");
-        String computableModelId = request.getParameter("computableModelId");
-        String instanceId = request.getParameter("instanceId");
         try {
+            ServletInputStream inputStream = request.getInputStream();
+            String jsonData = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            jsonData = buffer.toString();
+            JSONObject requstJSON = JSONObject.parseObject(jsonData);
+
+            String ip = requstJSON.getString("ip");
+            String port = requstJSON.getString("port");
+            String msid = requstJSON.getString("msid");
+            String inputs = requstJSON.getString("inputs");
+            String userId = requstJSON.getString("userId");
+            String username = requstJSON.getString("username");
+            String modelId = requstJSON.getString("modelId");
+            String modelName = requstJSON.getString("modelName");
+            String computableModelId = requstJSON.getString("computableModelId");
+            String instanceId = requstJSON.getString("instanceId");
+
+
             //调用模型
 //            String recordId = CmpModelService.invokeModel_MC(ip, port, msid, inputs);
             String recordId = CmpModelService.invokeModel_MC(ip, port, msid, inputs);
@@ -383,6 +425,13 @@ public class CmpModelController {
             e.printStackTrace();
             return ResultUtils.error(ResultEnum.FAILED_TO_UPLOAD_DATA);
         }
+    }
+
+
+    @RequestMapping(value="/updateModelResource",method = RequestMethod.POST)
+    public JsonResult updateModelResource(@RequestBody ModelResource mr){
+        ModelResource modelResource = modelResourceDao.updateModel(mr);
+        return ResultUtils.success(modelResource);
     }
 
 

@@ -1,13 +1,12 @@
 <template>
-  <div>
+  <div style="overflow:auto">
     <h2 style="text-align:center;margin:20px;">Create Comparison Task</h2>
-    <Steps :current="currentStep" style="width:1000px;margin:auto;">
+    <Steps :current="currentStep" style="width:800px;margin-left:38%">
       <Step title="Step 1">
       </Step>
       <Step title="Step 2">
       </Step>
     </Steps>
-
     <div v-show="currentStep===0" class="box">
       <Form ref="step1Form" :model="taskInfo" style="margin-top:30px;" :rules="step1Rules">
         <FormItem prop="name" label="Task Name" :label-width="150">
@@ -32,7 +31,7 @@
               <Icon v-else type="md-close" color="#f00" />
             </template>
             <template slot-scope="{row,index}" slot="check">
-              <input type="checkbox" :checked="row.checked" @click="checkedChange(index)">
+              <input type="checkbox" :checked="row.checked" @click="checkedChange_single(index)">
             </template>
           </Table>
         </FormItem>
@@ -49,12 +48,12 @@
         <Split v-model="split">
           <div slot="left" class="split-pane">
             <Tabs size="small" @on-click="changeTab" :value="leftTabValue">
-              <TabPane label="Metrics" name="metrics">
+              <!-- <TabPane label="Metrics" name="metrics">
                 <CellGroup>
                   <Cell class="element-item" v-for="(metricsInfo,idx) of taskInfo.checkedMetrics"
                     :key="metricsInfo.metric.name" type="instance" :id="idx" :title="metricsInfo.metric.alias" />
                 </CellGroup>
-              </TabPane>
+              </TabPane> -->
               <TabPane label="Data Process" name="dataProcess">
                 <Button style="float:right;margin-bottom:5px;margin-right:10px;" size="small"
                   @click="createDPM('normal')">Create</Button>
@@ -79,20 +78,35 @@
                 <div id="graphContainer" :style="{height:splitHeight}" @mousemove="mMove($event)"
                   @mousedown="mDown($event)" @mouseup="mUp($event)">
                   <ButtonGroup size="small" style="position:absolute;margin-left:10px;margin-top:10px;">
-                    <Button @click="importXML">import</Button>
+                    <!-- <Button @click="importXML">import</Button> -->
                     <Button @click="delCell"
                       :disabled="_.isEmpty(selectVertex) && _.isEmpty(selectEdge)">Delete</Button>
                   </ButtonGroup>
-                  <Button style="position:absolute; bottom:5px; right:5px;" @click.stop.prevent="saveTask">Save</Button>
+                  <!-- <Button style="position:absolute; bottom:5px; right:5px;" @click.stop="saveTask">Save</Button> -->
+                  <!-- <Button style="position:absolute; bottom:5px; right:5px;">Save</Button> -->
                   <div id="container" style="background-color:#31676f;" :style="mouseBoxStyle"></div>
                 </div>
               </div>
-              <div slot='right'>
-                <div v-if="selectVertex.data" style="margin-left:20px">
+              <div slot='right' ref="right_info">
+                <div v-if="selectVertex.data&& selectVertex.data.type==='instance'"
+                  :style="{'margin-left':'20px','margin-right':'20px','overflow':'auto',height:splitHeight}">
+                  <div style="margin-top:10px;">
+                    <!-- <h3>Method Name:</h3> -->
+                    <h2 style="display:block;color:cadetblue;">{{getInstance(selectVertex.data.instanceId).name}}</h2>
+                  </div>
+
+                  <div style="margin-top:10px;">
+                    <h3>Description:</h3>
+                    <p style="margin:10px;">{{getInstance(selectVertex.data.instanceId).description}}</p>
+                  </div>
+                </div>
+                <div v-if="selectVertex.data&& selectVertex.data.type!=='instance'"
+                  :style="{'margin-left':'20px','overflow':'auto',height:splitHeight}">
                   <div style="margin-top:10px;">
                     <!-- <h3>Method Name:</h3> -->
                     <h2 style="display:block;color:cadetblue;">{{selectVertex.data.name}}</h2>
                   </div>
+
                   <div style="margin-top:10px;">
                     <h3>Description:</h3>
                     <p style="margin:10px;">{{selectVertex.data.desc}}</p>
@@ -101,11 +115,20 @@
                   <div style="margin-top:10px;">
                     <h3>Params:</h3>
                   </div>
-                  <Form>
+                  <Form v-if="hackReset">
                     <FormItem v-for="(param,index) in selectVertex.data.parameterList" :key="index" :label="param.name"
-                      :label-width="50">
+                      :label-width="100">
                       <!-- <Input ref="inputParam" v-model="param.value" :placeholder="param.type" style="width:100px" /> -->
-                      <input v-model="param.value" :placeholder="param.type"
+                      <DatePicker v-if="param.type==='date'" v-model="param.value" type="date"
+                        :start-date="new Date(1982, 0, 1)" :options="model_time_32" placeholder="1982-2013" size="small"
+                        style="width:120px;margin-left:10px;"></DatePicker>
+                      <RadioGroup v-else-if="param.type==='time_unit'" v-model="param.value">
+                        <!-- <Radio v-for="type of itemTypeList" :key="type.name" :label="type.label">{{type.name}}</Radio> -->
+                        <Radio label="D" border>day</Radio>
+                        <Radio label="M" border>month</Radio>
+                        <Radio label="Y" border>year</Radio>
+                      </RadioGroup>
+                      <input v-else v-model="param.value" :placeholder="param.type"
                         style="width:100px;height:25px;margin-left:10px;" />
                     </FormItem>
                   </Form>
@@ -115,7 +138,7 @@
           </div>
         </Split>
       </div>
-
+      <Divider style="margin-top:10px;margin-bottom:10px;" dashed />
       <Button class="stepBtn" type="primary" v-if="currentStep===0" @click="next">Next step</Button>
       <Button class="stepBtn" type="primary" v-if="currentStep===1" @click="createTask">Create</Button>
       <Button class="stepBtn" type="primary" v-if="currentStep===1" @click="previous">Previous</Button>
@@ -134,9 +157,28 @@ const {
   mxGeometry,
   mxUtils,
   mxEventObject,
-  mxConnectionHandler
+  mxConnectionHandler,
+  mxStencilRegistry
   // mxGraphHandler
 } = mxgraph;
+
+
+
+Date.prototype.format = function (fmt) { //author: meizz
+  var o = {
+    "M+": this.getMonth() + 1, //月份
+    "d+": this.getDate(), //日
+    "h+": this.getHours(), //小时
+    "m+": this.getMinutes(), //分
+    "s+": this.getSeconds(), //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds() //毫秒
+  };
+  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+  for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+  return fmt;
+}
 
 Object.assign(mxEvent, {
   NORMAL_TYPE_CLICKED: "NORMAL_TYPE_CLICKED"
@@ -149,19 +191,21 @@ let graph = null;
 let outline = null;
 let idSeed = 0;
 let ellipse = "ellipse;whiteSpace=wrap;html=1;";
-let rounded = "rounded=1;whiteSpace=wrap;html=1;";
-let hexagon = "shape=hexagon;whiteSpace=wrap;html=1;";
-let rhombus = "rhombus;whiteSpace=wrap;html=1;";
+let rounded = "rounded;whiteSpace=wrap;html=1;rounded=1;shadow=0;comic=0;strokeColor=#000000;fillColor=#FFE599;";
+let hexagon = "shape=hexagon;whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;fontSize=18;strokeColor=#000000;fillColor=#F8CECC;";
+// let rhombus = "rhombus;whiteSpace=wrap;html=1;";// 菱形
+let data_Cell = "shape=Parallelepiped;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2"
 // const vm = this;
 
-const insertVertex = (dom, target, x, y, instance) => {
-  const type = dom.getAttribute("type");
-  const id = Number(dom.getAttribute("id"));
+const insertVertex = (type, idx, target, x, y, instance) => {
+  var parent = graph.getDefaultParent();
+  // graph.insertVertex(parent, null, '演员', 50, 300, 150, 150, "shape=parallelogram;perimeter=ellipsePerimeter;");
+  const id = idx;
   let nodeRootVertex = null;
   if (type === "instance") {
-    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), ellipse);
+    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 130, 85), "img;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2");
   } else if (type === "dataProcess") {
-    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), rhombus);
+    nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), hexagon);
   } else {
     nodeRootVertex = new mxCell("", new mxGeometry(0, 0, 120, 80), rounded);
   }
@@ -187,7 +231,7 @@ const insertVertex = (dom, target, x, y, instance) => {
 };
 
 const makeDraggable = (sourceEles, checkedMetrics) => {
-  const dropValidate = function(evt) {
+  const dropValidate = function (evt) {
     const x = mxEvent.getClientX(evt);
     const y = mxEvent.getClientY(evt);
     // console.log("x:", x);
@@ -203,17 +247,17 @@ const makeDraggable = (sourceEles, checkedMetrics) => {
   };
 
   // drop成功后新建一个节点
-  const dropSuccessCb = function(_graph, evt, target, x, y) {
+  const dropSuccessCb = function (_graph, evt, target, x, y) {
     // console.log("这里放一个节点");
     let type = this.element.getAttribute("type");
-    let index = this.element.getAttribute("id");
+    let idx = this.element.getAttribute("id");
     if (type === "instance") {
-      let relatedInstances = checkedMetrics[index].releatedInfo;
+      let relatedInstances = checkedMetrics[idx].releatedInfo;
       relatedInstances.forEach((instance, index) => {
-        insertVertex(this.element, target, x, y + 100 * index, instance);
+        insertVertex(type, idx, target, x, y + 100 * index, instance);
       });
     } else {
-      insertVertex(this.element, target, x, y, null);
+      insertVertex(type, idx, target, x, y, null);
     }
   };
 
@@ -254,7 +298,7 @@ const listenGraphEvent = () => {
 
 const setCursor = () => {
   const oldGetCursorForCell = mxGraph.prototype.getCursorForCell;
-  graph.getCursorForCell = function(...args) {
+  graph.getCursorForCell = function (...args) {
     const [cell] = args;
     return cell.style.includes("normalType")
       ? "pointer"
@@ -297,16 +341,6 @@ const initGraph = () => {
   // graph.connectionArrowsEnabled = true;
 };
 
-var objDeepCopy = function(source) {
-  var sourceCopy = source instanceof Array ? [] : {};
-  for (var item in source) {
-    sourceCopy[item] =
-      typeof source[item] === "object"
-        ? objDeepCopy(source[item])
-        : source[item];
-  }
-  return sourceCopy;
-};
 
 export default {
   beforeRouteLeave(to, from, next) {
@@ -319,16 +353,16 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
-        success: function(data) {
+        success: function (data) {
           if (!data) {
             vm.$store.commit("userLogout");
             vm.$router.push({ name: "Login" });
           }
         },
-        error: function(err) {
+        error: function (err) {
           console.log("Get user state fail.");
         }
       });
@@ -348,10 +382,10 @@ export default {
   data() {
     return {
       split: 0.2,
-      split2: 0.8,
+      split2: 0.7,
       splitHeight: "",
       // splitHeight: window.screen.availHeight - 300 + "px",
-      graphBoxHeight: $(document).height() - 230 + "px",
+      graphBoxHeight: $(document).height() - 200 + "px",
       projectId: "",
       taskInfo: {
         projectId: this.projectId,
@@ -407,7 +441,17 @@ export default {
           }
         ]
       },
-      leftTabValue: "metrics"
+      leftTabValue: "dataProcess",
+      model_time_32: {
+        disabledDate(date) {
+          // print(date);
+          let time_1982 = new Date("1982-01-01 00:00:00");
+          let time_2013 = new Date("2013-12-31 23:59:59");
+          return date && (date < time_1982 || date > time_2013);
+        }
+      },
+      startTime_1982: "1982-01-01",
+      hackReset: true,
     };
   },
   methods: {
@@ -528,14 +572,25 @@ export default {
     },
     checkedChange(index) {
       this.taskInfo.checkedMetrics = [];
-      this.metricsTableData[index].checked = !this.metricsTableData[index]
-        .checked;
+      this.metricsTableData[index].checked = !this.metricsTableData[index].checked;
       this.metricsTableData.forEach((data, index) => {
         if (data.checked) {
           this.taskInfo.checkedMetrics.push(this.metricsAllInfo[index]);
         }
       });
       // console.log("checkedMetrics:",JSON.stringify(this.checkedMetrics));
+    },
+    checkedChange_single(index) {
+      this.taskInfo.checkedMetrics = [];
+      this.metricsTableData.forEach(data => {
+        data.checked = false;
+      });
+      this.metricsTableData[index].checked = !this.metricsTableData[index].checked;
+      this.metricsTableData.forEach((data, index) => {
+        if (data.checked) {
+          this.taskInfo.checkedMetrics.push(this.metricsAllInfo[index]);
+        }
+      });
     },
     getDataProcessMethod() {
       this.$api.cmp_task
@@ -593,11 +648,17 @@ export default {
       const cell = selectModel.cells[0];
 
       if (cell.vertex) {
+        this.hackReset = false;
+        this.$nextTick(() => {
+          this.hackReset = true;
+        })
         this.selectVertex = cell;
         console.log("selectVertex id:", this.selectVertex.data.id);
+        // console.log("selectVertex",this.selectVertex);
         if (this.$refs.inputParam) {
           this.$refs.inputParam.blur();
         }
+        // this.$refs["right_info"].$forceUpdate();
       } else {
         this.selectEdge = cell;
       }
@@ -618,26 +679,35 @@ export default {
     },
     createTask() {
       // console.log("taskInfo:", this.taskInfo);
-      this.$api.cmp_task
-        .createTask(this.taskInfo)
-        .then(res => {
-          let recordId = res.recordId;
-          this.$router.push({
-            path: `/cmp-task-record/${recordId}`
+
+      let taskReady = this.saveTask();
+      // let formData = new FormData();
+      // formData.set("taskInfo", JSON.stringify(this.taskInfo));
+      if (taskReady) {
+        this.$api.cmp_task
+          .createTask(JSON.stringify(this.taskInfo))
+          .then(res => {
+            let recordId = res.recordId;
+            this.$router.push({
+              path: `/cmp-task-record/${recordId}`
+            });
+          })
+          .catch(err => {
+            this.$Message.error(err);
           });
-        })
-        .catch(err => {
-          this.$Message.error(err);
-        });
+      }
     },
     saveTask(event) {
       const xml = graph.exportModelXML();
-      console.log(xml);
+      // console.log(xml);
       console.log("model:", graph.getModel());
       let computableModelInfo = this.parseGraphModel(graph.getModel());
+      if (!computableModelInfo) {
+        return false;
+      }
       computableModelInfo.graphXML = xml;
       //* push 前先判断computableModels中是否已有该对象，如有则覆盖。
-      let index = _.findIndex(this.taskInfo.computableModels, function(model) {
+      let index = _.findIndex(this.taskInfo.computableModels, function (model) {
         return model.metricId === computableModelInfo.metricId;
       });
       if (index >= 0) {
@@ -646,7 +716,8 @@ export default {
       this.taskInfo.computableModels.push(computableModelInfo);
       //* 清空画布并跳转第一个tab页；
       graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
-      this.leftTabValue = "metrics";
+      return true;
+      // this.leftTabValue = "metrics";
     },
     parseGraphModel(model) {
       let cells = model.cells;
@@ -699,7 +770,7 @@ export default {
             return;
           }
 
-          cmpMethodInfo.params = objDeepCopy(cell.data.parameterList);
+          cmpMethodInfo.params = _.cloneDeep(cell.data.parameterList);
           cmpMethodInfo.input = cell.data.inputList[0];
           cmpMethodInfo.output = cell.data.outputList[0];
           cmpMethodInfo.dependencyLibs = cell.data.dependencyItemList;
@@ -719,6 +790,14 @@ export default {
           dpmInfo.methodSourceId = cell.data.scriptSourceId;
           //* 判断数据处理方法参数是否设置
           for (let param of cell.data.parameterList) {
+            //* 将 {} 转换为 ""
+            if (JSON.stringify(param.value) === '{}' || param.value === null) {
+              param.value = "";
+            }
+            //* 将date类型的数据格式化为：YYYY-MM-DD
+            if (param.type === 'date' && param.value) {
+              param.value = new Date(param.value).format('yyyy-MM-dd');
+            }
             if (!param.optional && !param.value) {
               this.$Message.error(
                 "Please enter the parameters of the data processing method."
@@ -757,7 +836,7 @@ export default {
             );
             return;
           }
-          dpmInfo.params = objDeepCopy(cell.data.parameterList);
+          dpmInfo.params = _.cloneDeep(cell.data.parameterList);
           dpmInfo.input = cell.data.inputList[0];
           dpmInfo.output = cell.data.outputList[0];
           dpmInfo.dependencyLibs = cell.data.dependencyItemList;
@@ -827,52 +906,25 @@ export default {
         this.$refs["step1Form"].validate(valid => {
           if (valid) {
             this.currentStep += 1;
+            //* 将 instance 节点绘制到画布上
+            let relatedInstances = this.taskInfo.checkedMetrics[0].releatedInfo;
+            relatedInstances.forEach((instance, index) => {
+              insertVertex("instance", 0, null, 200, 50 + 100 * index, instance);
+            });
+            this.changeTab();
           }
         });
-        this.changeTab();
+        // this.changeTab();
       } else if (this.currentStep === 1) {
         this.currentStep += 1;
       } else {
       }
     },
-    importXML() {
-      let txt = `<mxGraphModel>
-  <root>
-    <mxCell id="0"/>
-    <mxCell id="1" parent="0"/>
-    <mxCell id="2" value="实例1" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" data="{&quot;id&quot;:0,&quot;type&quot;:&quot;instance&quot;,&quot;dataIndex&quot;:0,&quot;name&quot;:&quot;实例1&quot;,&quot;desc&quot;:&quot;asdfadf&quot;}" parent="1">
-      <mxGeometry x="60" y="80" width="120" height="80" as="geometry"/>
-    </mxCell>
-    <mxCell id="3" value="数据处理方法1" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" data="{&quot;id&quot;:0,&quot;type&quot;:&quot;dataProcess&quot;,&quot;dataIndex&quot;:0,&quot;name&quot;:&quot;数据处理方法1&quot;,&quot;desc&quot;:&quot;asdfadf&quot;}" parent="1">
-      <mxGeometry x="320" y="80" width="120" height="80" as="geometry"/>
-    </mxCell>
-    <mxCell id="4" value="对比方法1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" data="{&quot;id&quot;:0,&quot;type&quot;:&quot;comparisonMethods&quot;,&quot;dataIndex&quot;:0,&quot;name&quot;:&quot;对比方法1&quot;,&quot;desc&quot;:&quot;asdfadf&quot;}" parent="1">
-      <mxGeometry x="610" y="160" width="120" height="80" as="geometry"/>
-    </mxCell>
-    <mxCell id="5" value="实例2" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" data="{&quot;id&quot;:0,&quot;type&quot;:&quot;instance&quot;,&quot;dataIndex&quot;:1,&quot;name&quot;:&quot;实例2&quot;,&quot;desc&quot;:&quot;asdgasowieh&quot;}" parent="1">
-      <mxGeometry x="60" y="230" width="120" height="80" as="geometry"/>
-    </mxCell>
-    <mxCell id="6" value="数据处理方法1" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" data="{&quot;id&quot;:0,&quot;type&quot;:&quot;dataProcess&quot;,&quot;dataIndex&quot;:0,&quot;name&quot;:&quot;数据处理方法1&quot;,&quot;desc&quot;:&quot;asdfadf&quot;}" parent="1">
-      <mxGeometry x="320" y="230" width="120" height="80" as="geometry"/>
-    </mxCell>
-    <mxCell id="7" style="exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="2" target="3">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="8" style="exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="6">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="9" style="exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="4">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="10" style="exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="4">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-  </root>
-</mxGraphModel>`;
+    importXML(txt) {
       graph.importModelXML(txt);
     },
     getGraphHeight() {
-      this.splitHeight = window.screen.availHeight - 350 + "px";
+      this.splitHeight = window.screen.availHeight - 300 + "px";
     },
     createDPM(type) {
       this.$router.push({
@@ -897,9 +949,9 @@ export default {
       graph.addListener(mxEvent.MOVE_CELLS, (sender, evt) => {
         const cell = evt.properties.cells[0];
         const position = Graph.getCellPosition(cell);
-        setTimeout(() => {
-          vm.$Message.info(`节点被移动到 ${JSON.stringify(position)}`);
-        }, 1000);
+        // setTimeout(() => {
+        //   vm.$Message.info(`节点被移动到 ${JSON.stringify(position)}`);
+        // }, 1000);
       });
 
       graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
@@ -945,24 +997,29 @@ export default {
           }
 
           console.log(JSON.stringify(cell.data));
-          vm.$Message.info("添加了一个节点");
+          // vm.$Message.info("添加了一个节点");
         } else if (cell.edge) {
-          vm.$Message.info("添加了一条线");
+          // vm.$Message.info("添加了一条线");
         }
       });
 
       graph.addListener(mxEvent.LABEL_CHANGED, (sender, evt) => {
-        vm.$Message.info(`内容改变为：${evt.getProperty("value")}`);
+        // vm.$Message.info(`内容改变为：${evt.getProperty("value")}`);
       });
 
       graph.addListener(mxEvent.CONNECT_CELL, (sender, evt) => {
-        vm.$Message.info(`改变了连线`);
+        // vm.$Message.info(`改变了连线`);
       });
     },
     mDown(e) {
       px = e.pageX;
       py = e.pageY;
       console.log("父组件捕获");
+      var el = e.target;
+      // if (el.innerHTML === 'Save') {
+      //   //do something
+      //   this.saveTask(el);
+      // }
     },
     mMove(e) {
       if (px == "" || py == "") {
@@ -1042,12 +1099,39 @@ export default {
       return this.metricsColumn.filter(col => {
         return col.key != "metric" && col.slot != "check";
       });
+    },
+    getInstance() {
+      return function (instanceId) {
+        let result = this.taskInfo.targetInstanceList.filter(instance => {
+          return instance.instanceId === instanceId;
+        });
+        return result[0];
+      }
     }
   },
   mounted() {
     initGraph();
     // this.changeTab();
     this._listenEvent();
+    let taskRecord = this.$route.params.taskRecord;
+    if (taskRecord) {
+      console.log("taskRecord:", taskRecord);
+      this.taskInfo.name = taskRecord.name;
+      this.taskInfo.description = taskRecord.desc;
+      this.taskInfo.targetInstanceList = taskRecord.instanceList;
+      this.taskInfo.checkedMetrics = taskRecord.metrics;
+      this.taskInfo.computableModels = taskRecord.cmpTaskModelList;
+      this.currentStep = 1;
+      graph.importModelXML(this.taskInfo.computableModels[0].graphXML);
+
+      //* 求所有 instance 中 cmpDataList 的并集
+      let cmpDataIdList = [];
+      this.taskInfo.targetInstanceList.forEach(instance => {
+        cmpDataIdList = _.union(cmpDataIdList, instance.cmpDataList);
+      });
+      // console.log("idList:", JSON.stringify(cmpDataIdList));
+      this.getCmpDataList(cmpDataIdList);
+    }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.getGraphHeight);
@@ -1066,6 +1150,7 @@ export default {
   /* height: 700px; */
   margin-left: 10px;
   margin-right: 10px;
+  /* border-bottom: 1px solid #000; */
 }
 
 #graphContainer {
