@@ -3,7 +3,7 @@
     <h2 style="text-align:center;margin:20px;">{{getTitle(dpmInfo.type)}}</h2>
     <Form ref="dpmInfo" :model="dpmInfo" :rules="rules">
       <FormItem prop="scriptSourceId" label="Script" :label-width="150" l>
-        <Upload action="/GeoProblemSolving/cmp_model/uploadData_DC" :before-upload="beforeUpload"
+        <Upload action="/GeoProblemSolving_Backend/cmp_model/uploadData_DC" :before-upload="beforeUpload"
           :data="uploadScriptInfo" :on-success="uploadSuccess" :on-error="uploadError" :on-remove="removeData"
           ref="upload">
           <Button icon="ios-cloud-upload-outline">Upload files</Button>
@@ -97,7 +97,7 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
         success: function (data) {

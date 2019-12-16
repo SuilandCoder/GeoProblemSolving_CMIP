@@ -1,4 +1,4 @@
-const appName="/GeoProblemSolving";
+const appName="/GeoProblemSolving_Backend";
 const cmpProject = "/cmp_project";
 const cmpItem = "/cmp_item";
 const cmpSolution = "/cmp_solution";

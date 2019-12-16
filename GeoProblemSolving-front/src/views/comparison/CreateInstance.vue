@@ -37,7 +37,7 @@
         <FormItem label="Model" :label-width="150">
           <Upload :max-size="1024*1024" :before-upload="beforeUpload" :data="deployRequestInfo"
             accept="application/zip,application/x-zip,application/x-zip-compressed"
-            action="/GeoProblemSolving/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
+            action="/GeoProblemSolving_Backend/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
             :on-success="uploadSuccess" :on-error="uploadError">
             <Button icon="ios-cloud-upload-outline">Upload Model</Button>
           </Upload>
@@ -87,7 +87,7 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
       $.ajax({
-        url: "/GeoProblemSolving/user/state",
+        url: "/GeoProblemSolving_Backend/user/state",
         type: "GET",
         async: false,
         success: function (data) {

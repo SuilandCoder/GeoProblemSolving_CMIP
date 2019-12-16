@@ -447,7 +447,7 @@ export default {
           var email = this.registerForm.email;
           this.axios
             .post(
-              "/GeoProblemSolving/user/register",
+              "/GeoProblemSolving_Backend/user/register",
               // params
               userJson
             )
@@ -459,7 +459,7 @@ export default {
               } else {
                 that.axios
                   .get(
-                    "/GeoProblemSolving/user/login" +
+                    "/GeoProblemSolving_Backend/user/login" +
                       "?email=" +
                       email +
                       "&password=" +
@@ -474,7 +474,7 @@ export default {
                       registerEmailBody["recipient"] = this.registerForm.email;
                       registerEmailBody["mailTitle"] = "Register result";
                       registerEmailBody["mailContent"] = "Welcome to join in GeoProblem-Solving platform, you can solve complex problems in this platform with others collaboratively."
-                      that.axios.post("/GeoProblemSolving/email/send", registerEmailBody)
+                      that.axios.post("/GeoProblemSolving_Backend/email/send", registerEmailBody)
                         .then(res=>{
                           console.log(res.data);
                         })

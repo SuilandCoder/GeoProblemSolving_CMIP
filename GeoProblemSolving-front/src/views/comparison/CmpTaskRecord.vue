@@ -603,7 +603,7 @@ export default {
       let fileName = output.fileName + "."+output.suffix;
       let reqJson = { dataUrl: output.downloadUrl, fileName: fileName };
       this.axios
-        .post(`/GeoProblemSolving/cmp_data/downloadDataFromDataContainer`, reqJson)
+        .post(`/GeoProblemSolving_Backend/cmp_data/downloadDataFromDataContainer`, reqJson)
         .then(res => {
           if (res.data) {
             let content = res.headers["content-disposition"];

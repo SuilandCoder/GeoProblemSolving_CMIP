@@ -11,7 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:8080",allowCredentials = "true")
+//@CrossOrigin(origins = "http://localhost:8080",allowCredentials = "true")
+@CrossOrigin
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -19,7 +20,7 @@ public class UserController {
     @Resource
     private MongoTemplate mongoTemplate;
 
-    @RequestMapping(value = "/register", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public String saveUser(@RequestBody UserEntity user) {
         UserDaoImpl userDao = new UserDaoImpl(mongoTemplate);
         String userId = UUID.randomUUID().toString();

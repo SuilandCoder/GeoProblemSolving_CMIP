@@ -22,7 +22,7 @@ export default {
       fileName = fileName + "." + suffix;
       let reqJson = { dataUrl: downloadUrl, fileName: fileName };
       this.axios
-        .post(`/GeoProblemSolving/cmp_data/downloadDataFromDataContainer`, reqJson)
+        .post(`/GeoProblemSolving_Backend/cmp_data/downloadDataFromDataContainer`, reqJson)
         .then(res => {
           if (res.data) {
             console.log("table json:", res.data)

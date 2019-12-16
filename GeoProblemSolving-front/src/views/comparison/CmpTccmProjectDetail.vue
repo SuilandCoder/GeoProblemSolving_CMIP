@@ -693,7 +693,7 @@ export default {
       this.selectCardContent = [];
       this.resourceType = type;
       this.axios
-        .get("/GeoProblemSolving/common/findAllItem?type=" + this.resourceType)
+        .get("/GeoProblemSolving_Backend/common/findAllItem?type=" + this.resourceType)
         .then(res => {
           this.typeResources = res.data.data; //异步
         });

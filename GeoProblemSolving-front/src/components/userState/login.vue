@@ -6,13 +6,13 @@
             /*--footerHeight: 60px;*/
             overflow: hidden;
         }
-      
+
 
         .content {
             background-image: url("../../assets/images/c5.jpg");
             background-size:cover;
             display: flex;
-            justify-content: center;   
+            justify-content: center;
             /* background-attachment:fixed; */
             margin: 0 auto;
         }
@@ -255,7 +255,7 @@ export default {
           var passwordAESURI = window.encodeURIComponent(passwordAES);
           this.axios
             .get(
-              "/GeoProblemSolving/user/login" +
+              "/GeoProblemSolving_Backend/user/login" +
                 "?email=" +
                 email +
                 "&password=" +

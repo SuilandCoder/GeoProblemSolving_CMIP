@@ -57,7 +57,7 @@
               <Upload v-if="modelInfo.computableModels&&modelInfo.computableModels.length<=0" :max-size="1024*1024"
                 :before-upload="beforeModelUpload" :data="deployRequestInfo"
                 accept="application/zip,application/x-zip,application/x-zip-compressed"
-                action="/GeoProblemSolving/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
+                action="/GeoProblemSolving_Backend/cmp_model/deployModel" :disabled="creatable" :on-remove="removeFile"
                 :on-success="uploadSuccess" :on-error="uploadError">
                 <Button icon="ios-cloud-upload-outline">Upload Model</Button>
               </Upload>
@@ -129,7 +129,7 @@
                 <Input style="width: 300px" v-model="row.fileName" :ref="row.name" disabled>
                 <Upload v-if="row.type==='response'" :max-size="1024*1024" :before-upload="beforeDataUpload"
                   slot="append" :state="state.stateName" :event="row.name"
-                  action="/GeoProblemSolving/cmp_model/uploadData_DC" style="display:inline-block;"
+                  action="/GeoProblemSolving_Backend/cmp_model/uploadData_DC" style="display:inline-block;"
                   :show-upload-list="false" :data="uploadDataInfo" :on-success="dataUploadSuccess"
                   :on-error="dataUploadError">
                   <Button title="Upload Data">
@@ -433,7 +433,7 @@ export default {
       // window.open(event.url, "_self");
       let reqJson = { dataUrl: event.url, fileName: event.fileName };
       this.axios
-        .post(`/GeoProblemSolving/cmp_data/downloadDataFromDataContainer`, reqJson)
+        .post(`/GeoProblemSolving_Backend/cmp_data/downloadDataFromDataContainer`, reqJson)
         .then(res => {
           if (res.data) {
             let content = res.headers["content-disposition"];

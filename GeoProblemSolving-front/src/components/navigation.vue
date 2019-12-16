@@ -333,7 +333,7 @@ export default {
     changeSelect(name) {
       if (name == "logout") {
         this.axios
-          .get("/GeoProblemSolving/user/logout")
+          .get("/GeoProblemSolving_Backend/user/logout")
           .then(res => {
             this.$store.commit("userLogout");
             this.noticeSocket.close();
