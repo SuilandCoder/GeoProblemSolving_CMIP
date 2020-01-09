@@ -143,7 +143,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose concepts</Button>
+                    <Button @click="showChooseConcepts">Choose concepts</Button>
                     <Table border :columns="resColumns" :data="conceptList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -158,7 +158,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                    <Button @click="showChooseConcepts">Choose templates</Button>
                     <Table border :columns="resColumns" :data="templateList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -173,7 +173,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose unit</Button>
+                    <Button @click="showChooseConcepts">Choose unit</Button>
                     <Table border :columns="resColumns" :data="unitList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -190,7 +190,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose reference</Button>
+                    <Button @click="showChooseConcepts">Choose reference</Button>
                     <Table border :columns="resColumns" :data="spatialRefList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -201,7 +201,7 @@
                       </template>
                     </Table>
                   </TabPane>
-                  <Button style="float:right" type="primary" ghost @click="modalCreate = true"
+                  <Button style="float:right" type="primary" ghost @click="showCreateRepositories"
                     slot="extra">Create</Button>
                 </Tabs>
               </Panel>
@@ -248,7 +248,8 @@
             <Drawer :closable="false" v-model="drawerShow" style="z-index:1005">
               <div slot="header" style="display:flex;align-items:center">
                 <h3>Choose Metric</h3>
-                <Button slot="append" @click="modal13 = true" size="small" style="margin-left: 60px;"> Create</Button>
+                <Button slot="append" @click="modal13=true" size="small" style="margin-left: 60px;">
+                  Create</Button>
               </div>
               <CellGroup>
                 <Cell v-for="(metric,index) of metrics" :title="metric.wkName? metric.wkName: metric.alias"
@@ -659,7 +660,11 @@ export default {
                   "/GeoProblemSolving/home"
               };
               this.axios
-                .post("/GeoProblemSolving_Backend/project/applyByMail", emailObject)
+                .post("/GeoProblemSolving_Backend/project/applyByMail", emailObject, {
+                  headers: {
+                    "Content-Type": 'text/plain'
+                  }
+                })
                 .then(res => {
                   if (res.data == "Success") {
                     console.log("Email Success.");
@@ -695,6 +700,16 @@ export default {
         return false;
       }
 
+    },
+    showChooseConcepts() {
+      if (this.checkPermission()) {
+        this.vocabularyValue = true;
+      }
+    },
+    showCreateRepositories() {
+      if (this.checkPermission()) {
+        this.modalCreate = true;
+      }
     },
     onCreateSuccess(data) {
       this.metrics.push(data);
@@ -803,7 +818,11 @@ export default {
     },
     taskDetail(task) {
       this.$router.push({
-        path: `/cmp-task-record/${task.recordId}`
+        name: "cmp-task-record",
+        params: {
+          id: task.recordId,
+          projectInfo: this.projectInfo
+        }
       });
     },
     getResourceList(type, list) {
@@ -997,7 +1016,7 @@ export default {
         });
     },
     createInstance() {
-      if(this.checkPermission()){
+      if (this.checkPermission()) {
         this.$router.push({
           path: `/create-cmp-instance/${this.projectInfo.projectId}`
         });
@@ -1013,7 +1032,11 @@ export default {
     },
     instanceDetail(instance) {
       this.$router.push({
-        path: `/cmp-instance-detail/${instance.instanceId}`
+        name: "cmp-instance-detail",
+        params: {
+          "id": instance.instanceId,
+          "projectInfo": this.projectInfo
+        }
       });
     },
     cancelCreate() {

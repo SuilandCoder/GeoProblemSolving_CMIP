@@ -3,11 +3,17 @@ package cn.edu.njnu.geoproblemsolving.Controller;
 import cn.edu.njnu.geoproblemsolving.Dao.Project.ProjectDaoImpl;
 import cn.edu.njnu.geoproblemsolving.Entity.EmailEntity;
 import cn.edu.njnu.geoproblemsolving.Entity.ProjectEntity;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 @CrossOrigin(origins = "*", allowCredentials = "true")
 @RestController
@@ -106,9 +112,29 @@ public class ProjectController {
     }
 
     @RequestMapping(value = "/applyByMail", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
-    public String sendEmail(@RequestBody EmailEntity emailEntity) {
-        ProjectDaoImpl projectDao = new ProjectDaoImpl(mongoTemplate);
-        return projectDao.applyByEmail(emailEntity);
+    public String sendEmail(HttpServletRequest request) {
+        ServletInputStream inputStream = null;
+        try {
+            inputStream = request.getInputStream();
+            //            inputStream.
+            String email = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer buffer = new StringBuffer();
+            String str = "";
+            while(!StringUtils.isEmpty(str = reader.readLine())) {
+                buffer.append(str);
+            }
+            email = buffer.toString();
+
+            JSONObject emailJson = JSONObject.parseObject(email);
+            EmailEntity emailEntity = emailJson.toJavaObject(EmailEntity.class);
+            ProjectDaoImpl projectDao = new ProjectDaoImpl(mongoTemplate);
+            return projectDao.applyByEmail(emailEntity);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Fail";
+        }
+
     }
 
     @RequestMapping(value = "/picture", method = RequestMethod.POST)

@@ -67,18 +67,21 @@
             <div v-for="(cmpTaskModel,index) in cmpTaskModelList">
               <div style="margin-top:10px;" v-for="(cmpMethodInfo,index) in cmpTaskModel.cmpMethodInfoList">
                 <h4 style="margin-top: 30px;  font-size: 18px;margin-left: 10px;">
-                  <li>{{cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:""}}</li></h4>
+                  <li>{{cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:""}}</li>
+                </h4>
                 <!-- <img v-if="cmpMethodInfo.status==='1'" style="width:600px;display:block;margin:auto;"
                   :src="cmpMethodInfo.output.downloadUrl"
                   :alt="cmpMethodInfo.methodInfo?cmpMethodInfo.methodInfo.name:''"> -->
 
-                  <!-- 如果是表，则前端绘制 -->
-                  <async-table v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='table'"
-                  :json-url="cmpMethodInfo.output.downloadUrl"
-                  :file-name="cmpMethodInfo.output.fileName"
-                  :suffix="cmpMethodInfo.output.suffix" style="width:800px;display:block;margin:auto;margin-top:20px;"></async-table>
+                <!-- 如果是表，则前端绘制 -->
+                <async-table v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='table'"
+                  :json-url="cmpMethodInfo.output.downloadUrl" :file-name="cmpMethodInfo.output.fileName"
+                  :suffix="cmpMethodInfo.output.suffix" style="width:800px;display:block;margin:auto;margin-top:20px;">
+                </async-table>
 
-                  <async-img v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='file'" style="width:600px;display:block;margin:auto;" :img-url="cmpMethodInfo.output.downloadUrl"></async-img>
+                <async-img v-if="cmpMethodInfo.status==='1'&&cmpMethodInfo.output&&cmpMethodInfo.output.type=='file'"
+                  style="width:600px;display:block;margin:auto;" :img-url="cmpMethodInfo.output.downloadUrl">
+                </async-img>
               </div>
             </div>
           </div>
@@ -89,7 +92,8 @@
       <div v-if="selectVertex.data">
         <div style="margin-top:10px;">
           <!-- <h3>Method Name:</h3> -->
-          <h2 style="display:block;color:cadetblue;">{{getMethodRecordBySelectVertex.methodInfo?getMethodRecordBySelectVertex.methodInfo.name:""}}</h2>
+          <h2 style="display:block;color:cadetblue;">
+            {{getMethodRecordBySelectVertex.methodInfo?getMethodRecordBySelectVertex.methodInfo.name:""}}</h2>
         </div>
 
         <div style="margin-top:10px;">
@@ -104,7 +108,8 @@
 
         <div style="margin-top:10px;">
           <h3>Description:</h3>
-          <p style="margin:10px;">{{getMethodRecordBySelectVertex.methodInfo?getMethodRecordBySelectVertex.methodInfo.desc:""}}</p>
+          <p style="margin:10px;">
+            {{getMethodRecordBySelectVertex.methodInfo?getMethodRecordBySelectVertex.methodInfo.desc:""}}</p>
         </div>
 
         <div style="margin-top:10px;">
@@ -224,12 +229,14 @@ export default {
   },
   created() {
     this.taskRecordId = this.$route.params.id;
-
+    this.projectInfo = this.$route.params.projectInfo;
+    // console.log("luyou:",this.projectInfo);
     this.getCmpTaskRecord();
     this.startTaskQueue();
   },
   data() {
     return {
+      projectInfo: "",
       taskRecordId: "",
       taskRecord: {},
       cmpTaskModelList: [],
@@ -264,7 +271,7 @@ export default {
       timer: function () { },
       running_process_modal: false,
       selectVertex: {},
-      excuteFailed:false,
+      excuteFailed: false,
     };
   },
   methods: {
@@ -311,7 +318,7 @@ export default {
             if (record.status === "0") {
               this.methodRequestList.push(record);
             }
-            if(record.status === '-1'){
+            if (record.status === '-1') {
               this.excuteFailed = true;
             }
             this.changeVertexStyle(record);
@@ -332,9 +339,9 @@ export default {
       let that = this;
       return this.timer = setInterval(() => {
         if (that.methodRequestList.length > 0) {
-          if(that.excuteFailed){
+          if (that.excuteFailed) {
             //* 当有方法执行失败时 发送请求，将 methodRequestList(正在运行)中的记录状态设为 2(终止)；
-            that.methodRequestList.forEach(mr=>{
+            that.methodRequestList.forEach(mr => {
               mr.status = "2";
             })
             that.$api.cmp_task.updateCmpMethodRecord(that.methodRequestList);
@@ -413,7 +420,7 @@ export default {
             }
           }
         });
-      } else if(record.status === "2"){
+      } else if (record.status === "2") {
         vertices.forEach(vert => {
           if (
             vert.data.type !== "instance" &&
@@ -468,20 +475,39 @@ export default {
           });
       });
     },
-    reconfigure() {
-      //* 跳转 createTask 页面 ，并将 taskRecord作为参数
-      if (JSON.stringify(this.taskRecord) !== '{}') {
-        // let taskRecord = ;
+    checkPermission() {
+      //* 判断是否登录
+      if (!this.$store.getters.userState) {
         this.$router.push({
-          path: `/create-cmp-task`,
-          name: "create-cmp-task",
-          params: {
-            id: this.taskRecord.projectId,
-            taskRecord: this.taskRecord
-          }
-        })
+          path: `/login`
+        });
       } else {
-        this.$Message.info("Task Record has not been fetched.");
+        //* 判断是否有权限
+        let userId = this.$store.getters.userId;
+        let index = _.findIndex(this.projectInfo.members, function (member) { return member.userId == userId });
+        if (index >= 0 || userId === this.projectInfo.managerId) {
+          return true;
+        }
+        this.$Message.info("No permission, Please apply first.");
+        return false;
+      }
+    },
+    reconfigure() {
+      if (this.checkPermission()) {
+        //* 跳转 createTask 页面 ，并将 taskRecord作为参数
+        if (JSON.stringify(this.taskRecord) !== '{}') {
+          // let taskRecord = ;
+          this.$router.push({
+            path: `/create-cmp-task`,
+            name: "create-cmp-task",
+            params: {
+              id: this.taskRecord.projectId,
+              taskRecord: this.taskRecord
+            }
+          })
+        } else {
+          this.$Message.info("Task Record has not been fetched.");
+        }
       }
     },
     showNormalTypeSelect(sender, evt) {
@@ -600,15 +626,15 @@ export default {
     downData(output) {
       // this.$Message.info(event);
       // window.open(path, "_self");
-      let fileName = output.fileName + "."+output.suffix;
+      let fileName = output.fileName + "." + output.suffix;
       let reqJson = { dataUrl: output.downloadUrl, fileName: fileName };
       this.axios
         .post(`/GeoProblemSolving_Backend/cmp_data/downloadDataFromDataContainer`, reqJson)
         .then(res => {
           if (res.data) {
             let content = res.headers["content-disposition"];
-            let fileName = content.substring(content.indexOf("filename=")+9);
-            this.downloadLink(res.data,fileName);
+            let fileName = content.substring(content.indexOf("filename=") + 9);
+            this.downloadLink(res.data, fileName);
           } else {
             this.$Message.error("Failed to download data");
           }
@@ -617,7 +643,7 @@ export default {
           this.$Message.error(err);
         })
     },
-    downloadLink(data,fileName) {
+    downloadLink(data, fileName) {
       let url = window.URL.createObjectURL(new Blob([data]))
       let link = document.createElement('a')
       link.style.display = 'none'
@@ -681,10 +707,10 @@ export default {
         return status === "1"
           ? "Success"
           : status === "0"
-          ? "Running"
-          : status === "2"
-          ? "Abort"
-          : "Failed";
+            ? "Running"
+            : status === "2"
+              ? "Abort"
+              : "Failed";
       };
     },
     getColorofStatus() {
@@ -692,10 +718,10 @@ export default {
         return status === "1"
           ? "rgb(10, 171, 67)"
           : status === "0"
-          ? "coral"
-          : status === "2"
-          ? "#efae39"
-          : "#f00";
+            ? "coral"
+            : status === "2"
+              ? "#efae39"
+              : "#f00";
       };
     },
 

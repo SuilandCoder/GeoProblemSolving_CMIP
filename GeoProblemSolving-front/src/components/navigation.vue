@@ -181,7 +181,7 @@ export default {
     }
     window.addEventListener("resize", this.reSize);
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     window.removeEventListener("resize", this.reSize);
   },
   updated() {
@@ -258,9 +258,9 @@ export default {
       this.axios
         .get(
           "/GeoProblemSolving_Backend/notice/inquiry" +
-            "?key=recipientId" +
-            "&value=" +
-            this.$store.getters.userId
+          "?key=recipientId" +
+          "&value=" +
+          this.$store.getters.userId
         )
         .then(res => {
           let noticeList = res.data;
@@ -336,7 +336,7 @@ export default {
           .get("/GeoProblemSolving_Backend/user/logout")
           .then(res => {
             this.$store.commit("userLogout");
-            this.noticeSocket.close();
+            // this.noticeSocket.close();
             this.$router.replace({ name: "Home" });
           })
           .catch(err => {

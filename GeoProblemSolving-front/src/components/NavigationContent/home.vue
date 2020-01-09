@@ -176,7 +176,7 @@ export default {
   methods: {
     start() {
       if (this.$store.getters.userState) {
-        this.$router.push({ name: "Projects" });
+        this.$router.push({ name: "cmp-projectlist" });
       } else {
         this.$router.push({ name: "Login" });
       }
@@ -406,7 +406,7 @@ $firstHeight: 700px;
   .flow {
     margin: 5rem auto;
     width: 80%;
-  
+
     // .color-cover {
     //   position: absolute;
     //   width: 50%;
@@ -456,7 +456,7 @@ $firstHeight: 700px;
         .flow-item {
           z-index: 10;
           display: inline-block;
-         
+
           vertical-align: middle;
           color: #161a1dc0;
           .flow-item-icon {
