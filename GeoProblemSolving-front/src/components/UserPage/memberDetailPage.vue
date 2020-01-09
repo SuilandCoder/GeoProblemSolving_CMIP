@@ -351,7 +351,7 @@ body {
   table-layout: auto;
   width: 100% !important;
 }
-.participatoryProjectCard:hover,{
+.participatoryProjectCard:hover{
   cursor:pointer;
 }
 </style>
@@ -402,7 +402,7 @@ export default {
     getUserProfile() {
       this.axios
         .get(
-          "/GeoProblemSolving/user/inquiry" +
+          "/GeoProblemSolving_Backend/user/inquiry" +
             "?key=userId" +
             "&value=" +
             this.$route.params.id
@@ -424,7 +424,7 @@ export default {
     readPersonalEvent() {
       this.axios
         .get(
-          "/GeoProblemSolving/history/inquiry?" +
+          "/GeoProblemSolving_Backend/history/inquiry?" +
             "eventType=project" +
             "&key=userId" +
             "&value=" +
@@ -446,7 +446,7 @@ export default {
     getManagerProjectList() {
       this.axios
         .get(
-          "/GeoProblemSolving/project/inquiry" +
+          "/GeoProblemSolving_Backend/project/inquiry" +
             "?key=managerId" +
             "&value=" +
             this.$route.params.id
@@ -467,7 +467,7 @@ export default {
       for (let i = 0; i < projectIds.length; i++) {
         this.axios
           .get(
-            "/GeoProblemSolving/project/inquiry" +
+            "/GeoProblemSolving_Backend/project/inquiry" +
               "?key=projectId" +
               "&value=" +
               projectIds[i].projectId

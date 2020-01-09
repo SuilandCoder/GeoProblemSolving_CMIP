@@ -46,9 +46,9 @@
 }
 </style>
 <template>
-<div>
-  <Row>
-    <Col span="22" offset="1">
+  <div>
+    <Row>
+      <Col span="22" offset="1">
       <h1 style="margin-top:20px">Notifications</h1>
       <Tabs type="card" value="notice" style="margin:20px 0">
         <TabPane :label="noticeTab" name="notice">
@@ -74,7 +74,8 @@
                       </h4>
                       <small class="noticeDescription">{{notice.content.description}}</small>
                       <small>{{notice.createTime}}</small>
-                      <Button class="noticeReadBtn" v-if="notice.state=='unread'" @click="gotoWork(notice.noticeId, notice.content.subProjectId)">Go</Button>
+                      <Button class="noticeReadBtn" v-if="notice.state=='unread'"
+                        @click="gotoWork(notice.noticeId, notice.content.subProjectId)">Go</Button>
                     </Card>
                   </template>
                   <template v-else>
@@ -90,7 +91,8 @@
                       </h4>
                       <small class="noticeDescription">{{notice.content.description}}</small>
                       <small>{{notice.createTime}}</small>
-                      <Button class="noticeReadBtn" v-if="notice.state=='unread'" @click="readNotice(notice.noticeId)">Got it</Button>
+                      <Button class="noticeReadBtn" v-if="notice.state=='unread'"
+                        @click="readNotice(notice.noticeId)">Got it</Button>
                     </Card>
                   </template>
                 </div>
@@ -108,9 +110,9 @@
               <template v-else-if="this.replyList.length>0">
                 <div class="noticeDetail" v-for="reply in this.replyList" :key="reply.index">
                   <Card style="height:100%">
-                  Reply Datail
-                  <!-- 此处添加回复类型通知的Card显示 -->
-                </Card>
+                    Reply Datail
+                    <!-- 此处添加回复类型通知的Card显示 -->
+                  </Card>
                 </div>
               </template>
             </div>
@@ -138,8 +140,10 @@
                     <small class="noticeDescription">{{apply.content.description}}</small>
                     <small>{{apply.createTime}}</small>
                     <template v-if="apply.content.approve=='unknow'">
-                      <Button class="approveApplyBtn" v-if="apply.state=='unread'" @click="refuseApply(apply)">×</Button>
-                      <Button class="refuseApplyBtn" v-if="apply.state=='unread'" @click="approveApply(apply)">√</Button>
+                      <Button class="approveApplyBtn" v-if="apply.state=='unread'"
+                        @click="refuseApply(apply)">×</Button>
+                      <Button class="refuseApplyBtn" v-if="apply.state=='unread'"
+                        @click="approveApply(apply)">√</Button>
                     </template>
                     <template v-else-if="apply.content.approve=='true'">
                       <Button disabled style="float:right;">√</Button>
@@ -154,9 +158,9 @@
           </Card>
         </TabPane>
       </Tabs>
-    </Col>
-  </Row>
-</div>
+      </Col>
+    </Row>
+  </div>
 </template>
 <script>
 export default {
@@ -217,10 +221,10 @@ export default {
     loadNotifications() {
       this.axios
         .get(
-          "/GeoProblemSolving/notice/inquiry?" +
-            "key=recipientId" +
-            "&value=" +
-            this.$store.getters.userId
+          "/GeoProblemSolving_Backend/notice/inquiry?" +
+          "key=recipientId" +
+          "&value=" +
+          this.$store.getters.userId
         )
         .then(res => {
           if (res.data !== "Fail") {
@@ -232,7 +236,7 @@ export default {
             let applyUnreadCount = 0;
             let notifications = res.data;
             for (let i = 0; i < notifications.length; i++) {
-              if (notifications[i].type === "notice"|| notifications[i].type === "work") {
+              if (notifications[i].type === "notice" || notifications[i].type === "work") {
                 noticeListTest.push(notifications[i]);
                 if (notifications[i].state === "unread") {
                   noticeUnreadCount++;
@@ -259,7 +263,7 @@ export default {
             this.$set(this, "applyUnreadCount", applyUnreadCount);
             this.$set(this, "applyList", applyListTest);
           }
-          else{
+          else {
             this.$Message.error("load notifications fail");
           }
         })
@@ -269,15 +273,15 @@ export default {
     },
     deleteNotice(notice) {
       this.axios
-        .get("/GeoProblemSolving/notice/delete" + "?noticeId=" + notice.noticeId)
+        .get("/GeoProblemSolving_Backend/notice/delete" + "?noticeId=" + notice.noticeId)
         .then(res => {
-          if(res.data == "Offline"){
+          if (res.data == "Offline") {
             this.$store.commit("userLogout");
             this.$router.push({ name: "Login" });
           }
           else if (res.data == "Success") {
             this.$Message.success("delete notification success.");
-            if(notice.state=="unread"){
+            if (notice.state == "unread") {
               this.$emit("readNotification");
             }
             this.loadNotifications();
@@ -289,41 +293,41 @@ export default {
           this.$Message.error("delete notification fail.");
         });
     },
-    readAllNotice(){
-      var unreadList = this.noticeList.filter(function(notice){
-        if(notice.state=='unread'){
+    readAllNotice() {
+      var unreadList = this.noticeList.filter(function (notice) {
+        if (notice.state == 'unread') {
           return notice;
         }
       });
       var unreadCount = unreadList.length;
-      for(var i=0;i<unreadList.length;i++){
+      for (var i = 0; i < unreadList.length; i++) {
         this.axios
-        .get("/GeoProblemSolving/notice/read" + "?noticeId=" + unreadList[i].noticeId)
-        .then(res => {
-          if(res.data == "Offline"){
-            this.$store.commit("userLogout");
-            this.$router.push({ name: "Login" });
-          }
-          else if (res.data == "Success") {
-            this.$emit("readNotification");
-            this.$store.commit("getUserInfo");
-            if(--unreadCount==0){
-              this.loadNotifications();
+          .get("/GeoProblemSolving_Backend/notice/read" + "?noticeId=" + unreadList[i].noticeId)
+          .then(res => {
+            if (res.data == "Offline") {
+              this.$store.commit("userLogout");
+              this.$router.push({ name: "Login" });
             }
-          } else {
+            else if (res.data == "Success") {
+              this.$emit("readNotification");
+              this.$store.commit("getUserInfo");
+              if (--unreadCount == 0) {
+                this.loadNotifications();
+              }
+            } else {
+              this.$Message.error("update notification fail.");
+            }
+          })
+          .catch(err => {
             this.$Message.error("update notification fail.");
-          }
-        })
-        .catch(err => {
-          this.$Message.error("update notification fail.");
-        });
+          });
       }
     },
     readNotice(noticeId) {
       this.axios
-        .get("/GeoProblemSolving/notice/read" + "?noticeId=" + noticeId)
+        .get("/GeoProblemSolving_Backend/notice/read" + "?noticeId=" + noticeId)
         .then(res => {
-          if(res.data == "Offline"){
+          if (res.data == "Offline") {
             this.$store.commit("userLogout");
             this.$router.push({ name: "Login" });
           }
@@ -339,12 +343,12 @@ export default {
           this.$Message.error("update notification fail.");
         });
     },
-    gotoWork(noticeId,subProjectId){
+    gotoWork(noticeId, subProjectId) {
       //路由跳转好像和回调的关系有点问题，这样在回调之前就已经跳转了，回调的内容好像没啥用
       this.axios
-        .get("/GeoProblemSolving/notice/read" + "?noticeId=" + noticeId)
+        .get("/GeoProblemSolving_Backend/notice/read" + "?noticeId=" + noticeId)
         .then(res => {
-          if(res.data == "Offline"){
+          if (res.data == "Offline") {
             this.$store.commit("userLogout");
             this.$router.push({ name: "Login" });
           }
@@ -359,7 +363,7 @@ export default {
           this.$Message.error("update notification fail.");
         });
 
-      this.$router.push( `./project/${id}/subproject`);
+      this.$router.push(`./project/${id}/subproject`);
     },
     refuseApply(apply) {
       let updateApply = new URLSearchParams();
@@ -367,9 +371,9 @@ export default {
       updateApply.append("content.approve", "false");
       updateApply.append("state", "read");
       this.axios
-        .post("/GeoProblemSolving/notice/update", updateApply)
+        .post("/GeoProblemSolving_Backend/notice/update", updateApply)
         .then(res => {
-          if(res.data == "Offline"){
+          if (res.data == "Offline") {
             this.$store.commit("userLogout");
             this.$router.push({ name: "Login" });
           }
@@ -387,7 +391,7 @@ export default {
                 " ."
             };
             this.axios
-              .post("/GeoProblemSolving/notice/save", replyNotice)
+              .post("/GeoProblemSolving_Backend/notice/save", replyNotice)
               .then(result => {
                 if (result.data == "Success") {
                   this.$emit("sendNotice", apply.content.userId);
@@ -412,9 +416,9 @@ export default {
       updateApply.append("content.approve", "true");
       updateApply.append("state", "read");
       this.axios
-        .post("/GeoProblemSolving/notice/update", updateApply)
+        .post("/GeoProblemSolving_Backend/notice/update", updateApply)
         .then(res => {
-          if(res.data == "Offline"){
+          if (res.data == "Offline") {
             this.$store.commit("userLogout");
             this.$router.push({ name: "Login" });
           }
@@ -422,26 +426,49 @@ export default {
             this.$emit("readNotification");
             this.loadNotifications();
             //update project members
-            this.axios
-              .get(
-                "/GeoProblemSolving/"+apply.content.scope+"/join?" +
-                  apply.content.scope+"Id=" +
+            if (apply.content.scope === "cmp_project") {
+              this.axios
+                .get(
+                  "/GeoProblemSolving_Backend/" + apply.content.scope + "/join?projectId=" +
                   apply.content.projectId +
                   "&userId=" +
                   apply.content.userId
-              )
-              .then(res => {
-                if (res.data === "Fail") {
-                  this.$Message.error("Join fail.");
-                } else if (res.data === "Exist") {
-                  this.$Message.info(
-                    "He/she is already a member of the "+ apply.content.scope +"."
-                  );
-                }
-              })
-              .catch(err => {
-                this.$Message.error("Join fail");
-              });
+                )
+                .then(res => {
+                  if (res.data === "Fail") {
+                    this.$Message.error("Join fail.");
+                  } else if (res.data === "Exist") {
+                    this.$Message.info(
+                      "He/she is already a member of the " + apply.content.scope + "."
+                    );
+                  }
+                })
+                .catch(err => {
+                  this.$Message.error("Join fail");
+                });
+            } else {
+              this.axios
+                .get(
+                  "/GeoProblemSolving_Backend/" + apply.content.scope + "/join?" +
+                  apply.content.scope + "Id=" +
+                  apply.content.projectId +
+                  "&userId=" +
+                  apply.content.userId
+                )
+                .then(res => {
+                  if (res.data === "Fail") {
+                    this.$Message.error("Join fail.");
+                  } else if (res.data === "Exist") {
+                    this.$Message.info(
+                      "He/she is already a member of the " + apply.content.scope + "."
+                    );
+                  }
+                })
+                .catch(err => {
+                  this.$Message.error("Join fail");
+                });
+            }
+
             //reply to applicant
             let replyNotice = {};
             replyNotice["recipientId"] = apply.content.userId;
@@ -449,22 +476,22 @@ export default {
             replyNotice["content"] = {
               title: "Result for application",
               description:
-                "Congratulations for joining the "+apply.content.scope+": " +
+                "Congratulations for joining the " + apply.content.scope + ": " +
                 apply.content.projectTitle +
                 " ."
             };
             this.axios
-              .post("/GeoProblemSolving/notice/save", replyNotice)
+              .post("/GeoProblemSolving_Backend/notice/save", replyNotice)
               .then(result => {
                 if (result.data == "Success") {
                   this.$emit("sendNotice", apply.content.userId);
                   let resultEmailBody = {};
                   resultEmailBody["recipient"] = apply.content.userEmail;
                   resultEmailBody["mailTitle"] = "Join project result";
-                  resultEmailBody["mailContent"] = "Hello, "+ apply.content.userName + ", Congratulations for joining the "+apply.content.scope+": " + apply.content.projectTitle + " .";
-                  this.axios.post("/GeoProblemSolving/email/send", resultEmailBody)
-                  .then(res=>{
-                    if (res.data == "Success") {
+                  resultEmailBody["mailContent"] = "Hello, " + apply.content.userName + ", Congratulations for joining the " + apply.content.scope + ": " + apply.content.projectTitle + " .";
+                  this.axios.post("/GeoProblemSolving_Backend/email/send", resultEmailBody)
+                    .then(res => {
+                      if (res.data == "Success") {
                         this.$Notice.success({
                           title: "Result for application",
                           desc:
@@ -476,10 +503,10 @@ export default {
                           desc: "The invitation isn't be sent successfully."
                         });
                       }
-                  })
-                  .catch(err=>{
-                    console.log(err.data);
-                  })
+                    })
+                    .catch(err => {
+                      console.log(err.data);
+                    })
                 } else {
                   this.$Message.error("reply fail.");
                 }
@@ -488,9 +515,9 @@ export default {
                 this.$Message.error("reply fail.");
               });
 
-              // 发送审核通过的邮件
-              // let resultEmailBody = {};
-              // resultEmailBody["recipient"] =
+            // 发送审核通过的邮件
+            // let resultEmailBody = {};
+            // resultEmailBody["recipient"] =
 
 
 

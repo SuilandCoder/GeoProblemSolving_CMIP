@@ -41,4 +41,6 @@ public interface ICmpProjectDao {
 
     List<CmpProject> getProjects(String key, String value);
 
+    String joinProject(String projectId,String userId);
+
 }

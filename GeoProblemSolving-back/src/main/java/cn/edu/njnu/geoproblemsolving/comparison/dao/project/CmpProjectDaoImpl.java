@@ -1,9 +1,15 @@
 package cn.edu.njnu.geoproblemsolving.comparison.dao.project;
 
+import cn.edu.njnu.geoproblemsolving.Dao.Method.CommonMethod;
+import cn.edu.njnu.geoproblemsolving.Entity.ProjectEntity;
 import cn.edu.njnu.geoproblemsolving.Entity.Unit;
+import cn.edu.njnu.geoproblemsolving.Entity.UserEntity;
+import cn.edu.njnu.geoproblemsolving.View.StaticPagesBuilder;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.user.CmpUserImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.entity.CmpProject;
 import cn.edu.njnu.geoproblemsolving.comparison.utils.DaoUtils;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -192,8 +198,6 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
         return cmpProject;
     }
 
-
-
     @Override
     public List<CmpProject> getProjects(String key, String value) {
         Query query = Query.query(Criteria.where(key).is(value));
@@ -202,6 +206,42 @@ public class CmpProjectDaoImpl implements ICmpProjectDao {
         } else {
             List<CmpProject> projectEntities = mongoTemplate.find(query, CmpProject.class);
             return projectEntities;
+        }
+    }
+
+    @Override
+    public String joinProject(String projectId, String userId) {
+        Query query = Query.query(Criteria.where("projectId").is(projectId));
+        if (!mongoTemplate.find(query, CmpProject.class).isEmpty()) {
+            CmpProject project = mongoTemplate.findOne(query, CmpProject.class);
+            String managerId = project.getManagerId();
+            JSONArray members = project.getMembers();
+            Query queryUser = Query.query(Criteria.where("userId").is(userId));
+            UserEntity user = mongoTemplate.findOne(queryUser, UserEntity.class);
+            CommonMethod method = new CommonMethod();
+            Object result = method.joinGroup(members, managerId, userId, user.getUserName());
+            if (result.equals("Exist")) {
+                return "Exist";
+            } else {
+                Update update = new Update();
+                update.set("members", result);
+                mongoTemplate.updateFirst(query, update, CmpProject.class);
+                JSONArray joinedProjects = user.getJoinedProjects();
+                JSONObject newProjectInfo = new JSONObject();
+                newProjectInfo.put("projectId", project.getProjectId());
+                newProjectInfo.put("title", project.getTitle());
+                newProjectInfo.put("type","cmp");
+                joinedProjects.add(newProjectInfo);
+                Update updateUser = new Update();
+                updateUser.set("joinedProjects", joinedProjects);
+                mongoTemplate.updateFirst(queryUser, updateUser, UserEntity.class);
+
+//                StaticPagesBuilder staticPagesBuilder = new StaticPagesBuilder(mongoTemplate);
+//                staticPagesBuilder.projectDetailPageBuilder(projectId);
+                return "Success";
+            }
+        }else{
+            return "Fail";
         }
     }
 

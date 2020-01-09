@@ -703,7 +703,7 @@ export default {
         for (let i = 0; i < projectIds.length; i++) {
           this.axios
             .get(
-              "/GeoProblemSolving/project/inquiry" +
+              "/GeoProblemSolving_Backend/project/inquiry" +
                 "?key=projectId" +
                 "&value=" +
                 projectIds[i].projectId
@@ -730,7 +730,7 @@ export default {
     getManagerProjectList() {
       this.axios
         .get(
-          "/GeoProblemSolving/project/inquiry" +
+          "/GeoProblemSolving_Backend/project/inquiry" +
             "?key=managerId" +
             "&value=" +
             this.userDetail.userId
@@ -752,7 +752,7 @@ export default {
     logOutAccount() {
       this.axios
         .get(
-          "/GeoProblemSolving/user/remove?" +
+          "/GeoProblemSolving_Backend/user/remove?" +
             "userId=" +
             this.$store.getters.userId
         )
@@ -772,7 +772,7 @@ export default {
       let quitProjectId = this.currentProject.projectId;
       this.axios
         .get(
-          "/GeoProblemSolving/project/quit" +
+          "/GeoProblemSolving_Backend/project/quit" +
             "?projectId=" +
             quitProjectId +
             "&userId=" +
@@ -799,7 +799,7 @@ export default {
                 "!"
             };
             this.axios
-              .post("/GeoProblemSolving/notice/save", notice)
+              .post("/GeoProblemSolving_Backend/notice/save", notice)
               .then(res => {
                 if (res.data == "Success") {
                   this.$emit("sendNotice", recipientId);
@@ -833,7 +833,7 @@ export default {
     authorize() {
       this.axios
         .get(
-          "/GeoProblemSolving/project/manager?" +
+          "/GeoProblemSolving_Backend/project/manager?" +
             "projectId=" +
             this.currentProject.projectId +
             "&newManagerId=" +
@@ -859,7 +859,7 @@ export default {
                 " !"
             };
             this.axios
-              .post("/GeoProblemSolving/notice/save", notice)
+              .post("/GeoProblemSolving_Backend/notice/save", notice)
               .then(res => {
                 if (res.data == "Success") {
                   this.$emit("sendNotice", recipientId);
@@ -891,7 +891,7 @@ export default {
       if (this.deleteProjectId != "") {
         this.axios
           .get(
-            "/GeoProblemSolving/project/delete?" +
+            "/GeoProblemSolving_Backend/project/delete?" +
               "projectId=" +
               this.deleteProjectId
           )
@@ -968,7 +968,7 @@ export default {
             }
           }
           this.axios
-            .post("/GeoProblemSolving/user/update", changedProfile)
+            .post("/GeoProblemSolving_Backend/user/update", changedProfile)
             .then(res => {
               if (res.data !== "Fail") {
                 // this.drawerClose = true;
@@ -997,7 +997,7 @@ export default {
     readPersonalEvent() {
       this.axios
         .get(
-          "/GeoProblemSolving/history/inquiry?" +
+          "/GeoProblemSolving_Backend/history/inquiry?" +
             "eventType=project" +
             "&key=userId" +
             "&value=" +
@@ -1018,7 +1018,7 @@ export default {
     getUserResource() {
       this.axios
         .get(
-          "/GeoProblemSolving/resource/inquiry" +
+          "/GeoProblemSolving_Backend/resource/inquiry" +
             "?key=uploaderId" +
             "&value=" +
             this.$store.getters.userId
@@ -1045,7 +1045,7 @@ export default {
       if (this.deleteResourceId != "") {
         this.axios
           .get(
-            "/GeoProblemSolving/resource/delete?" +
+            "/GeoProblemSolving_Backend/resource/delete?" +
               "resourceId=" +
               this.deleteResourceId
           )
@@ -1093,7 +1093,7 @@ export default {
       shareForm.append("scope", JSON.stringify(scopeObject));
       if (scopeObject.projectId != "") {
         this.axios
-          .post("/GeoProblemSolving/resource/share", shareForm)
+          .post("/GeoProblemSolving_Backend/resource/share", shareForm)
           .then(res => {
             if (res.data != "Fail") {
               this.$Notice.open({
@@ -1123,7 +1123,7 @@ export default {
       form["eventType"] = "project";
       form["userId"] = this.$store.getters.userId;
       this.axios
-        .post("/GeoProblemSolving/history/save", form)
+        .post("/GeoProblemSolving_Backend/history/save", form)
         .then(res => {
           console.log(res.data);
         })

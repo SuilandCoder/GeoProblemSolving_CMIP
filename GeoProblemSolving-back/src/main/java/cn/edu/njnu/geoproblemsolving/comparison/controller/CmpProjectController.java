@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.controller;
 
+import cn.edu.njnu.geoproblemsolving.Dao.Project.ProjectDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.bean.JsonResult;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.modelresource.ModelResourceDaoImpl;
 import cn.edu.njnu.geoproblemsolving.comparison.dao.project.CmpProjectDaoImpl;
@@ -51,71 +52,71 @@ public class CmpProjectController {
         }
     }
 
-    @RequestMapping(value="/getAllProjects", method = RequestMethod.GET)
-    public JsonResult getProjectList(){
+    @RequestMapping(value = "/getAllProjects", method = RequestMethod.GET)
+    public JsonResult getProjectList() {
         CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
-        try{
+        try {
             List<CmpProject> allProject = cmpProjectDao.getAllProject();
             return ResultUtils.success(allProject);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResultUtils.error(ResultEnum.FAILED);
         }
     }
 
     @RequestMapping(value = "/getSubprojectList", method = RequestMethod.GET)
-    public JsonResult getSubprojectList(@RequestParam("projectId") String projectId){
+    public JsonResult getSubprojectList(@RequestParam("projectId") String projectId) {
         CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
-        try{
+        try {
             CmpProject project = cmpProjectDao.findByProjectId(projectId);
-            if(project.getSubprojects()!=null){
+            if (project.getSubprojects() != null) {
                 List<CmpProject> projectList = cmpProjectDao.findByProjectIdList(project.getSubprojects());
                 return ResultUtils.success(projectList);
-            }else{
+            } else {
                 return ResultUtils.error(ResultEnum.NO_OBJECT);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResultUtils.error(ResultEnum.FAILED);
         }
     }
 
-    @RequestMapping(value = "/getProject",method = RequestMethod.GET)
-    public JsonResult getProject(@RequestParam("key") String key, @RequestParam("value") String value){
+    @RequestMapping(value = "/getProject", method = RequestMethod.GET)
+    public JsonResult getProject(@RequestParam("key") String key, @RequestParam("value") String value) {
         CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
-        try{
+        try {
             List<CmpProject> projects = cmpProjectDao.getProjects(key, value);
             return ResultUtils.success(projects);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResultUtils.error(ResultEnum.FAILED);
         }
     }
 
-    @RequestMapping(value = "/getProjectAllInfo",method = RequestMethod.GET)
-    public JsonResult getProjectAllInfo(@RequestParam("projectId") String projectId){
+    @RequestMapping(value = "/getProjectAllInfo", method = RequestMethod.GET)
+    public JsonResult getProjectAllInfo(@RequestParam("projectId") String projectId) {
         CmpProjectDaoImpl cmpProjectDao = new CmpProjectDaoImpl(mongoTemplate);
         CmpProject project = cmpProjectDao.findByProjectId(projectId);
 
         ProjectType projectType = project.getProjectType();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("project",project);
-        if(projectType.equals(ProjectType.COMPREHENSIVE)){
+        jsonObject.put("project", project);
+        if (projectType.equals(ProjectType.COMPREHENSIVE)) {
             // 如果是 comprehensive 类型，只查询子项目信息;
             List<String> subprojects = project.getSubprojects();
             List<CmpProject> subprojectList = cmpProjectDao.findByProjectIdList(subprojects);
-            jsonObject.put("subproject",subprojectList);
-        }else{
+            jsonObject.put("subproject", subprojectList);
+        } else {
 
             //modelList
             List<String> modelIdList = project.getModelList();
             ModelResourceDaoImpl modelResourceDao = new ModelResourceDaoImpl(mongoTemplate);
             List<ModelResource> modelList = modelResourceDao.findModelByIdList(modelIdList);
 
-            jsonObject.put("model",modelList);
+            jsonObject.put("model", modelList);
         }
         return ResultUtils.success(jsonObject);
     }
 
-    @RequestMapping(value = "/updateList",method = RequestMethod.POST)
-    public JsonResult updateList(@RequestBody JSONObject requestJson){
+    @RequestMapping(value = "/updateList", method = RequestMethod.POST)
+    public JsonResult updateList(@RequestBody JSONObject requestJson) {
         String projectId = requestJson.getString("projectId");
         String type = requestJson.getString("type");
         String id = requestJson.getString("id");
@@ -136,9 +137,27 @@ public class CmpProjectController {
         return ResultUtils.success();
     }
 
-    @RequestMapping(value = "/updateProject",method = RequestMethod.POST)
-    public JsonResult updateProject(@RequestBody CmpProject project){
+    @RequestMapping(value = "/updateProject", method = RequestMethod.POST)
+    public JsonResult updateProject(@RequestBody CmpProject project) {
         CmpProject cmpProject = cmpProjectDao.updateProject(project);
         return ResultUtils.success(cmpProject);
+    }
+
+    @RequestMapping(value = "/join", method = RequestMethod.GET)
+    public JsonResult joinProject(@RequestParam("projectId") String projectId, @RequestParam("userId") String userId) {
+//        ProjectDaoImpl projectDao = new ProjectDaoImpl(mongoTemplate);
+        try {
+//            return projectDao.joinProject(projectId, userId);
+            String result = cmpProjectDao.joinProject(projectId, userId);
+            if ("Success".equals(result)) {
+                return ResultUtils.success();
+            } else if ("Fail".equals(result)) {
+                return ResultUtils.error(ResultEnum.FAILED_TO_JOIN);
+            } else {
+                return ResultUtils.error(ResultEnum.EXIST);
+            }
+        } catch (Exception e) {
+            return ResultUtils.error(ResultEnum.FAILED_TO_JOIN);
+        }
     }
 }

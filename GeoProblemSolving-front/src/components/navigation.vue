@@ -176,7 +176,7 @@ export default {
     this.headerWidth = window.innerWidth + "px";
     if (this.$store.getters.userState) {
       this.setTimer();
-      this.initWebSocket();
+      // this.initWebSocket();
       this.getUnreadNoticeCount();
     }
     window.addEventListener("resize", this.reSize);
@@ -257,7 +257,7 @@ export default {
       //get请求发送的是用户id
       this.axios
         .get(
-          "/GeoProblemSolving/notice/inquiry" +
+          "/GeoProblemSolving_Backend/notice/inquiry" +
             "?key=recipientId" +
             "&value=" +
             this.$store.getters.userId
@@ -282,7 +282,7 @@ export default {
         this.noticeSocket = null;
       }
       var noticeSocketURL =
-        "ws://localhost:8081/GeoProblemSolving/NoticeSocket";
+        "ws://geomodeling.njnu.edu.cn/GeoProblemSolving_Backend/NoticeSocket";
       // var noticeSocketURL = "ws://"+this.$store.state.IP_Port+"/GeoProblemSolving/NoticeSocket";
       this.noticeSocket = new WebSocket(noticeSocketURL);
       this.noticeSocket.onopen = this.onOpen;
