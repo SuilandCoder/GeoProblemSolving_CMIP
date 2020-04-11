@@ -1,6 +1,12 @@
 <template>
   <div style="overflow:auto">
-    <h1 style="text-align:center;margin-top:30px;">Comparison Task</h1>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute; left:65px" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h1 style="text-align:center;margin-top:30px;">Comparison Task</h1>
+    </div>
     <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
         <Card style="width:350px">
@@ -275,6 +281,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     async getCmpTaskRecord() {
       try {
         //* 获取对比任务信息

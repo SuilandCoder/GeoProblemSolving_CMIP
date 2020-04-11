@@ -89,7 +89,7 @@ public class ResourceDaoImpl implements IResourceDao {
                             fileOutputStream.close();
                             inputStream.close();
 
-                            String pathURL="/GeoProblemSolving/resource/"+folderName+"/"+newFileTitle;
+                            String pathURL="/GeoProblemSolving_Backend/resource/"+folderName+"/"+newFileTitle;
 
                             // 如果是zip文件
 //                            if(suffix.equals("zip")){

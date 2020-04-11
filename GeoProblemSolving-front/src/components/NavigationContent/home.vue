@@ -6,13 +6,11 @@
       <div class="mask"></div>
       <div class="content">
         <div>
-          <span class="title">Solving complex geo-problems? Collaboration.</span>
+          <span class="title">Participatory Model-data Intercomparison Platform (P-MIP).</span>
           <span class="sub-title">Build Projects | Assemble Participants | Communicate Ideas | Explore Solutions</span>
-          <span class="desc">The platform is full of vitality, where resesrchers can exchange their views, collide their thoughts,<br />and establish their collabarations.</span>
-          <Button
-            class="home-start-btn"
-            @click="start"
-          >Try it now</Button>
+          <span class="desc">The platform is full of vitality, where resesrchers can exchange their views, collide their
+            thoughts,<br />and establish their collabarations.</span>
+          <Button class="home-start-btn" @click="start">Try it now</Button>
         </div>
       </div>
     </div>
@@ -31,29 +29,26 @@
           <span class="flow-title">Solve a Problem Collaboratively</span>
           <div class="flow-item-container">
             <span class="flow-item">
-              <span class="flow-item-icon blue">
+              <span class="flow-item-icon blue" @click="goPage('register')">
                 <span class="flow-item-bg"></span>
                 <Icon type="md-build" />
               </span>
               <span class="flow-item-text">Register as a participant</span>
             </span>
             <span class="flow-item">
-
-              <span class="flow-item-icon yellow">
+              <span class="flow-item-icon yellow" @click="goPage('createPro')">
                 <span class="flow-item-bg"></span>
-                <Icon type="md-search" />
+                <Icon type="ios-create" />
               </span>
-              <span class="flow-item-text">Create or join a project</span>
+              <span class="flow-item-text">Create a project</span>
             </span>
 
             <span class="flow-item">
-
-              <span class="flow-item-icon green">
+              <span class="flow-item-icon green" @click="goPage('goPro')">
                 <span class="flow-item-bg"></span>
                 <Icon type="md-share" />
               </span>
-              <span class="flow-item-text">Communicate ideas in a team</span>
-
+              <span class="flow-item-text">Participate in projects</span>
             </span>
           </div>
         </div>
@@ -62,10 +57,7 @@
       <div class="cases">
         <span class="case-title">Demo and Popular Projects</span>
         <Row class="case-content">
-          <Col
-            class="case-item"
-            span="8"
-          >
+          <Col class="case-item" span="8">
           <div class="case-img img1">
 
           </div>
@@ -77,10 +69,7 @@
             </div>
           </div>
           </Col>
-          <Col
-            class="case-item"
-            span="8"
-          >
+          <Col class="case-item" span="8">
           <div class="case-img img2">
           </div>
           <div class="mask">
@@ -91,10 +80,7 @@
             </div>
           </div>
           </Col>
-          <Col
-            class="case-item"
-            span="8"
-          >
+          <Col class="case-item" span="8">
           <div class="case-img img3">
           </div>
           <div class="mask">
@@ -110,52 +96,33 @@
 
       <div class="tools">
         <span class="tools-title">Explore More</span>
-        <Row
-          class="tools-container"
-          type="flex"
-          justify="space-around"
-        >
-          <Col
-            class="card"
-            span="4"
-          >
+        <Row class="tools-container" type="flex" justify="space-around">
+          <Col class="card" span="4">
           <span class="bg img-map"></span>
           <span class="card-title">Map</span>
           <span class="card-desc">The fastest tools for visualizing geospatial data</span>
           <router-link to="#">Learn More</router-link>
           </Col>
-          <Col
-            class="card"
-            span="4"
-          >
+          <Col class="card" span="4">
           <span class="bg img-chart"></span>
           <span class="card-title">Chart</span>
           <span class="card-desc">Give a deeper understanding of your table data</span>
           <router-link to="#">Learn More</router-link>
           </Col>
 
-          <Col
-            class="card"
-            span="4"
-          >
+          <Col class="card" span="4">
           <span class="bg img-video"></span>
           <span class="card-title">Video</span>
           <span class="card-desc">One-stop Video and Text Chat Tool for convenient communication</span>
           <router-link to="#">Learn More</router-link>
           </Col>
-          <Col
-            class="card"
-            span="4"
-          >
+          <Col class="card" span="4">
           <span class="bg img-edit"></span>
           <span class="card-title">Edit</span>
           <span class="card-desc">Deeply tapping the potential value of resources</span>
           <router-link to="#">Learn More</router-link>
           </Col>
-          <Col
-            class="card"
-            span="4"
-          >
+          <Col class="card" span="4">
           <span class="bg img-todo"></span>
           <span class="card-title">TODO</span>
           <span class="card-desc">Life goes on, needs to keep moving forward.</span>
@@ -179,6 +146,19 @@ export default {
         this.$router.push({ name: "cmp-projectlist" });
       } else {
         this.$router.push({ name: "Login" });
+      }
+    },
+    goPage(page) {
+      if (page === 'register') {
+        this.$router.push({ name: "Register" });
+      } else if (page === 'createPro') {
+        if(this.$store.getters.userState){
+           this.$router.push({ name: "create-tccm-project" });
+        }else{
+           this.$router.push({ name: "Login" });
+        }
+      } else if (page === 'goPro') {
+        this.$router.push({ name: "cmp-projectlist" });
       }
     }
   }
@@ -234,7 +214,7 @@ $firstHeight: 700px;
   align-content: center;
   color: white;
   .title {
-    font-size: 3.8rem;
+    font-size: 3.2rem;
     font-family: Georgia, sans-serif, serif;
   }
 

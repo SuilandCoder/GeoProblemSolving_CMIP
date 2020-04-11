@@ -1,8 +1,15 @@
 <template>
   <div style="overflow:auto">
-    <h1 style="text-align:center;margin-top:30px;">Comparison Instance
-      <span :style="{color:getTitleColor}">({{instanceInfo.type}})</span>
-    </h1>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute; left:65px" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h1 style="text-align:center;margin-top:30px;">Comparison Instance
+        <span :style="{color:getTitleColor}">({{instanceInfo.type}})</span>
+      </h1>
+    </div>
+
     <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
         <Card>
@@ -367,6 +374,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     forkNewInstance() {
       this.$refs["newInstanceInfo"].validate(valid => {
         if (valid) {

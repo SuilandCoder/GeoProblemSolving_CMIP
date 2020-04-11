@@ -1,6 +1,13 @@
 <template>
   <div style="overflow:auto">
-    <h2 style="text-align:center;margin:20px;">Create Comparison Task</h2>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute;left:80px;" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h2 style="text-align:center;margin:20px;">Create Comparison Task</h2>
+    </div>
+
     <Steps :current="currentStep" style="width:800px;margin-left:38%">
       <Step title="Step 1">
       </Step>
@@ -455,6 +462,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     renderTransfer(item) {
       return item.label;
     },

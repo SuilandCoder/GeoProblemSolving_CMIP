@@ -1,6 +1,13 @@
 <template>
   <div class="mainContent">
-    <h1 class="cmpTitle">{{this.projectInfo.title}}</h1>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute; left:65px" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h1 class="cmpTitle">{{this.projectInfo.title}}</h1>
+    </div>
+
     <Button type="info" v-if="!isMember" class="apply_btn" @click="applyJoinModal=true">Apply</Button>
     <Row>
       <Col span="22" offset="1">
@@ -409,37 +416,59 @@ var uuid = function () {
   return uuid;
 };
 export default {
-  // beforeRouteEnter: (to, from, next) => {
-  //   if (from.name === "cmp-projectlist") {
-  //     to.meta.keepAlive = false;
-  //   } else {
-  //     to.meta.keepAlive = true;
-  //   }
-  //   next(vm => {
-  //     if (!vm.$store.getters.userState) {
-  //       next("/login");
-  //     } else {
-  //       next();
-  //     }
-  //   });
-  // },
+  beforeRouteEnter: (to, from, next) => {
+    if (from.name === "cmp-instance-detail"
+      || from.name === "cmp-task-record"
+      || from.name === "create-cmp-task"
+      || from.name === "create-cmp-instance") {
+      to.meta.isBack = true;
+    }
+    next(vm => {
+      if (!vm.$store.getters.userState) {
+        next("/login");
+      } else {
+        next();
+      }
+    });
+  },
   beforeRouteLeave(to, from, next) {
     // ...
     // from.meta.keepAlive = true;
     next();
   },
   created() {
+    this.isFirstEnter = true;
     this.initSize();
-    this.projectId = this.$route.params.id;
 
-    //* 获取项目信息
-    this.getProjectInfo();
-    //* 获取instance
-    this.getInstanceList();
-    //* 获取 task
-    this.getTaskList();
-    this.getAllConcept("concept");
-    this.getMetrics();
+
+    // //* 获取项目信息
+    // this.getProjectInfo();
+    // //* 获取instance
+    // this.getInstanceList();
+    // //* 获取 task
+    // this.getTaskList();
+    // this.getAllConcept("concept");
+    // this.getMetrics();
+  },
+  activated() {
+    if (!this.$route.meta.isBack || this.isFirstEnter) {
+      this.projectId = this.$route.params.id;
+      this.isMember = false;
+      this.haveApplied = false;
+      //* 获取项目信息
+      this.getProjectInfo();
+      //* 获取instance
+      this.getInstanceList();
+      //* 获取 task
+      this.getTaskList();
+      this.getAllConcept("concept");
+      this.getMetrics();
+    }
+
+    // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+    this.$route.meta.isBack = false
+    // 恢复成默认的false，避免isBack一直是true，导致每次都获取新数据
+    this.isFirstEnter = false;
   },
   components: {
     Avatar,
@@ -449,6 +478,7 @@ export default {
   },
   data() {
     return {
+      isFirstEnter: false,
       isMember: false,
       haveApplied: false,
       applyValidate: {
@@ -591,6 +621,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     joinApply(name) {
       this.$refs[name].validate(valid => {
         if (valid) {
