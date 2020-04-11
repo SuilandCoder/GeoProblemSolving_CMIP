@@ -1,6 +1,14 @@
 <template>
   <div class="mainContent">
-    <h1 class="cmpTitle">{{this.projectInfo.title}}</h1>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute; left:65px" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h1 class="cmpTitle">{{this.projectInfo.title}}</h1>
+    </div>
+
+    <Button type="info" v-if="!isMember" class="apply_btn" @click="applyJoinModal=true">Apply</Button>
     <Row>
       <Col span="22" offset="1">
       <Row>
@@ -26,9 +34,11 @@
             <div class="info-tag">
               <Icon type="md-people" :size="20" />
               <span>Members</span>
+
             </div>
             <div style="display:flex;flex-wrap:wrap;">
-              <span class="member" v-for="member of this.projectInfo.members">{{member}}</span>
+              <span class="member" v-for="member of this.projectInfo.members">{{member.userName}}</span>
+
             </div>
           </div>
 
@@ -133,15 +143,14 @@
                 </Tabs>
               </Panel>
               <Panel name="repositories">
-                <strong  style="font-size:18px;"> Basic Repositories </strong>
-                <Tabs slot="content" @on-click="getAllConcept" :animated="false"
-                  :style="{overflow:'unset'}">
+                <strong style="font-size:18px;"> Basic Repositories </strong>
+                <Tabs slot="content" @on-click="getAllConcept" :animated="false" :style="{overflow:'unset'}">
                   <TabPane label="Concept" name="concept">
                     <div v-for="sellist in selectCardContent" :key="sellist.id">
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose concepts</Button>
+                    <Button @click="showChooseConcepts">Choose concepts</Button>
                     <Table border :columns="resColumns" :data="conceptList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -156,7 +165,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose templates</Button>
+                    <Button @click="showChooseConcepts">Choose templates</Button>
                     <Table border :columns="resColumns" :data="templateList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -171,7 +180,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose unit</Button>
+                    <Button @click="showChooseConcepts">Choose unit</Button>
                     <Table border :columns="resColumns" :data="unitList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -188,7 +197,7 @@
                       <Tag color="primary">{{sellist.name}}</Tag>
                       <Icon type="md-close" @click="clearInput(sellist.id)" />
                     </div>
-                    <Button @click="vocabularyValue = true">Choose reference</Button>
+                    <Button @click="showChooseConcepts">Choose reference</Button>
                     <Table border :columns="resColumns" :data="spatialRefList" :max-height="300">
                       <template slot-scope="{row,index}" slot="name">
                         <span style="font-size:16px;">{{row.name}}</span>
@@ -199,7 +208,7 @@
                       </template>
                     </Table>
                   </TabPane>
-                  <Button style="float:right" type="primary" ghost @click="modalCreate = true"
+                  <Button style="float:right" type="primary" ghost @click="showCreateRepositories"
                     slot="extra">Create</Button>
                 </Tabs>
               </Panel>
@@ -246,7 +255,8 @@
             <Drawer :closable="false" v-model="drawerShow" style="z-index:1005">
               <div slot="header" style="display:flex;align-items:center">
                 <h3>Choose Metric</h3>
-                <Button slot="append" @click="modal13 = true" size="small" style="margin-left: 60px;"> Create</Button>
+                <Button slot="append" @click="modal13=true" size="small" style="margin-left: 60px;">
+                  Create</Button>
               </div>
               <CellGroup>
                 <Cell v-for="(metric,index) of metrics" :title="metric.wkName? metric.wkName: metric.alias"
@@ -370,6 +380,20 @@
       </Row>
       </Col>
     </Row>
+
+    <Modal v-model="applyJoinModal" title="Apply to join the project">
+      <Form ref="applyValidate" :model="applyValidate" :rules="applyRuleValidate" :label-width="80">
+        <FormItem label="Reason" prop="reason">
+          <Input v-model="applyValidate.reason" type="textarea" :rows="4"
+            placeholder="Enter The Reason For Application ..." />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="applyJoinModal=false">Cancel</Button>
+        <Button type="success" @click="joinApply('applyValidate')">Apply</Button>
+      </div>
+    </Modal>
+
   </div>
 
 </template>
@@ -392,37 +416,59 @@ var uuid = function () {
   return uuid;
 };
 export default {
-  // beforeRouteEnter: (to, from, next) => {
-  //   if (from.name === "cmp-projectlist") {
-  //     to.meta.keepAlive = false;
-  //   } else {
-  //     to.meta.keepAlive = true;
-  //   }
-  //   next(vm => {
-  //     if (!vm.$store.getters.userState) {
-  //       next("/login");
-  //     } else {
-  //       next();
-  //     }
-  //   });
-  // },
+  beforeRouteEnter: (to, from, next) => {
+    if (from.name === "cmp-instance-detail"
+      || from.name === "cmp-task-record"
+      || from.name === "create-cmp-task"
+      || from.name === "create-cmp-instance") {
+      to.meta.isBack = true;
+    }
+    next(vm => {
+      if (!vm.$store.getters.userState) {
+        next("/login");
+      } else {
+        next();
+      }
+    });
+  },
   beforeRouteLeave(to, from, next) {
     // ...
     // from.meta.keepAlive = true;
     next();
   },
   created() {
+    this.isFirstEnter = true;
     this.initSize();
-    this.projectId = this.$route.params.id;
 
-    //* 获取项目信息
-    this.getProjectInfo();
-    //* 获取instance
-    this.getInstanceList();
-    //* 获取 task
-    this.getTaskList();
-    this.getAllConcept("concept");
-    this.getMetrics();
+
+    // //* 获取项目信息
+    // this.getProjectInfo();
+    // //* 获取instance
+    // this.getInstanceList();
+    // //* 获取 task
+    // this.getTaskList();
+    // this.getAllConcept("concept");
+    // this.getMetrics();
+  },
+  activated() {
+    if (!this.$route.meta.isBack || this.isFirstEnter) {
+      this.projectId = this.$route.params.id;
+      this.isMember = false;
+      this.haveApplied = false;
+      //* 获取项目信息
+      this.getProjectInfo();
+      //* 获取instance
+      this.getInstanceList();
+      //* 获取 task
+      this.getTaskList();
+      this.getAllConcept("concept");
+      this.getMetrics();
+    }
+
+    // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+    this.$route.meta.isBack = false
+    // 恢复成默认的false，避免isBack一直是true，导致每次都获取新数据
+    this.isFirstEnter = false;
   },
   components: {
     Avatar,
@@ -432,6 +478,28 @@ export default {
   },
   data() {
     return {
+      isFirstEnter: false,
+      isMember: false,
+      haveApplied: false,
+      applyValidate: {
+        reason: ""
+      },
+      applyRuleValidate: {
+        reason: [
+          {
+            required: true,
+            message: "Please enter the reason for application",
+            trigger: "blur"
+          },
+          {
+            type: "string",
+            min: 5,
+            message: "The reason no less than 10 characters",
+            trigger: "blur"
+          }
+        ]
+      },
+      applyJoinModal: false,
       modal1: false,
       collapseVal: ["goals", "background"],
       collapseRight: ["protocol"],
@@ -553,6 +621,129 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
+    joinApply(name) {
+      this.$refs[name].validate(valid => {
+        if (valid) {
+          this.applyJoinModal = false;
+          if (
+            this.haveApplied == true &&
+            this.projectInfo.projectId == sessionStorage.getItem("applyId")
+          ) {
+            this.$Notice.warning({
+              title: "repeat apply warning",
+              desc: "You have apply success, no need to click again!"
+            });
+          } else {
+            if (this.$store.getters.userState) {
+              let userDetail = this.$store.getters.userInfo;
+              let joinForm = {};
+              sessionStorage.setItem("applyId", this.projectInfo.projectId);
+              joinForm["recipientId"] = this.projectInfo.managerId;
+              joinForm["type"] = "apply";
+              joinForm["content"] = {
+                userEmail: userDetail.email,
+                userName: this.$store.getters.userName,
+                userId: this.$store.getters.userId,
+                title: "Group application",
+                description:
+                  "User " +
+                  this.$store.getters.userName +
+                  " apply to join your project: " +
+                  this.projectInfo.title +
+                  " ." +
+                  " The reason for application is: " +
+                  this.applyValidate.reason,
+                projectId: this.projectInfo.projectId,
+                projectTitle: this.projectInfo.title,
+                scope: "cmp_project",
+                approve: "unknow"
+              };
+              this.axios
+                .post("/GeoProblemSolving_Backend/notice/save", joinForm)
+                .then(res => {
+                  if (res.data == "Success") {
+                    this.$Notice.open({
+                      title: "Apply Successfully",
+                      desc:
+                        "The project's manager will process your apply in time,you can get a notification later to tell you the result."
+                    });
+                    this.$emit("sendNotice", this.projectInfo.managerId);
+                    this.haveApplied = true;
+                  } else {
+                    this.$Notice.open({
+                      desc: "Apply failed"
+                    });
+                  }
+                })
+                .catch(err => {
+                  console.log("申请失败的原因是：" + err.data);
+                });
+              let emailObject = {
+                recipient: joinForm.recipientId,
+                mailTitle: "Group application",
+                mailContent:
+                  joinForm.content.description +
+                  "<br>" +
+                  "You can click this url and enter the site to process this application: " +
+                  "http://" +
+                  this.$store.state.IP_Port +
+                  "/GeoProblemSolving/home"
+              };
+              this.axios
+                .post("/GeoProblemSolving_Backend/project/applyByMail", emailObject, {
+                  headers: {
+                    "Content-Type": 'text/plain'
+                  }
+                })
+                .then(res => {
+                  if (res.data == "Success") {
+                    console.log("Email Success.");
+                  } else {
+                    console.log("Email fail.");
+                  }
+                })
+                .catch(err => {
+                  console.log("Email fail.");
+                });
+            } else {
+              this.$Message.error("you must have an account before you apply");
+              this.$router.push({ name: "Login" });
+            }
+          }
+        }
+      })
+    },
+    checkPermission() {
+      //* 判断是否登录
+      if (!this.$store.getters.userState) {
+        this.$router.push({
+          path: `/login`
+        });
+      } else {
+        //* 判断是否有权限
+        let userId = this.$store.getters.userId;
+        let index = _.findIndex(this.projectInfo.members, function (member) { return member.userId == userId });
+        if (index >= 0 || userId === this.projectInfo.managerId) {
+          return true;
+        }
+        this.$Message.info("No permission, Please apply first.");
+        return false;
+      }
+
+    },
+    showChooseConcepts() {
+      if (this.checkPermission()) {
+        this.vocabularyValue = true;
+      }
+    },
+    showCreateRepositories() {
+      if (this.checkPermission()) {
+        this.modalCreate = true;
+      }
+    },
     onCreateSuccess(data) {
       this.metrics.push(data);
       this.modal13 = false;
@@ -568,8 +759,10 @@ export default {
         });
     },
     addProtocol(type) {
-      this.modal1 = true;
-      this.currentType = type;
+      if (this.checkPermission()) {
+        this.modal1 = true;
+        this.currentType = type;
+      }
     },
     chooseMetric(metric) {
       this.protocolItem.metrics = metric;
@@ -658,7 +851,11 @@ export default {
     },
     taskDetail(task) {
       this.$router.push({
-        path: `/cmp-task-record/${task.recordId}`
+        name: "cmp-task-record",
+        params: {
+          id: task.recordId,
+          projectInfo: this.projectInfo
+        }
       });
     },
     getResourceList(type, list) {
@@ -796,7 +993,11 @@ export default {
           console.log(res);
           this.projectInfo = res.project;
           this.modelList = res.model;
-
+          let userId = this.$store.getters.userId;
+          let index = _.findIndex(this.projectInfo.members, function (member) { return member.userId == userId });
+          if (index >= 0 || userId == this.projectInfo.managerId) {
+            this.isMember = true;
+          }
           if (
             this.projectInfo.unitList &&
             this.projectInfo.unitList.length > 0
@@ -848,18 +1049,27 @@ export default {
         });
     },
     createInstance() {
-      this.$router.push({
-        path: `/create-cmp-instance/${this.projectInfo.projectId}`
-      });
+      if (this.checkPermission()) {
+        this.$router.push({
+          path: `/create-cmp-instance/${this.projectInfo.projectId}`
+        });
+      }
     },
     createTask() {
-      this.$router.push({
-        path: `/create-cmp-task/${this.projectInfo.projectId}`
-      });
+      if (this.checkPermission()) {
+        this.$router.push({
+          path: `/create-cmp-task/${this.projectInfo.projectId}`
+        });
+      }
+
     },
     instanceDetail(instance) {
       this.$router.push({
-        path: `/cmp-instance-detail/${instance.instanceId}`
+        name: "cmp-instance-detail",
+        params: {
+          "id": instance.instanceId,
+          "projectInfo": this.projectInfo
+        }
       });
     },
     cancelCreate() {
@@ -1004,7 +1214,7 @@ body {
   margin-left: 20px;
   margin-top: 5px;
   margin-bottom: 5px;
-  font-size: 16px;
+  letindefont-size: 16px;
 }
 
 .members {
@@ -1134,5 +1344,11 @@ body {
   display: flex;
   align-items: center;
   margin-right: 10px;
+}
+
+.apply_btn {
+  position: absolute;
+  right: 100px;
+  top: 100px;
 }
 </style>

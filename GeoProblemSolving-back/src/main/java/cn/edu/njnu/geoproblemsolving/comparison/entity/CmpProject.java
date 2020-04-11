@@ -1,5 +1,6 @@
 package cn.edu.njnu.geoproblemsolving.comparison.entity;
 
+import cn.edu.njnu.geoproblemsolving.Entity.ProjectEntity;
 import cn.edu.njnu.geoproblemsolving.comparison.enums.ProjectType;
 import com.alibaba.fastjson.JSONArray;
 import lombok.*;
@@ -19,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document
-public class CmpProject {
+public class CmpProject{
     String projectId;
     String parentId;
     ProjectType projectType;

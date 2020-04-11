@@ -2,7 +2,7 @@
 <style scoped>
 #logo {
   position: absolute;
-  width: 129px;
+  /* width: 129px; */
   height: 40px;
   z-index: 1;
   margin-top: 5px;
@@ -148,7 +148,7 @@ footer {
       <h2 class="footerTop">
         <i>Open Geographic Modeling and Simulation</i>
       </h2>
-      <p class="footerBottom">Copyright © 2013-2019 OpenGMS. All rights reserved.</p>
+      <p class="footerBottom">Copyright © 2013-2020 OpenGMS. All rights reserved.</p>
     </footer>
   </div>
 </template>
@@ -176,12 +176,12 @@ export default {
     this.headerWidth = window.innerWidth + "px";
     if (this.$store.getters.userState) {
       this.setTimer();
-      this.initWebSocket();
+      // this.initWebSocket();
       this.getUnreadNoticeCount();
     }
     window.addEventListener("resize", this.reSize);
   },
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     window.removeEventListener("resize", this.reSize);
   },
   updated() {
@@ -257,10 +257,10 @@ export default {
       //get请求发送的是用户id
       this.axios
         .get(
-          "/GeoProblemSolving/notice/inquiry" +
-            "?key=recipientId" +
-            "&value=" +
-            this.$store.getters.userId
+          "/GeoProblemSolving_Backend/notice/inquiry" +
+          "?key=recipientId" +
+          "&value=" +
+          this.$store.getters.userId
         )
         .then(res => {
           let noticeList = res.data;
@@ -282,7 +282,7 @@ export default {
         this.noticeSocket = null;
       }
       var noticeSocketURL =
-        "ws://localhost:8081/GeoProblemSolving/NoticeSocket";
+        "ws://geomodeling.njnu.edu.cn/GeoProblemSolving_Backend/NoticeSocket";
       // var noticeSocketURL = "ws://"+this.$store.state.IP_Port+"/GeoProblemSolving/NoticeSocket";
       this.noticeSocket = new WebSocket(noticeSocketURL);
       this.noticeSocket.onopen = this.onOpen;
@@ -336,7 +336,7 @@ export default {
           .get("/GeoProblemSolving_Backend/user/logout")
           .then(res => {
             this.$store.commit("userLogout");
-            this.noticeSocket.close();
+            // this.noticeSocket.close();
             this.$router.replace({ name: "Home" });
           })
           .catch(err => {

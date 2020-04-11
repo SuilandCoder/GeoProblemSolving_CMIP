@@ -1,12 +1,14 @@
 <template>
   <div class="listContent">
-      <Divider orientation="left" dashed>
-        <h1>
-          Comparison Projects
-        </h1>
-      </Divider>
-        <div>
-          <Tabs value="All" type="card" @click="filterProjects">
+    <Divider orientation="left" dashed>
+      <h1>
+        Comparison Projects
+      </h1>
+    </Divider>
+    <div style=" display: flex; flex-direction: column;">
+      <Button style="width:150px;align-self:flex-end" @click="newProject" type="success" icon="md-add" slot="extra">Create project</Button>
+      <cmp-project-tab :projectShowList="projectShowList"></cmp-project-tab>
+      <!-- <Tabs value="All" type="card" @click="filterProjects">
             <TabPane label="All" name="All" icon="ios-list">
               <cmp-project-tab :projectShowList="projectShowList"></cmp-project-tab>
             </TabPane>
@@ -34,8 +36,8 @@
               icon="md-add"
               slot="extra"
             >Create project</Button>
-          </Tabs>
-        </div>
+          </Tabs> -->
+    </div>
   </div>
 
 </template>
@@ -43,34 +45,34 @@
 <script>
 import CmpProjectTab from "@/components/comparison/CmpProjectTab"
 export default {
-  components:{
+  components: {
     CmpProjectTab
   },
-  created: function(){
+  created: function () {
     this.$api.cmp_project.getAllProjects()
-      .then(res=>{
+      .then(res => {
         this.projectShowList = res;
       })
-      .catch(err=>{
+      .catch(err => {
         this.$Message.error(err);
       })
   },
-  data(){
+  data() {
     return {
-      projectShowList:[
+      projectShowList: [
       ]
     }
   },
-  methods:{
-    filterProjects(){
+  methods: {
+    filterProjects() {
 
     },
-    newProject(){
+    newProject() {
       if (!this.$store.getters.userState) {
         this.$router.push({ name: "Login" });
       } else {
         // this.$router.push({ name: "create-cmp-project"  });
-        this.$router.push({ name: "create-tccm-project"  });
+        this.$router.push({ name: "create-tccm-project" });
       }
     }
   }
@@ -79,11 +81,11 @@ export default {
 </script>
 
 <style scoped>
-h1{
+h1 {
   color: #17233d;
 }
 
-.listContent{
+.listContent {
   margin-left: 5%;
   margin-right: 5%;
 }
@@ -97,5 +99,4 @@ h1{
   background-color: #19be6b;
   color: white;
 }
-
 </style>

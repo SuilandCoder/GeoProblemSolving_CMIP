@@ -1,9 +1,16 @@
 <template>
   <div class="box">
-    <h2 style="text-align:center;margin:20px;">Create Instance</h2>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h2 style="text-align:center;margin:20px;">Create Instance</h2>
+    </div>
+
     <Form ref="instanceInfo" :model="instanceInfo" :rules="rules">
       <FormItem prop="name" label="Name" :label-width="150">
-        <Input v-model="instanceInfo.name" style="width: 300px" placeholder="Enter instance name" />
+        <Input v-model="instanceInfo.name" style="width: 500px" placeholder="Enter instance name" />
       </FormItem>
       <FormItem prop="description" label="Abstraction" :label-width="150">
         <div>
@@ -64,7 +71,7 @@
       <div style="height:30px; display: flex; justify-content: space-between; margin-left:100px;margin-top:20px;">
         <h3 style="display:inline">Description:</h3>
       </div>
-      <mavon-editor  v-model="instanceInfo.descMarkDown" style="margin-left:150px;z-index:1;"/>
+      <mavon-editor v-model="instanceInfo.descMarkDown" style="margin-left:150px;z-index:1;" />
     </div>
 
     <Button style="margin-top: 50px;  margin-bottom: 20px; margin-left: 150px;" type="primary" :loading="loading"
@@ -118,7 +125,7 @@ export default {
         userId: this.$store.getters.userId,
         projectId: "",
         modelId: "",
-        descMarkDown:""
+        descMarkDown: ""
       },
       dataList: [],
       dataColumn: [
@@ -221,6 +228,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     showUploadDialog() {
       this.uploadmodal = true;
     },
@@ -236,7 +246,7 @@ export default {
       this.uploadmodal = false;
     },
     creataInstance() {
-      console.log("descMarkdown:",this.instanceInfo.descMarkdown);
+      console.log("descMarkdown:", this.instanceInfo.descMarkdown);
       this.$refs["instanceInfo"].validate(valid => {
         if (valid) {
           this.instanceInfo.cmpDataList = this.dataList.map(data => {

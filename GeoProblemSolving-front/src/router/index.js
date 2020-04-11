@@ -41,7 +41,7 @@ const routes = [{
 
     { path: 'cmp-projectlist', name: 'cmp-projectlist', component: resolve => (require(["@/views/comparison/CmpProjectList"], resolve)) },
     { path: 'create-cmp-project', name: 'create-cmp-project', component: resolve => (require(["@/views/comparison/CreateProject"], resolve)) },
-    { path: 'cmp-project/:id', name: 'cmp-project-detail', component: resolve => (require(["@/views/comparison/CmpProjectDetail"], resolve)) },
+    { path: 'cmp-project/:id', name: 'cmp-project-detail', component: resolve => (require(["@/views/comparison/CmpProjectDetail"], resolve))},
     { path: 'cmp-project/comprehensive/:id', name: 'cmp-project-comprehensive', component: resolve => (require(["@/views/comparison/ComprehensiveProject"], resolve)) },
     { path: 'cmp-project/specific/:id', name: 'cmp-project-specific', component: resolve => (require(["@/views/comparison/SpecificProject"], resolve)) },
     { path: 'cmp-subproject/:id', name: 'cmp-subproject', component: resolve => (require(["@/views/comparison/SpecificProject"], resolve)) },
@@ -58,7 +58,7 @@ const routes = [{
     { path: 'cmp-task-record/:id', name:"cmp-task-record", component:resolve=>(require(["@/views/comparison/CmpTaskRecord"],resolve))},
     { path: 'topic', name: 'topic', component: resolve => (require(["@/views/comparison/topic"], resolve)) },
     { path: 'create-tccm-project', name: 'create-tccm-project', component: resolve => (require(["@/views/comparison/CreateTccmProject"], resolve)) },
-    { path: 'cmp-project/tccm/:id', name: 'cmp-project-tccm', component: resolve => (require(["@/views/comparison/CmpTccmProjectDetail"], resolve)) },
+    { path: 'cmp-project/tccm/:id', name: 'cmp-project-tccm', component: resolve => (require(["@/views/comparison/CmpTccmProjectDetail"], resolve)) ,meta:{keepAlive: true,isBack:false, } },
     { path: 'cmp-instance-detail/:id', name: 'cmp-instance-detail', component: resolve => (require(["@/views/comparison/CmpInstanceDetail"], resolve)) },
   ]
 },

@@ -1,8 +1,15 @@
 <template>
   <div style="overflow:auto">
-    <h1 style="text-align:center;margin-top:30px;">Comparison Instance
-      <span :style="{color:getTitleColor}">({{instanceInfo.type}})</span>
-    </h1>
+    <div style="position:relative">
+      <Button type="info" style="position:absolute; left:65px" @click="routerBack">
+        <Icon type="ios-arrow-back" />
+        Backward
+      </Button>
+      <h1 style="text-align:center;margin-top:30px;">Comparison Instance
+        <span :style="{color:getTitleColor}">({{instanceInfo.type}})</span>
+      </h1>
+    </div>
+
     <div style="display:flex;width:1500px;margin:auto">
       <div class="left">
         <Card>
@@ -48,7 +55,7 @@
         <Divider v-if="modelId" />
         <Card v-if="modelId">
           <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0" id="fork_btn" size="small"
-            type="dashed" shape="circle" title="fork as a new instance" @click="forkInstanceModal=true">
+            type="dashed" shape="circle" title="fork as a new instance" @click="showForkModal">
             <Icon size="18" type="md-git-network" /></Button>
           <div style="display:flex;">
             <img id="model_img" src="@/assets/images/comparison/model.png" alt="model img">
@@ -62,7 +69,7 @@
                 <Button icon="ios-cloud-upload-outline">Upload Model</Button>
               </Upload>
               <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
-                style="width:100px;text-align:center;" type="success" @click="invokeModal=true">Invoke</Button>
+                style="width:100px;text-align:center;" type="success" @click="showInvokeModal">Invoke</Button>
             </div>
           </div>
           <Divider />
@@ -151,7 +158,7 @@
         </Card>
         <Button v-if="modelInfo.computableModels&&modelInfo.computableModels.length>0"
           style="width:100px;float:right;margin-top:20px;text-align:center;" type="success"
-          @click="invokeModal=true">Invoke</Button>
+          @click="showInvokeModal">Invoke</Button>
       </div>
     </div>
     <Modal v-model="modal13" draggable scrollable title="Create Metric">
@@ -202,6 +209,8 @@ import CreateMetricForm from "@/components/comparison/CreateMetricsForm";
 export default {
   created() {
     this.instanceId = this.$route.params.id;
+    this.projectInfo = this.$route.params.projectInfo;
+    // console.log("router params:", this.projectInfo);
     this.getInstance();
   },
   components: {
@@ -209,6 +218,7 @@ export default {
   },
   data() {
     return {
+      projectInfo: "",
       collapseVal: "description",
       instanceId: "",
       instanceInfo: {},
@@ -364,6 +374,9 @@ export default {
     };
   },
   methods: {
+    routerBack() {
+      this.$router.back(-1);
+    },
     forkNewInstance() {
       this.$refs["newInstanceInfo"].validate(valid => {
         if (valid) {
@@ -437,8 +450,8 @@ export default {
         .then(res => {
           if (res.data) {
             let content = res.headers["content-disposition"];
-            let fileName = content.substring(content.indexOf("filename=")+9);
-            this.downloadLink(res.data,fileName);
+            let fileName = content.substring(content.indexOf("filename=") + 9);
+            this.downloadLink(res.data, fileName);
           } else {
             this.$Message.error("Failed to download data");
           }
@@ -447,7 +460,7 @@ export default {
           this.$Message.error(err);
         })
     },
-    downloadLink(data,fileName) {
+    downloadLink(data, fileName) {
       let url = window.URL.createObjectURL(new Blob([data]))
       let link = document.createElement('a')
       link.style.display = 'none'
@@ -478,8 +491,33 @@ export default {
           this.$Message.error(err);
         });
     },
+    checkPermission() {
+      //* 判断是否登录
+      if (!this.$store.getters.userState) {
+        this.$router.push({
+          path: `/login`
+        });
+      } else {
+        //* 判断是否有权限
+        let userId = this.$store.getters.userId;
+        let index = _.findIndex(this.projectInfo.members, function (member) { return member.userId == userId });
+        if (index >= 0 || userId === this.projectInfo.managerId) {
+          return true;
+        }
+        this.$Message.info("No permission, Please apply first.");
+        return false;
+      }
+    },
     showInvokeModal() {
-      this.invokeModal = true;
+      //* 检查权限
+      if (this.checkPermission()) {
+        this.invokeModal = true;
+      }
+    },
+    showForkModal() {
+      if (this.checkPermission()) {
+        this.forkInstanceModal = true;
+      }
     },
     cancel() { },
     getInstance() {
@@ -732,16 +770,16 @@ export default {
       });
 
       let reqJson = {};
-      reqJson["ip"]=this.computableModelInfo.serviceNode.host;
-      reqJson["port"]=this.computableModelInfo.serviceNode.port;
-      reqJson["msid"]=this.computableModelInfo.serviceNode.msid;
-      reqJson["userId"]=this.$store.getters.userId;
-      reqJson["username"]=this.$store.getters.userName;
-      reqJson["instanceId"]=this.instanceId;
-      reqJson["inputs"]=JSON.stringify(this.states);
-      reqJson["modelId"]=this.modelId;
-      reqJson["modelName"]=this.modelInfo.modelName;
-      reqJson["computableModelId"]=this.computableModelInfo.oid;
+      reqJson["ip"] = this.computableModelInfo.serviceNode.host;
+      reqJson["port"] = this.computableModelInfo.serviceNode.port;
+      reqJson["msid"] = this.computableModelInfo.serviceNode.msid;
+      reqJson["userId"] = this.$store.getters.userId;
+      reqJson["username"] = this.$store.getters.userName;
+      reqJson["instanceId"] = this.instanceId;
+      reqJson["inputs"] = JSON.stringify(this.states);
+      reqJson["modelId"] = this.modelId;
+      reqJson["modelName"] = this.modelInfo.modelName;
+      reqJson["computableModelId"] = this.computableModelInfo.oid;
 
       this.$api.cmp_model
         .invokeModel_MC(JSON.stringify(reqJson))

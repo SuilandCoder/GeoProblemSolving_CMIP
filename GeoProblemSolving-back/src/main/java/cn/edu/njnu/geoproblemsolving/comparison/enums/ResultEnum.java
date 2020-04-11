@@ -36,7 +36,9 @@ public enum ResultEnum {
     FAILED_TO_EXCUTE_SCRIPT(-24,"Failed to excute scripte"),
     FAILED_TO_COMPARING(-25,"Failed to comparing."),
     EVENT_NOT_BIND_METRICS(-26,"Output Event haven't bind metrics."),
-    FAILED_TO_CREATE_INSTANCE(-27, "Failed to create instance");
+    FAILED_TO_CREATE_INSTANCE(-27, "Failed to create instance"),
+    EXIST(-28,"Exist"),
+    FAILED_TO_JOIN(-29, "Faied to join.");
 
     private Integer code;
 
