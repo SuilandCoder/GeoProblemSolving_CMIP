@@ -17,7 +17,7 @@ export default new Vuex.Store({
         project: {},
         subProject: {},
         // IP_Port:"172.21.213.185:8080",
-        IP_Port:"localhost:8080",
+        IP_Port:window.location.host,
         // IP_Port:"172.21.212.72:8082",
         // IP_Port:"94.191.49.160:8080",
     },
