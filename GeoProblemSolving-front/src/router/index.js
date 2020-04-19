@@ -62,7 +62,8 @@ const routes = [{
     { path: 'cmp-instance-detail/:id', name: 'cmp-instance-detail', component: resolve => (require(["@/views/comparison/CmpInstanceDetail"], resolve)) },
   ]
 },
-{ path: '/chat', name: 'chatUtil', component: resolve => (require(["@/components/utils/chatroom"], resolve)) },
+// { path: '/chat', name: 'chatUtil', component: resolve => (require(["@/components/utils/chatroom"], resolve)) },
+{ path: '/chat', name: 'chatUtil', component: resolve => (require(["@/components/comparison/chatroom"], resolve)) },
 { path: '/draw', name: 'drawUtil', component: resolve => (require(["@/components/utils/drawBoard"], resolve)) },
 { path: '/map', name: 'mapTool', component: resolve => (require(["@/components/utils/mapTool"], resolve)) },
 { path: '/charts', name: 'dataCharts', component: resolve => (require(["@/components/utils/charts"], resolve)) },

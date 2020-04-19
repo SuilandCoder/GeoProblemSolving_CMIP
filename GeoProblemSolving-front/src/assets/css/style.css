@@ -3,7 +3,7 @@ html {
     overflow-y: auto;
   }
   body{
-      min-height: 675px;
+      /* min-height: 675px; */
       min-width: 1200px;
       width: 100vw;
       overflow: hidden;

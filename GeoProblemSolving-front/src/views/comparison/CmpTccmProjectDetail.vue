@@ -6,6 +6,9 @@
         Backward
       </Button>
       <h1 class="cmpTitle">{{this.projectInfo.title}}</h1>
+      <Button v-if="isMember" @click="showChatroom" style="position:absolute; right:65px;top:0px;">
+        <Icon type="ios-chatbubbles" size="24"/>
+        Chat Room</Button>
     </div>
 
     <Button type="info" v-if="!isMember" class="apply_btn" @click="applyJoinModal=true">Apply</Button>
@@ -478,6 +481,7 @@ export default {
   },
   data() {
     return {
+      chatModal: false,
       isFirstEnter: false,
       isMember: false,
       haveApplied: false,
@@ -617,10 +621,46 @@ export default {
       drawerShow: false,
       metrics: [],
       currentType: "",
-      modal13: false
+      modal13: false,
+      chatPanel: {},
+      panelClosed:true,
     };
   },
   methods: {
+    showChatroom() {
+      // this.chatModal=true;
+      let router = "/PMIP/chat";
+      let userName = this.$store.getters.userName;
+      let userId = this.$store.getters.userId;
+      let groupID = this.projectId;
+      let src = `${router}?userName=${userName}&userID=${userId}&groupID=${groupID}`;
+      let toolURL = `<iframe src=${src} style="width: 100%;height:100%;"></iframe>`;
+      if (this.panelClosed) {
+        let that = this;
+        this.chatPanel = parent.jsPanel.create({
+          theme: "primary",
+          headerTitle: "Chat Room",
+          footerToolbar: '<p style="height:10px"></p>',
+          contentSize: "800 400",
+          content: toolURL,
+          disableOnMaximized: true,
+          dragit: {
+            containment: 5
+          },
+          closeOnEscape: true,
+          onclosed: function (panel, status, closedByUser) {
+            // window.clearTimeout(demoPanelTimer);
+            console.log("panel 关闭")
+            // this.$set(this, "chatPanel", {});
+            that.panelClosed = true;
+          }
+        });
+        $(".jsPanel-content").css("font-size", "0");
+        this.panelClosed = false;
+      }else{
+        this.chatPanel.normalize();
+      }
+    },
     routerBack() {
       this.$router.back(-1);
     },
@@ -1124,6 +1164,13 @@ export default {
     },
     handleClose() {
       this.showTag = false;
+    },
+    getChatRoomUrl() {
+      let url = "/chat";
+      let userName = this.$store.getters.userName;
+      let userId = this.$store.getters.userId;
+      let groupID = this.projectId;
+      return `${url}?userName=${userName}&userID=${userId}&groupID=${groupID}`;
     }
   }
 };
